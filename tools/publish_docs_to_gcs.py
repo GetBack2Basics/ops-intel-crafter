@@ -24,6 +24,15 @@ def upload_web_assets():
         ("data/WP302026_CYCLONE_ZONES.geojson", "application/geo+json; charset=utf-8"),
     ]
 
+    # Also include map_packages
+    map_packages_dir = DOCS_DIR / "map_packages"
+    if map_packages_dir.exists():
+        for p in sorted(map_packages_dir.rglob("*")):
+            if p.is_file():
+                rel = p.relative_to(DOCS_DIR).as_posix()
+                ct = "text/html; charset=utf-8" if p.suffix == ".html" else "application/json" if p.suffix == ".json" else "text/css" if p.suffix == ".css" else "application/javascript" if p.suffix == ".js" else "text/plain"
+                files_to_upload.append((rel, ct))
+
     for rel_path, content_type in files_to_upload:
         file_path = DOCS_DIR / rel_path
         if not file_path.exists():

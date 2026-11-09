@@ -928,7 +928,27 @@
     return config.key;
   }
 
-  document.addEventListener("DOMContentLoaded", wireUi);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wireUi);
+  } else {
+    wireUi();
+  }
 
-  window.OICLayers = { attach, activate, clear, openMeta, openChart, openTable, zoomToFeatureByProp, bindResultsRows, registerLayer, catalog: CATALOG };
+  window.OICLayers = {
+    attach,
+    activate,
+    clear,
+    openMeta,
+    openChart,
+    openTable,
+    zoomToFeatureByProp,
+    bindResultsRows,
+    registerLayer,
+    catalog: CATALOG,
+    byKey: BY_KEY,
+    loadData,
+    getLayerData: key => (state[key] ? state[key].data : null),
+    getState: key => state[key],
+    getActiveKeys: () => order.filter(k => state[k] && state[k].visible)
+  };
 })();

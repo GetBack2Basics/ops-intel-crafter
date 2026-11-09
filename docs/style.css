@@ -169,11 +169,28 @@ section[id^="panel-"] { scroll-margin-top: 8rem; }
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: all 0.15s ease;
 }
-.chip:hover { background: var(--surface-container-high); }
-.chip-featured { background: var(--primary); color: #ffffff; }
-.chip-featured:hover { background: var(--primary-container); }
+.chip:hover {
+  background: var(--surface-container-high);
+  border-color: var(--outline-variant);
+}
+.chip.chip-active,
+.chip.chip-featured,
+.chip.active,
+.chip[aria-pressed="true"] {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--secondary) !important;
+  box-shadow: 0 0 0 2px rgba(0, 105, 115, 0.4) !important;
+}
+.chip.chip-active:hover,
+.chip.chip-featured:hover,
+.chip.active:hover,
+.chip[aria-pressed="true"]:hover {
+  background: var(--primary-container) !important;
+  color: #ffffff !important;
+}
 
 /* ---------- Badges ---------- */
 .badge {

@@ -479,6 +479,10 @@ def _clip_gdf_to_geojson_dict(gdf: gpd.GeoDataFrame, bbox_4326: List[float], max
     work_4326 = work.to_crs("EPSG:4326")
     clip_box = box(*bbox_4326)
     sub = work_4326[work_4326.geometry.notna() & ~work_4326.geometry.is_empty & work_4326.geometry.intersects(clip_box)].copy()
+    if len(sub) == 0 and len(work_4326) > 0:
+        # If no records strictly intersect a tight micro-bbox, retain available active features
+        # so situational feeds (e.g. live incidents) are still accessible offline
+        sub = work_4326[work_4326.geometry.notna() & ~work_4326.geometry.is_empty].copy()
     if len(sub) > max_features:
         sub = sub.iloc[:max_features].copy()
 

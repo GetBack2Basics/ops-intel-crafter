@@ -111,8 +111,8 @@
             class="material-symbols-outlined text-[20px]">fact_check</span>Data QA Overview</a>
         <a class="nav-link" href="qa/inspect.html"><span
             class="material-symbols-outlined text-[20px]">travel_explore</span>Source Inspector</a>
-        <a class="nav-link" href="map_packages/hunter_flood_emergency_pack/index.html"><span
-            class="material-symbols-outlined text-[20px]">inventory_2</span>Offline Map Pack</a>
+        <button type="button" id="navOfflineMapPack" class="nav-link text-left w-full cursor-pointer"><span
+            class="material-symbols-outlined text-[20px]">inventory_2</span>Offline Map-in-a-Box</button>
       </nav>
     </div>
     <div class="px-4 flex flex-col gap-3">
@@ -749,6 +749,36 @@
               </div>
             </div>
           </div>
+
+          <!-- Browser Profile & Saved Offline Map Packs -->
+          <div class="space-y-4 pt-6 border-t border-surface-container-high">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+                  <span class="material-symbols-outlined text-secondary text-[22px]">account_circle</span>
+                  Browser Profile &amp; Saved Offline Map Packs
+                </h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Air-gapped Map-in-a-Box packages for your active queries, persisted directly in your local browser profile</p>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" id="btnSaveCurrentToProfile" class="action-btn action-btn-primary flex items-center gap-1.5 text-xs py-1.5 px-3">
+                  <span class="material-symbols-outlined text-[18px]">bookmark_add</span>
+                  Save Query to Profile
+                </button>
+                <button type="button" id="btnExportCurrentZip" class="action-btn action-btn-secondary flex items-center gap-1.5 text-xs py-1.5 px-3">
+                  <span class="material-symbols-outlined text-[18px]">folder_zip</span>
+                  Save as ZIP
+                </button>
+                <button type="button" id="btnLaunchCurrentBox" class="action-btn action-btn-secondary flex items-center gap-1.5 text-xs py-1.5 px-3">
+                  <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+                  Open Map-in-a-Box
+                </button>
+              </div>
+            </div>
+            <div id="savedProfilesContainer" class="table-wrapper">
+              <!-- Populated by app.js: table of saved profiles or empty state -->
+            </div>
+          </div>
         </section>
 
         <!-- STEP 6: Multi-Scale Hazards & Offline Field Package -->
@@ -833,6 +863,26 @@
       <div id="catalogModalBody" class="p-4 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3"></div>
     </div>
   </div>
+
+  <!-- Offline Map-in-a-Box (AURA) & Browser Profile Modal -->
+  <div id="offlinePackModal" class="oic-modal-backdrop" role="dialog" aria-modal="true">
+    <div class="oic-modal-card max-w-2xl">
+      <div class="px-5 py-3 bg-primary text-on-primary flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary-fixed text-[20px]">inventory_2</span>
+          <h3 class="font-headline-sm text-base font-bold">Offline Map-in-a-Box (AURA) — Field Pack Generator</h3>
+        </div>
+        <button type="button" class="px-2 py-1 rounded bg-primary-container hover:bg-error text-white text-xs font-bold"
+          data-close-modal="offlinePackModal">✕ Close</button>
+      </div>
+      <div id="offlinePackModalBody" class="p-5 overflow-y-auto space-y-5 text-xs">
+        <!-- Content dynamically injected by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- JSZip (for client-side KMZ unzip) & shpjs (for zipped shapefiles) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
