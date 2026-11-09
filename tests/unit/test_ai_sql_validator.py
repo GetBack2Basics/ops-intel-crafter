@@ -1,6 +1,21 @@
 """Unit tests for the AI Spatial SQL Allow-List & Read-Only Safety Validator."""
 
-import pytest
+try:
+    import pytest
+except ImportError:
+    import unittest
+    class _PytestStub:
+        @staticmethod
+        def raises(exc, match=None):
+            class _Context:
+                def __enter__(self): return self
+                def __exit__(self, exc_type, exc_val, exc_tb):
+                    if exc_type is None:
+                        raise AssertionError(f"Expected {exc.__name__} but none was raised")
+                    return issubclass(exc_type, exc)
+            return _Context()
+    pytest = _PytestStub()
+
 from src.ai.sql_validator import SQLValidationError, validate_spatial_sql
 from src.ai.query_planner import plan_natural_language_query
 

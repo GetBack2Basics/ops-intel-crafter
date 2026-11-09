@@ -14,12 +14,35 @@ from src.catalogue.manifest_loader import (
 class DatasetRegistry:
     """Provides structured lookup and allow-list verification over the dataset manifest."""
 
-    def __init__(self, manifest_path: Optional[Path] = None):
+    def __init__(
+        self,
+        manifest_path: Optional[Path] = None,
+        include_aura: bool = True,
+    ):
         self.manifest_path = manifest_path
         self._manifest: DatasetManifest = load_manifest(manifest_path)
+        self.include_aura = include_aura
+        if include_aura:
+            try:
+                from src.catalogue.aura_bridge import load_aura_datasets
+                aura_entries = load_aura_datasets()
+                for k, entry in aura_entries.items():
+                    if k not in self._manifest.datasets:
+                        self._manifest.datasets[k] = entry
+            except Exception:
+                pass
 
     def reload(self) -> None:
         self._manifest = load_manifest(self.manifest_path)
+        if self.include_aura:
+            try:
+                from src.catalogue.aura_bridge import load_aura_datasets
+                aura_entries = load_aura_datasets()
+                for k, entry in aura_entries.items():
+                    if k not in self._manifest.datasets:
+                        self._manifest.datasets[k] = entry
+            except Exception:
+                pass
 
     @property
     def manifest(self) -> DatasetManifest:

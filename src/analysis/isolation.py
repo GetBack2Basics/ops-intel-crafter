@@ -31,16 +31,20 @@ def run_isolation_vulnerability_analysis(
     WITH inund_3112 AS (
         SELECT
             objectid AS inund_id,
+            _bbox_minx, _bbox_miny, _bbox_maxx, _bbox_maxy,
             ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
         FROM inundation
+        WHERE _bbox_maxx >= 151.30 AND _bbox_minx <= 151.95 AND _bbox_maxy >= -33.30 AND _bbox_miny <= -32.60
     ),
     sa2_3112 AS (
         SELECT
             sa2_code_2021 AS sa2_code21,
             sa2_name_2021 AS sa2_name21,
             ROUND(area_albers_sqkm, 2) AS sa2_area_sqkm,
+            _bbox_minx, _bbox_miny, _bbox_maxx, _bbox_maxy,
             ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS sa2_geom_3112
         FROM sa2_asgs
+        WHERE _bbox_maxx >= 151.30 AND _bbox_minx <= 151.95 AND _bbox_maxy >= -33.30 AND _bbox_miny <= -32.60
     ),
     sa2_inund_pairs AS (
         SELECT
@@ -57,7 +61,9 @@ def run_isolation_vulnerability_analysis(
             ) AS inundated_area_sqm,
             MIN(ST_Distance(s.sa2_geom_3112, i.geom_3112)) AS min_dist_to_inund_m
         FROM sa2_3112 s
-        CROSS JOIN inund_3112 i
+        JOIN inund_3112 i
+          ON s._bbox_maxx >= (i._bbox_minx - 0.02) AND s._bbox_minx <= (i._bbox_maxx + 0.02)
+         AND s._bbox_maxy >= (i._bbox_miny - 0.02) AND s._bbox_miny <= (i._bbox_maxy + 0.02)
         GROUP BY s.sa2_code21, s.sa2_name21, s.sa2_area_sqkm, s.sa2_geom_3112
         HAVING MIN(ST_Distance(s.sa2_geom_3112, i.geom_3112)) <= 1500.0
     )

@@ -74,7 +74,9 @@ def plan_natural_language_query(
     if "substation" in q and ("flood" in q or "inundation" in q or "5km" in q or "5 km" in q or "dependent" in q):
         sql = """
         WITH inund_3112 AS (
-            SELECT ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
+            SELECT
+                _bbox_minx, _bbox_miny, _bbox_maxx, _bbox_maxy,
+                ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
             FROM nsw_water_inundation_areas
         ),
         sub_3112 AS (
@@ -83,8 +85,10 @@ def plan_natural_language_query(
                 COALESCE(feature_name, 'Unnamed Substation') AS substation_name,
                 voltage_kv,
                 COALESCE(locality, 'Unknown') AS locality,
+                _bbox_minx, _bbox_miny, _bbox_maxx, _bbox_maxy,
                 ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
             FROM ga_electricity_substations
+            WHERE state = 'NSW' OR state IS NULL
         ),
         sub_flood_dist AS (
             SELECT
@@ -92,15 +96,19 @@ def plan_natural_language_query(
                 s.substation_name,
                 s.voltage_kv,
                 s.locality,
+                s._bbox_minx, s._bbox_miny, s._bbox_maxx, s._bbox_maxy,
                 s.geom_3112,
-                ROUND(MIN(ST_Distance(s.geom_3112, i.geom_3112)), 1) AS distance_to_inundation_m
+                COALESCE(ROUND(MIN(ST_Distance(s.geom_3112, i.geom_3112)), 1), 99999.0) AS distance_to_inundation_m
             FROM sub_3112 s
-            CROSS JOIN inund_3112 i
-            GROUP BY s.substation_id, s.substation_name, s.voltage_kv, s.locality, s.geom_3112
+            LEFT JOIN inund_3112 i
+              ON s._bbox_maxx >= (i._bbox_minx - 0.15) AND s._bbox_minx <= (i._bbox_maxx + 0.15)
+             AND s._bbox_maxy >= (i._bbox_miny - 0.15) AND s._bbox_miny <= (i._bbox_maxy + 0.15)
+            GROUP BY s.substation_id, s.substation_name, s.voltage_kv, s.locality, s._bbox_minx, s._bbox_miny, s._bbox_maxx, s._bbox_maxy, s.geom_3112
         ),
         foi_3112 AS (
             SELECT
                 objectid AS foi_id,
+                _bbox_minx, _bbox_miny, _bbox_maxx, _bbox_maxy,
                 ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
             FROM nsw_foi_building_complexes
         )
@@ -113,7 +121,9 @@ def plan_natural_language_query(
             COUNT(DISTINCT f.foi_id) AS dependent_foi_within_5km
         FROM sub_flood_dist s
         LEFT JOIN foi_3112 f
-          ON ST_DWithin(s.geom_3112, f.geom_3112, 5000.0)
+          ON f._bbox_maxx >= (s._bbox_minx - 0.06) AND f._bbox_minx <= (s._bbox_maxx + 0.06)
+         AND f._bbox_maxy >= (s._bbox_miny - 0.06) AND f._bbox_miny <= (s._bbox_maxy + 0.06)
+         AND ST_DWithin(s.geom_3112, f.geom_3112, 5000.0)
         GROUP BY s.substation_id, s.substation_name, s.voltage_kv, s.locality, s.distance_to_inundation_m
         ORDER BY s.distance_to_inundation_m ASC
         LIMIT 15
@@ -173,9 +183,13 @@ def plan_natural_language_query(
 
     if "lga" in q or "council" in q or "regional" in q or "inundation" in q or "flood" in q:
         sql = """
-        WITH lga_inund AS (
+        WITH nsw_lga AS (
+            SELECT * FROM next_lga_boundaries_asgs2025
+            WHERE state_name_2021 = 'New South Wales' OR state_name_2021 IS NULL
+        ),
+        lga_inund AS (
             SELECT l.lga_code_2025, COUNT(DISTINCT i.objectid) AS inundation_zones
-            FROM next_lga_boundaries_asgs2025 l
+            FROM nsw_lga l
             LEFT JOIN nsw_water_inundation_areas i
               ON i._bbox_maxx >= l._bbox_minx AND i._bbox_minx <= l._bbox_maxx
              AND i._bbox_maxy >= l._bbox_miny AND i._bbox_miny <= l._bbox_maxy
@@ -184,7 +198,7 @@ def plan_natural_language_query(
         ),
         lga_sub AS (
             SELECT l.lga_code_2025, COUNT(DISTINCT s.objectid) AS substations_count
-            FROM next_lga_boundaries_asgs2025 l
+            FROM nsw_lga l
             LEFT JOIN ga_electricity_substations s
               ON s._bbox_maxx >= l._bbox_minx AND s._bbox_minx <= l._bbox_maxx
              AND s._bbox_maxy >= l._bbox_miny AND s._bbox_miny <= l._bbox_maxy
@@ -193,7 +207,7 @@ def plan_natural_language_query(
         ),
         lga_foi AS (
             SELECT l.lga_code_2025, COUNT(DISTINCT f.objectid) AS foi_complexes_count
-            FROM next_lga_boundaries_asgs2025 l
+            FROM nsw_lga l
             LEFT JOIN nsw_foi_building_complexes f
               ON f._bbox_maxx >= l._bbox_minx AND f._bbox_minx <= l._bbox_maxx
              AND f._bbox_maxy >= l._bbox_miny AND f._bbox_miny <= l._bbox_maxy
@@ -207,7 +221,7 @@ def plan_natural_language_query(
             COALESCE(li.inundation_zones, 0) AS inundation_zones,
             COALESCE(ls.substations_count, 0) AS substations_count,
             COALESCE(lf.foi_complexes_count, 0) AS foi_complexes_count
-        FROM next_lga_boundaries_asgs2025 l
+        FROM nsw_lga l
         LEFT JOIN lga_inund li ON l.lga_code_2025 = li.lga_code_2025
         LEFT JOIN lga_sub ls ON l.lga_code_2025 = ls.lga_code_2025
         LEFT JOIN lga_foi lf ON l.lga_code_2025 = lf.lga_code_2025
@@ -225,6 +239,58 @@ def plan_natural_language_query(
             sql=sql.strip(),
             population_method=explicit_pop_method or "NOT_APPLICABLE",
             notes=["Joins ABS ASGS 2025 LGAs with NSW inundation polygons, GA substations, and NSW FOI complexes."],
+        )
+
+    if "cyclone" in q or "typhoon" in q or "wp302026" in q or "track" in q or "in-fa" in q:
+        sql = """
+        WITH cyclone_track AS (
+            SELECT
+                feature_name AS track_name,
+                ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS track_geom_3112
+            FROM uploaded_cyclone_track
+        ),
+        critical_assets AS (
+            SELECT
+                objectid AS asset_id,
+                COALESCE(feature_name, 'Unnamed Asset') AS asset_name,
+                'Substation' AS asset_type,
+                ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS asset_geom_3112
+            FROM ga_electricity_substations
+            UNION ALL
+            SELECT
+                objectid AS asset_id,
+                COALESCE(generalname, 'Unnamed Facility') AS asset_name,
+                classsubtype AS asset_type,
+                ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS asset_geom_3112
+            FROM nsw_foi_building_complexes
+        )
+        SELECT
+            a.asset_id,
+            a.asset_name,
+            a.asset_type,
+            ROUND(MIN(ST_Distance(a.asset_geom_3112, c.track_geom_3112)) / 1000.0, 1) AS distance_to_track_km,
+            CASE
+                WHEN MIN(ST_Distance(a.asset_geom_3112, c.track_geom_3112)) <= 50000.0 THEN 'ZONE_1: Destructive Core / Eyewall (>64 kt)'
+                WHEN MIN(ST_Distance(a.asset_geom_3112, c.track_geom_3112)) <= 150000.0 THEN 'ZONE_2: Severe Gale Force (48–63 kt)'
+                WHEN MIN(ST_Distance(a.asset_geom_3112, c.track_geom_3112)) <= 300000.0 THEN 'ZONE_3: Outer Gale Watch (34–47 kt)'
+                ELSE 'ZONE_4: Peripheral / Outside Direct Warning Cone'
+            END AS predicted_cyclone_zone
+        FROM critical_assets a
+        CROSS JOIN cyclone_track c
+        GROUP BY a.asset_id, a.asset_name, a.asset_type
+        ORDER BY distance_to_track_km ASC
+        LIMIT 25
+        """
+        return PlannedSpatialQuery(
+            status="READY",
+            intent_id="cyclone_track_asset_exposure_zones",
+            selected_datasets=["ga_electricity_substations", "nsw_foi_building_complexes"],
+            sql=sql.strip(),
+            population_method="NOT_APPLICABLE",
+            notes=[
+                "Calculates distance from uploaded cyclone track forecast to critical infrastructure in metric CRS EPSG:3112.",
+                "Assigns Zone 1 (<50 km Destructive Core), Zone 2 (50–150 km Severe Gale), Zone 3 (150–300 km Gale Watch), Zone 4 (>300 km Peripheral).",
+            ],
         )
 
     # Default: require clarification rather than guessing an arbitrary query

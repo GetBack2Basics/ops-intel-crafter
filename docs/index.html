@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="shell-type" content="web_dashboard"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="shell-type" content="web_dashboard" />
   <title>Emergency Spatial Workbench | Australian Infrastructure &amp; Hazard Analysis</title>
-  <meta name="description" content="Australian emergency management spatial analysis on GCS GeoParquet, DuckDB Spatial, and MapLibre."/>
+  <meta name="description"
+    content="Australian emergency management spatial analysis on GCS GeoParquet, DuckDB Spatial, and MapLibre." />
 
   <!-- Fonts: Plus Jakarta Sans, Space Grotesk, JetBrains Mono + Material Symbols -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Space+Grotesk:wght@600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Space+Grotesk:wght@600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap"
+    rel="stylesheet" />
 
   <!-- MapLibre GL CSS -->
-  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"/>
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
 
   <!-- Tailwind (CDN) + Stitch Design Token Theme -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -68,42 +74,56 @@
     };
   </script>
 
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body class="bg-surface font-body-md text-on-surface antialiased">
 
   <!-- ============ SIDEBAR ============ -->
-  <aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between py-6 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+  <aside
+    class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between py-6 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
     <div class="flex flex-col gap-6">
       <div class="px-6 flex items-center gap-3">
         <div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center">
           <span class="material-symbols-outlined text-secondary-fixed text-[22px]">layers</span>
         </div>
         <div>
-          <span class="font-headline-sm text-headline-sm text-primary block leading-tight tracking-tight">Spatial Workbench</span>
-          <span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">Emergency GIS</span>
+          <span class="font-headline-sm text-headline-sm text-primary block leading-tight tracking-tight">Spatial
+            Workbench</span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">Emergency
+            GIS</span>
         </div>
       </div>
       <nav id="sideNav" class="flex flex-col gap-1 px-3">
-        <a class="nav-link active" href="#panel-query"><span class="material-symbols-outlined text-[20px]">search</span>Query &amp; Area</a>
-        <a class="nav-link" href="#panel-sql"><span class="material-symbols-outlined text-[20px]">code</span>SQL Editor</a>
+        <a class="nav-link active" href="#panel-query"><span
+            class="material-symbols-outlined text-[20px]">search</span>Query &amp; Area</a>
+        <a class="nav-link" href="#panel-sql"><span class="material-symbols-outlined text-[20px]">code</span>SQL
+          Editor</a>
         <a class="nav-link" href="#panel-map"><span class="material-symbols-outlined text-[20px]">map</span>Map View</a>
-        <a class="nav-link" href="#panel-recommendations"><span class="material-symbols-outlined text-[20px]">table_chart</span>Results Table</a>
-        <a class="nav-link" href="#panel-analytics"><span class="material-symbols-outlined text-[20px]">bar_chart</span>Telemetry &amp; Profiles</a>
-        <a class="nav-link" href="#panel-ai-steps"><span class="material-symbols-outlined text-[20px]">public</span>Multi-Scale Hazards</a>
+        <a class="nav-link" href="#panel-recommendations"><span
+            class="material-symbols-outlined text-[20px]">table_chart</span>Results Table</a>
+        <a class="nav-link" href="#panel-analytics"><span
+            class="material-symbols-outlined text-[20px]">bar_chart</span>Telemetry &amp; Profiles</a>
+        <a class="nav-link" href="#panel-ai-steps"><span
+            class="material-symbols-outlined text-[20px]">public</span>Multi-Scale Hazards</a>
         <div class="h-px bg-surface-container-high my-2 mx-3"></div>
-        <a class="nav-link" href="qa/index.html"><span class="material-symbols-outlined text-[20px]">fact_check</span>Data QA Overview</a>
-        <a class="nav-link" href="qa/inspect.html"><span class="material-symbols-outlined text-[20px]">travel_explore</span>Source Inspector</a>
-        <a class="nav-link" href="map_packages/hunter_flood_emergency_pack/index.html"><span class="material-symbols-outlined text-[20px]">inventory_2</span>Offline Map Pack</a>
+        <a class="nav-link" href="qa/index.html"><span
+            class="material-symbols-outlined text-[20px]">fact_check</span>Data QA Overview</a>
+        <a class="nav-link" href="qa/inspect.html"><span
+            class="material-symbols-outlined text-[20px]">travel_explore</span>Source Inspector</a>
+        <a class="nav-link" href="map_packages/hunter_flood_emergency_pack/index.html"><span
+            class="material-symbols-outlined text-[20px]">inventory_2</span>Offline Map Pack</a>
       </nav>
     </div>
     <div class="px-4 flex flex-col gap-3">
       <div class="p-3 bg-surface-container rounded-lg flex flex-col gap-2">
         <div class="flex items-center justify-between">
           <span class="font-label-sm text-label-sm text-on-surface-variant">GCS Storage</span>
-          <span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-secondary"><span class="w-2 h-2 rounded-full bg-secondary-fixed-dim"></span>Online</span>
+          <span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-secondary"><span
+              class="w-2 h-2 rounded-full bg-secondary-fixed-dim"></span>Online</span>
         </div>
-        <span class="font-mono text-[10px] text-on-surface-variant truncate" title="gs://operational-intelligence-crafter-lake/">gs://operational-intelligence-crafter-lake/</span>
+        <span class="font-mono text-[10px] text-on-surface-variant truncate"
+          title="gs://operational-intelligence-crafter-lake/">gs://operational-intelligence-crafter-lake/</span>
       </div>
     </div>
   </aside>
@@ -114,22 +134,29 @@
       <div class="h-16 px-space-xl flex items-center justify-between gap-4">
         <div class="flex items-center gap-4 flex-1 max-w-xl">
           <div class="relative w-full">
-            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
-            <input id="globalSearch" type="search" class="w-full h-10 pl-10 pr-4 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary/30 transition-all" placeholder="Search flood zone, substation, LGA, bushfire or population grid… (Enter)"/>
+            <span
+              class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+            <input id="globalSearch" type="search"
+              class="w-full h-10 pl-10 pr-4 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary/30 transition-all"
+              placeholder="Search flood zone, substation, LGA, bushfire or population grid… (Enter)" />
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <a href="qa/index.html" class="h-10 px-4 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-2 transition-colors">
+          <a href="qa/index.html"
+            class="h-10 px-4 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-2 transition-colors">
             <span class="material-symbols-outlined text-[18px]">fact_check</span><span>Data QA</span>
           </a>
-          <button id="btnHeaderRun" type="button" class="h-10 px-4 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center gap-2 transition-colors">
+          <button id="btnHeaderRun" type="button"
+            class="h-10 px-4 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center gap-2 transition-colors">
             <span class="material-symbols-outlined text-[18px]">play_arrow</span><span>Run Query</span>
           </button>
         </div>
       </div>
-      <div class="h-12 px-space-xl bg-surface-container-lowest flex items-center justify-between gap-4 shadow-[0_1px_4px_rgba(0,0,0,0.02)]">
+      <div
+        class="h-12 px-space-xl bg-surface-container-lowest flex items-center justify-between gap-4 shadow-[0_1px_4px_rgba(0,0,0,0.02)]">
         <div class="flex items-center gap-4 overflow-x-auto">
-          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider shrink-0">Steps</span>
+          <span
+            class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider shrink-0">Steps</span>
           <div class="flex items-center gap-1.5 shrink-0">
             <a href="#panel-query" class="step-pill active">01 Query &amp; Area</a>
             <a href="#panel-sql" class="step-pill">02 SQL</a>
@@ -151,19 +178,23 @@
       <div class="flex flex-col w-full pb-16 space-y-8 pt-6">
 
         <!-- Top Summary Bar -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-space-md bg-surface-container-lowest rounded-xl shadow-sm">
+        <div
+          class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-space-md bg-surface-container-lowest rounded-xl shadow-sm">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-primary text-on-primary flex items-center justify-center shrink-0">
               <span class="material-symbols-outlined text-[24px]">layers</span>
             </div>
             <div>
               <h1 class="font-headline-sm text-headline-sm text-on-surface">Emergency Spatial Workbench</h1>
-              <p class="font-body-sm text-body-sm text-on-surface-variant">Australian Hazards, Infrastructure &amp; ABS 1 km² Population Grid (Methods A, B, C)</p>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Australian Hazards, Infrastructure &amp; ABS
+                1 km² Population Grid (Methods A, B, C)</p>
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <div class="ribbon-item"><span class="text-on-surface-variant font-normal">Basemap:</span><span class="font-bold">OpenStreetMap</span></div>
-            <div class="ribbon-item"><span class="text-on-surface-variant font-normal">Storage:</span><span class="font-bold font-mono">GeoParquet</span></div>
+            <div class="ribbon-item"><span class="text-on-surface-variant font-normal">Basemap:</span><span
+                class="font-bold">OpenStreetMap</span></div>
+            <div class="ribbon-item"><span class="text-on-surface-variant font-normal">Storage:</span><span
+                class="font-bold font-mono">GeoParquet</span></div>
           </div>
         </div>
 
@@ -174,41 +205,101 @@
               <span class="step-tag">STEP 01</span>
               <h2 class="font-headline-md text-headline-md text-on-surface">Select Preset or Enter Spatial Query</h2>
             </div>
-            <span class="font-label-sm text-label-sm text-on-surface-variant">Define area and options below before creating SQL</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant">Define area and options below before
+              creating SQL</span>
           </div>
 
           <div class="flex flex-col sm:flex-row gap-3">
             <div class="relative flex-1">
-              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-[22px]">search</span>
-              <input id="nlInput" type="text" value="" placeholder="Select a preset below or type a question (e.g. Substations near flood zones in Maitland)" class="w-full h-12 pl-12 pr-4 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary transition-all"/>
+              <span
+                class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-[22px]">search</span>
+              <input id="nlInput" type="text" value=""
+                placeholder="Select a preset below or type a question (e.g. Substations near flood zones in Maitland)"
+                class="w-full h-12 pl-12 pr-4 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary transition-all" />
             </div>
             <button id="btnAnalyze" type="button" class="btn h-12 px-6">
               <span class="material-symbols-outlined text-[20px]">code</span><span>Generate Query</span>
             </button>
-            <button id="btnClearAll" type="button" class="btn btn-secondary h-12 px-4" title="Reset query, SQL, map and tables to blank">
+            <button id="btnClearAll" type="button" class="btn btn-secondary h-12 px-4"
+              title="Reset query, SQL, map and tables to blank">
               <span class="material-symbols-outlined text-[18px]">restart_alt</span><span>Reset</span>
             </button>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider mr-1">Preset Queries:</span>
-            <button class="chip chip-featured" data-scenario="pop_comparison">1 km² Population Comparison (Methods A / B / C)</button>
-            <button class="chip" data-scenario="substation_flood">Substation Flood Proximity &amp; Facility Catchment</button>
+            <span
+              class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider mr-1">Preset
+              Queries:</span>
+            <button class="chip chip-featured" data-scenario="pop_comparison">1 km² Population Comparison (Methods A / B
+              / C)</button>
+            <button class="chip" data-scenario="substation_flood">Substation Flood Proximity &amp; Facility
+              Catchment</button>
             <button class="chip" data-scenario="lga_multi_hazard">LGA Flood, Substation &amp; Building Summary</button>
             <button class="chip" data-scenario="live_rfs">NSW RFS Active Bushfire Incidents</button>
             <button class="chip" data-scenario="national_power">National Power Stations &amp; Seismic Contours</button>
+            <button class="chip" data-scenario="cyclone_track_exposure">🌀 Cyclone Track Asset Exposure
+              (WP302026)</button>
             <button class="chip" data-scenario="ambiguous_pop">Population in Flood Zone</button>
             <button class="chip" data-scenario="uncatalogued_reject">Uncatalogued Source Check (SCADA / ICU)</button>
           </div>
 
+          <!-- Spatial File Upload Box (KMZ, KML, GeoJSON, Shapefile Zip) -->
+          <div id="spatialUploadBox"
+            class="border-2 border-dashed border-outline-variant/70 rounded-xl p-4 bg-surface-container-lowest hover:border-secondary transition-all flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary shrink-0">
+                <span class="material-symbols-outlined text-[24px]">cloud_upload</span>
+              </div>
+              <div>
+                <h4 class="font-headline-sm text-sm font-bold text-on-surface flex items-center gap-2">
+                  <span>Upload Hazard / Asset File</span>
+                  <span class="badge-tag optimal text-[10px] py-0.5 px-1.5 uppercase font-mono">KMZ • KML • GeoJSON •
+                    Shapefile .zip</span>
+                </h4>
+                <p id="uploadStatusText" class="font-body-sm text-xs text-on-surface-variant">Drop or browse a cyclone
+                  forecast track or spatial layer to calculate asset exposure and predicted hazard zones.</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <input id="spatialFileInput" type="file" accept=".kmz,.kml,.geojson,.json,.zip" class="hidden" />
+              <button id="btnBrowseFile" type="button"
+                class="btn btn-secondary h-9 px-4 text-xs font-semibold flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px]">upload_file</span>
+                <span>Upload File</span>
+              </button>
+              <button id="btnLoadSampleCyclone" type="button"
+                class="chip chip-featured text-xs py-1.5 px-3 flex items-center gap-1"
+                title="Test with Joint Typhoon Warning Center WP302026 track">
+                <span class="material-symbols-outlined text-[14px]">cyclone</span>
+                <span>Load Sample KMZ</span>
+              </button>
+              <button id="btnFlipLat" type="button"
+                class="chip text-xs py-1.5 px-3 flex items-center gap-1 hover:border-secondary transition-colors"
+                title="Invert/Flip Latitude (+Y ↔ -Y / North ↔ South)">
+                <span class="material-symbols-outlined text-[14px]">swap_vert</span>
+                <span>Flip Lat (Y)</span>
+              </button>
+              <button id="btnFlipXy" type="button"
+                class="chip text-xs py-1.5 px-3 flex items-center gap-1 hover:border-secondary transition-colors"
+                title="Swap Longitude and Latitude (X ↔ Y)">
+                <span class="material-symbols-outlined text-[14px]">swap_horiz</span>
+                <span>Flip X ↔ Y</span>
+              </button>
+            </div>
+          </div>
+
           <!-- Geographic Extent & Scope Clarification Box -->
-          <div id="clarificationBox" class="bg-surface-container-low rounded-xl p-space-md flex-col gap-4" style="display: none;">
+          <div id="clarificationBox" class="bg-surface-container-low rounded-xl p-space-md flex-col gap-4"
+            style="display: none;">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-secondary text-[20px]">map</span>
-                <h3 id="clarificationTitle" class="font-headline-sm text-headline-sm text-on-surface">Clarify Geographic Extent for Query</h3>
+                <h3 id="clarificationTitle" class="font-headline-sm text-headline-sm text-on-surface">Clarify Geographic
+                  Extent for Query</h3>
               </div>
-              <span id="clarificationSubtitle" class="font-label-sm text-label-sm text-on-surface-variant">Confirm or select target area before creating SQL</span>
+              <span id="clarificationSubtitle" class="font-label-sm text-label-sm text-on-surface-variant">Confirm or
+                select target area before creating SQL</span>
             </div>
             <div id="clarificationQuestions" class="space-y-4"></div>
             <!-- Validation Feedback Banner -->
@@ -247,11 +338,16 @@
               <div class="px-4 py-2.5 bg-primary-container flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2 min-w-0">
                   <span class="material-symbols-outlined text-[18px] text-secondary-fixed">folder_open</span>
-                  <span id="sqlTargetUri" class="font-label-sm text-label-sm text-on-primary font-mono truncate">gs://operational-intelligence-crafter-lake/geoparquet/ (awaiting query)</span>
+                  <span id="sqlTargetUri"
+                    class="font-label-sm text-label-sm text-on-primary font-mono truncate">gs://operational-intelligence-crafter-lake/geoparquet/
+                    (awaiting query)</span>
                 </div>
-                <button id="btnCopySql" type="button" class="shrink-0 flex items-center gap-1 px-2.5 py-1 rounded bg-primary text-on-primary font-label-sm text-label-sm hover:bg-on-primary-fixed-variant transition-colors">Copy SQL</button>
+                <button id="btnCopySql" type="button"
+                  class="shrink-0 flex items-center gap-1 px-2.5 py-1 rounded bg-primary text-on-primary font-label-sm text-label-sm hover:bg-on-primary-fixed-variant transition-colors">Copy
+                  SQL</button>
               </div>
-              <textarea id="sqlInput" class="sql-editor" spellcheck="false" placeholder="-- Select a preset or enter a query in Step 01, define your area and options in plain text, and click Create SQL..."></textarea>
+              <textarea id="sqlInput" class="sql-editor" spellcheck="false"
+                placeholder="-- Select a preset or enter a query in Step 01, define your area and options in plain text, and click Create SQL..."></textarea>
             </div>
 
             <!-- Context Cards (Start Blank with —) -->
@@ -270,7 +366,8 @@
                   <span class="material-symbols-outlined text-on-tertiary-container text-[20px]">tune</span>
                 </div>
                 <div id="ctxMethodVal" class="font-headline-md text-headline-md text-on-surface truncate">—</div>
-                <p id="ctxMethodSub" class="font-body-sm text-body-sm text-on-surface-variant">Distance / filter / population method</p>
+                <p id="ctxMethodSub" class="font-body-sm text-body-sm text-on-surface-variant">Distance / filter /
+                  population method</p>
               </div>
               <div class="context-tile">
                 <div class="flex items-center justify-between">
@@ -278,7 +375,8 @@
                   <span class="material-symbols-outlined text-secondary text-[20px]">database</span>
                 </div>
                 <div id="ctxGateVal" class="font-headline-md text-headline-md text-secondary">—</div>
-                <p id="ctxGateSub" class="font-body-sm text-body-sm text-on-surface-variant">Stored GeoParquet on GCS</p>
+                <p id="ctxGateSub" class="font-body-sm text-body-sm text-on-surface-variant">Stored GeoParquet on GCS
+                </p>
               </div>
             </div>
           </div>
@@ -290,24 +388,31 @@
             <div class="flex items-center gap-3">
               <span class="step-tag">STEP 03</span>
               <div>
-                <h2 id="mapSectionTitle" class="font-headline-md text-headline-md text-on-surface">Map View &amp; Layer Control</h2>
-                <p class="font-body-sm text-body-sm text-on-surface-variant">Click any point, line, or polygon on the map to inspect attributes, or use Layer Control for opacity, metadata (ℹ️), charts (📊) &amp; table view (⊞)</p>
+                <h2 id="mapSectionTitle" class="font-headline-md text-headline-md text-on-surface">Map View &amp; Layer
+                  Control</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Click any point, line, or polygon on the
+                  map to inspect attributes, or use Layer Control for opacity, metadata (ℹ️), charts (📊) &amp; table
+                  view (⊞)</p>
               </div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <span id="mapFeatureCountBadge" class="badge badge-accent">0 Features Loaded</span>
-              <span id="mapCrsBadge" class="badge"><span class="material-symbols-outlined text-[16px]">straighten</span>EPSG:7844 / EPSG:3112</span>
+              <span id="mapCrsBadge" class="badge"><span
+                  class="material-symbols-outlined text-[16px]">straighten</span>EPSG:7844 / EPSG:3112</span>
             </div>
           </div>
 
           <!-- AURA-Style Map Control Toolbar -->
-          <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
+          <div
+            class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-surface-container-low border border-surface-container-high">
             <div class="flex flex-wrap items-center gap-1.5">
               <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mr-1">Mode:</span>
-              <button id="btnModeIdentify" type="button" class="map-toolbar-btn active" title="Click points, lines or polygons on the map to inspect attributes">
+              <button id="btnModeIdentify" type="button" class="map-toolbar-btn active"
+                title="Click points, lines or polygons on the map to inspect attributes">
                 <span>👆 Click (Identify)</span>
               </button>
-              <button id="btnModePan" type="button" class="map-toolbar-btn" title="Pan/navigate map without triggering popups">
+              <button id="btnModePan" type="button" class="map-toolbar-btn"
+                title="Pan/navigate map without triggering popups">
                 <span>✋ Hand (Pan)</span>
               </button>
 
@@ -315,26 +420,34 @@
 
               <!-- Basemap & Opacity Selector -->
               <div class="relative">
-                <button id="btnBasemapMenu" type="button" class="map-toolbar-btn" title="Switch basemap style and adjust basemap opacity">
+                <button id="btnBasemapMenu" type="button" class="map-toolbar-btn"
+                  title="Switch basemap style and adjust basemap opacity">
                   <span>🗺️ Basemap: <strong id="basemapLabel">OSM Standard</strong></span>
                 </button>
-                <div id="basemapPopover" class="hidden absolute left-0 top-10 w-64 p-3 rounded-xl bg-surface-container-lowest shadow-xl border border-outline-variant/50 z-50 space-y-2.5">
-                  <div class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Select Basemap</div>
+                <div id="basemapPopover"
+                  class="hidden absolute left-0 top-10 w-64 p-3 rounded-xl bg-surface-container-lowest shadow-xl border border-outline-variant/50 z-50 space-y-2.5">
+                  <div class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Select Basemap
+                  </div>
                   <div class="space-y-1 text-xs" id="basemapOptionsList">
-                    <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-container cursor-pointer font-semibold">
-                      <input type="radio" name="basemapChoice" value="osm-standard" checked/> OpenStreetMap Standard
+                    <label
+                      class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-container cursor-pointer font-semibold">
+                      <input type="radio" name="basemapChoice" value="osm-standard" checked /> OpenStreetMap Standard
                     </label>
-                    <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-container cursor-pointer font-semibold">
-                      <input type="radio" name="basemapChoice" value="osm-hot"/> Humanitarian / Terrain OSM
+                    <label
+                      class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-container cursor-pointer font-semibold">
+                      <input type="radio" name="basemapChoice" value="osm-hot" /> Humanitarian / Terrain OSM
                     </label>
-                    <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-container cursor-pointer font-semibold">
-                      <input type="radio" name="basemapChoice" value="esri-imagery"/> Esri World Imagery (Satellite)
+                    <label
+                      class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-container cursor-pointer font-semibold">
+                      <input type="radio" name="basemapChoice" value="esri-imagery" /> Esri World Imagery (Satellite)
                     </label>
-                    <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-container cursor-pointer font-semibold">
-                      <input type="radio" name="basemapChoice" value="dark-canvas"/> Dark Operational Canvas
+                    <label
+                      class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-container cursor-pointer font-semibold">
+                      <input type="radio" name="basemapChoice" value="dark-canvas" /> Dark Operational Canvas
                     </label>
-                    <label class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-container cursor-pointer font-semibold">
-                      <input type="radio" name="basemapChoice" value="white-canvas"/> Clean White Canvas
+                    <label
+                      class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-container cursor-pointer font-semibold">
+                      <input type="radio" name="basemapChoice" value="white-canvas" /> Clean White Canvas
                     </label>
                   </div>
                   <div class="pt-2 border-t border-surface-container space-y-1">
@@ -342,7 +455,8 @@
                       <span>Basemap Opacity</span>
                       <span id="basemapOpacityVal">100%</span>
                     </div>
-                    <input id="basemapOpacitySlider" type="range" min="0" max="100" value="100" class="w-full accent-secondary cursor-pointer"/>
+                    <input id="basemapOpacitySlider" type="range" min="0" max="100" value="100"
+                      class="w-full accent-secondary cursor-pointer" />
                   </div>
                 </div>
               </div>
@@ -350,19 +464,25 @@
               <div class="h-4 w-px bg-outline-variant/50 mx-1"></div>
 
               <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mr-0.5">Extent:</span>
-              <button type="button" class="map-toolbar-btn" data-zoom-scale="hunter" title="Zoom to Lower Hunter / Maitland">🎯 Hunter</button>
-              <button type="button" class="map-toolbar-btn" data-zoom-scale="nsw" title="Zoom to NSW Statewide">🎯 NSW</button>
-              <button type="button" class="map-toolbar-btn" data-zoom-scale="australia" title="Zoom to National Australia">🎯 Australia</button>
+              <button type="button" class="map-toolbar-btn" data-zoom-scale="hunter"
+                title="Zoom to Lower Hunter / Maitland">🎯 Hunter</button>
+              <button type="button" class="map-toolbar-btn" data-zoom-scale="nsw" title="Zoom to NSW Statewide">🎯
+                NSW</button>
+              <button type="button" class="map-toolbar-btn" data-zoom-scale="australia"
+                title="Zoom to National Australia">🎯 Australia</button>
             </div>
 
             <div class="flex flex-wrap items-center gap-1.5">
-              <button id="btnOpenCatalogModal" type="button" class="map-toolbar-btn bg-secondary text-white border-secondary hover:bg-[#00575f] hover:text-white">
+              <button id="btnOpenCatalogModal" type="button"
+                class="map-toolbar-btn bg-secondary text-white border-secondary hover:bg-[#00575f] hover:text-white">
                 <span>+ Add / Manage Layers (12)</span>
               </button>
-              <button id="btnToggleLayerPanel" type="button" class="map-toolbar-btn active" title="Show/hide AURA Layer Control sidebar">
+              <button id="btnToggleLayerPanel" type="button" class="map-toolbar-btn active"
+                title="Show/hide AURA Layer Control sidebar">
                 <span>🗂️ Layer Control</span>
               </button>
-              <button id="btnToggleAttrDock" type="button" class="map-toolbar-btn" title="Open/close multi-layer Attribute Table View">
+              <button id="btnToggleAttrDock" type="button" class="map-toolbar-btn"
+                title="Open/close multi-layer Attribute Table View">
                 <span>⊞ Attribute Table View</span>
               </button>
             </div>
@@ -371,87 +491,130 @@
           <!-- Map Canvas + AURA Layer Control Split Grid -->
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
             <!-- Map Container -->
-            <div id="mapCanvasCol" class="lg:col-span-8 relative h-[540px] rounded-xl overflow-hidden bg-surface-container-low border border-surface-container-high">
+            <div id="mapCanvasCol"
+              class="lg:col-span-8 relative h-[540px] rounded-xl overflow-hidden bg-surface-container-low border border-surface-container-high">
               <div id="map" class="w-full h-full"></div>
 
               <!-- Empty-state overlay until query runs or layer is toggled -->
-              <div id="mapEmptyOverlay" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <div class="bg-surface-container-lowest/95 backdrop-blur-md px-5 py-4 rounded-xl shadow-md border border-outline-variant/40 text-center max-w-md pointer-events-auto space-y-2">
-                  <div class="font-label-md text-label-md text-primary font-bold flex items-center justify-center gap-1.5">
-                    <span class="material-symbols-outlined text-secondary text-[18px]">layers</span>Map Ready — Run a Query or Toggle Any Layer
+              <div id="mapEmptyOverlay"
+                class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                <div
+                  class="bg-surface-container-lowest/95 backdrop-blur-md px-5 py-4 rounded-xl shadow-md border border-outline-variant/40 text-center max-w-md pointer-events-auto space-y-2">
+                  <div
+                    class="font-label-md text-label-md text-primary font-bold flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-secondary text-[18px]">layers</span>Map Ready — Run a
+                    Query or Toggle Any Layer
                   </div>
-                  <p class="font-body-sm text-body-sm text-on-surface-variant">Run a spatial query in <strong>Step 01–02</strong>, or click <strong>+ Add / Manage Layers</strong> / check any layer in the <strong>Layer Control</strong> panel on the right to explore points, lines &amp; polygons immediately.</p>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant">Run a spatial query in <strong>Step
+                      01–02</strong>, or click <strong>+ Add / Manage Layers</strong> / check any layer in the
+                    <strong>Layer Control</strong> panel on the right to explore points, lines &amp; polygons
+                    immediately.</p>
                   <div class="pt-1 flex items-center justify-center gap-2">
-                    <button id="btnOverlayLoadDefault" type="button" class="btn h-8 px-3 text-xs">Load Hunter Flood &amp; Infrastructure Layers</button>
+                    <button id="btnOverlayLoadDefault" type="button" class="btn h-8 px-3 text-xs">Load Hunter Flood
+                      &amp; Infrastructure Layers</button>
                   </div>
                 </div>
               </div>
 
               <!-- Live Mouse Coordinates & Identify Hint Pill -->
-              <div class="absolute bottom-3 left-3 bg-primary/85 text-white backdrop-blur-sm px-3 py-1.5 rounded-lg text-[11px] font-mono flex items-center gap-3 z-10 pointer-events-none">
+              <div
+                class="absolute bottom-3 left-3 bg-primary/85 text-white backdrop-blur-sm px-3 py-1.5 rounded-lg text-[11px] font-mono flex items-center gap-3 z-10 pointer-events-none">
                 <span id="mapCoordReadout">Lon: 151.2000°E, Lat: -32.9000°S</span>
                 <span class="text-secondary-fixed">• Click any feature for popup</span>
               </div>
 
               <!-- Legend HUD (compact bottom-right overlay) -->
-              <div id="mapLegendHud" class="absolute bottom-3 right-3 bg-surface-container-lowest/95 backdrop-blur-md p-3 rounded-xl shadow-lg max-w-xs space-y-1.5 z-10 border border-outline-variant/40" style="display: none;">
-                <div class="font-label-sm text-label-sm text-on-surface font-bold uppercase tracking-wider flex items-center justify-between gap-2">
-                  <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px] text-secondary">palette</span><span>Active Symbology</span></span>
+              <div id="mapLegendHud"
+                class="absolute bottom-3 right-3 bg-surface-container-lowest/95 backdrop-blur-md p-3 rounded-xl shadow-lg max-w-xs space-y-1.5 z-10 border border-outline-variant/40"
+                style="display: none;">
+                <div
+                  class="font-label-sm text-label-sm text-on-surface font-bold uppercase tracking-wider flex items-center justify-between gap-2">
+                  <span class="flex items-center gap-1"><span
+                      class="material-symbols-outlined text-[15px] text-secondary">palette</span><span>Active
+                      Symbology</span></span>
                   <span id="legendActiveCount" class="text-[10px] font-mono text-secondary">0 layers</span>
                 </div>
-                <div id="mapLegendItems" class="grid grid-cols-1 gap-y-1 text-[11px] font-semibold text-on-surface-variant"></div>
+                <div id="mapLegendItems"
+                  class="grid grid-cols-1 gap-y-1 text-[11px] font-semibold text-on-surface-variant"></div>
               </div>
             </div>
 
             <!-- AURA-Style Layer Control & Metadata Sidebar -->
-            <div id="layerControlCol" class="lg:col-span-4 flex flex-col h-[540px] rounded-xl bg-surface-container-low border border-surface-container-high overflow-hidden">
+            <div id="layerControlCol"
+              class="lg:col-span-4 flex flex-col h-[540px] rounded-xl bg-surface-container-low border border-surface-container-high overflow-hidden">
               <div class="p-3 bg-primary text-on-primary flex items-center justify-between gap-2 shrink-0">
                 <div class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-secondary-fixed text-[18px]">stacks</span>
                   <div>
                     <h3 class="font-headline-sm text-sm font-bold leading-tight">Layer Control &amp; Metadata</h3>
-                    <p class="text-[10px] text-primary-fixed">Toggle visibility, opacity (🎚️), metadata (ℹ️), charts (📊) &amp; table (⊞)</p>
+                    <p class="text-[10px] text-primary-fixed">Toggle visibility, opacity (🎚️), metadata (ℹ️), charts
+                      (📊) &amp; table (⊞)</p>
                   </div>
                 </div>
-                <button id="btnAddLayerFromSidebar" type="button" class="px-2 py-1 rounded bg-secondary text-white text-[11px] font-bold hover:bg-[#00575f] transition-colors" title="Add/toggle catalogue layers">+ Catalogue</button>
+                <button id="btnAddLayerFromSidebar" type="button"
+                  class="px-2 py-1 rounded bg-secondary text-white text-[11px] font-bold hover:bg-[#00575f] transition-colors"
+                  title="Add/toggle catalogue layers">+ Catalogue</button>
               </div>
 
               <!-- Quick Filter inside Layer Control -->
-              <div class="p-2.5 bg-surface-container border-b border-surface-container-high flex items-center gap-2 shrink-0">
-                <input id="layerFilterInput" type="search" placeholder="Filter layers by name or theme..." class="w-full h-8 px-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-secondary"/>
-                <button id="btnShowAllLayers" type="button" class="px-2 h-8 rounded-lg bg-surface-container-lowest border border-outline-variant text-[11px] font-bold text-on-surface hover:bg-surface-container-high whitespace-nowrap" title="Switch between Active Layers and All 12 Catalogue Layers">All (12)</button>
+              <div
+                class="p-2.5 bg-surface-container border-b border-surface-container-high flex items-center gap-2 shrink-0">
+                <input id="layerFilterInput" type="search" placeholder="Filter layers by name or theme..."
+                  class="w-full h-8 px-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-secondary" />
+                <button id="btnShowAllLayers" type="button"
+                  class="px-2 h-8 rounded-lg bg-surface-container-lowest border border-outline-variant text-[11px] font-bold text-on-surface hover:bg-surface-container-high whitespace-nowrap"
+                  title="Switch between Active Layers and All 12 Catalogue Layers">All (12)</button>
               </div>
 
               <!-- Scrollable Layer Cards List -->
               <div id="layerControlList" class="flex-1 overflow-y-auto p-2.5 space-y-2"></div>
 
               <!-- Selected Feature Mini-Inspector Footer inside Sidebar -->
-              <div class="p-2.5 bg-surface-container border-t border-surface-container-high text-[11px] flex items-center justify-between gap-2 shrink-0">
-                <span id="sidebarIdentifyStatus" class="text-on-surface-variant truncate">👆 Click any point, line or polygon on map</span>
-                <a href="qa/inspect.html" class="font-bold text-secondary hover:underline whitespace-nowrap">Full QA Inspector &rarr;</a>
+              <div
+                class="p-2.5 bg-surface-container border-t border-surface-container-high text-[11px] flex items-center justify-between gap-2 shrink-0">
+                <span id="sidebarIdentifyStatus" class="text-on-surface-variant truncate">👆 Click any point, line or
+                  polygon on map</span>
+                <a href="qa/inspect.html" class="font-bold text-secondary hover:underline whitespace-nowrap">Full QA
+                  Inspector &rarr;</a>
               </div>
             </div>
           </div>
 
           <!-- AURA-Style Multi-Layer Interactive Attribute Table Dock -->
-          <div id="attrTableDock" class="rounded-xl border border-surface-container-high bg-surface-container-lowest overflow-hidden shadow-sm" style="display: none;">
-            <div class="px-4 py-2.5 bg-primary-container text-on-primary flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div id="attrTableDock"
+            class="rounded-xl border border-surface-container-high bg-surface-container-lowest overflow-hidden shadow-sm"
+            style="display: none;">
+            <div
+              class="px-4 py-2.5 bg-primary-container text-on-primary flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="material-symbols-outlined text-secondary-fixed text-[18px]">table_chart</span>
                 <span class="font-headline-sm text-sm font-bold">Layer Attribute Table View</span>
-                <select id="dockLayerSelect" class="h-7 px-2 rounded bg-primary text-white border border-on-primary-container text-xs font-semibold focus:outline-none"></select>
-                <span id="dockFeatureCountBadge" class="px-2 py-0.5 rounded-full bg-secondary text-white text-[11px] font-mono font-bold">0 rows</span>
+                <select id="dockLayerSelect"
+                  class="h-7 px-2 rounded bg-primary text-white border border-on-primary-container text-xs font-semibold focus:outline-none"></select>
+                <span id="dockFeatureCountBadge"
+                  class="px-2 py-0.5 rounded-full bg-secondary text-white text-[11px] font-mono font-bold">0 rows</span>
               </div>
               <div class="flex items-center gap-2">
-                <input id="dockSearchInput" type="search" placeholder="🔍 Search attributes..." class="h-7 px-2.5 rounded bg-surface-container-lowest text-on-surface text-xs w-48 focus:outline-none"/>
-                <button id="btnDockOpenMeta" type="button" class="px-2.5 h-7 rounded bg-primary hover:bg-on-primary-fixed-variant text-white text-[11px] font-bold" title="View layer metadata &amp; 3-Level QA lineage">ℹ️ Metadata</button>
-                <button id="btnDockOpenChart" type="button" class="px-2.5 h-7 rounded bg-primary hover:bg-on-primary-fixed-variant text-white text-[11px] font-bold" title="View attribute distribution charts">📊 Charts</button>
-                <button id="btnDockDownloadCsv" type="button" class="px-2.5 h-7 rounded bg-secondary hover:bg-[#00575f] text-white text-[11px] font-bold" title="Export current table rows to CSV">⬇ CSV</button>
-                <button id="btnCloseAttrDock" type="button" class="px-2 h-7 rounded bg-primary hover:bg-error text-white text-xs font-bold" title="Close Attribute Table Dock">✕</button>
+                <input id="dockSearchInput" type="search" placeholder="🔍 Search attributes..."
+                  class="h-7 px-2.5 rounded bg-surface-container-lowest text-on-surface text-xs w-48 focus:outline-none" />
+                <button id="btnDockOpenMeta" type="button"
+                  class="px-2.5 h-7 rounded bg-primary hover:bg-on-primary-fixed-variant text-white text-[11px] font-bold"
+                  title="View layer metadata &amp; 3-Level QA lineage">ℹ️ Metadata</button>
+                <button id="btnDockOpenChart" type="button"
+                  class="px-2.5 h-7 rounded bg-primary hover:bg-on-primary-fixed-variant text-white text-[11px] font-bold"
+                  title="View attribute distribution charts">📊 Charts</button>
+                <button id="btnDockDownloadCsv" type="button"
+                  class="px-2.5 h-7 rounded bg-secondary hover:bg-[#00575f] text-white text-[11px] font-bold"
+                  title="Export current table rows to CSV">⬇ CSV</button>
+                <button id="btnCloseAttrDock" type="button"
+                  class="px-2 h-7 rounded bg-primary hover:bg-error text-white text-xs font-bold"
+                  title="Close Attribute Table Dock">✕</button>
               </div>
             </div>
-            <div class="px-4 py-1.5 bg-surface-container-low border-b border-surface-container text-[11px] text-on-surface-variant flex items-center justify-between">
-              <span id="dockLayerSubtitle">Click any row below to pan/zoom the map to that feature and open its attribute popup.</span>
+            <div
+              class="px-4 py-1.5 bg-surface-container-low border-b border-surface-container text-[11px] text-on-surface-variant flex items-center justify-between">
+              <span id="dockLayerSubtitle">Click any row below to pan/zoom the map to that feature and open its
+                attribute popup.</span>
               <span class="font-mono">Stored CRS: EPSG:7844</span>
             </div>
             <div class="max-h-72 overflow-auto">
@@ -470,11 +633,13 @@
               <span class="step-tag">STEP 04</span>
               <div>
                 <h2 id="resultsTitle" class="font-headline-md text-headline-md text-on-surface">Query Results</h2>
-                <p id="resultsSubtitle" class="font-body-sm text-body-sm text-on-surface-variant">Run a query in Step 02 to populate summary metrics and feature rows</p>
+                <p id="resultsSubtitle" class="font-body-sm text-body-sm text-on-surface-variant">Run a query in Step 02
+                  to populate summary metrics and feature rows</p>
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <a id="btnExportGeojson" href="exports/hunter_population_grid_comparison/result.geojson" target="_blank" class="badge badge-accent" style="display: none;">
+              <a id="btnExportGeojson" href="exports/hunter_population_grid_comparison/result.geojson" target="_blank"
+                class="badge badge-accent" style="display: none;">
                 <span class="material-symbols-outlined text-[15px]">download</span>Download GeoJSON
               </a>
               <span id="execTimeBadge" class="badge">Not Run</span>
@@ -502,13 +667,15 @@
           </div>
 
           <!-- Feature Inspector Banner (dynamic; hidden by default) -->
-          <div id="inspectorBanner" class="rounded-xl bg-primary text-on-primary p-space-md shadow-sm" style="display: none;">
+          <div id="inspectorBanner" class="rounded-xl bg-primary text-on-primary p-space-md shadow-sm"
+            style="display: none;">
             <div class="flex items-center justify-between gap-3 mb-3">
               <div class="flex items-center gap-3 flex-wrap">
                 <span id="inspectorBadge" class="infra-badge">Selected Feature</span>
                 <h3 id="inspectorName" class="font-headline-sm text-headline-sm text-on-primary">—</h3>
               </div>
-              <button id="btnCloseInspector" type="button" class="flex items-center gap-1 px-2.5 py-1 rounded bg-primary-container hover:bg-on-primary-fixed-variant text-on-primary font-label-sm text-label-sm transition-colors">
+              <button id="btnCloseInspector" type="button"
+                class="flex items-center gap-1 px-2.5 py-1 rounded bg-primary-container hover:bg-on-primary-fixed-variant text-on-primary font-label-sm text-label-sm transition-colors">
                 <span class="material-symbols-outlined text-[14px]">close</span>Close
               </button>
             </div>
@@ -529,7 +696,9 @@
               </thead>
               <tbody id="resultsTableBody">
                 <tr>
-                  <td colspan="5" class="empty-cell">No query executed yet. Select a preset in <strong>Step 01</strong>, define your area and options, click <strong>Create SQL</strong>, and click <strong>Run Query</strong>.</td>
+                  <td colspan="5" class="empty-cell">No query executed yet. Select a preset in <strong>Step 01</strong>,
+                    define your area and options, click <strong>Create SQL</strong>, and click <strong>Run
+                      Query</strong>.</td>
                 </tr>
               </tbody>
             </table>
@@ -542,8 +711,10 @@
             <div class="flex items-center gap-3">
               <span class="step-tag">STEP 05</span>
               <div>
-                <h2 id="step5Title" class="font-headline-md text-headline-md text-on-surface">Execution Telemetry &amp; DuckDB Benchmarks</h2>
-                <p id="step5Subtitle" class="font-body-sm text-body-sm text-on-surface-variant">Live execution metrics, cache performance, and spatial query telemetry for the current query</p>
+                <h2 id="step5Title" class="font-headline-md text-headline-md text-on-surface">Execution Telemetry &amp;
+                  DuckDB Benchmarks</h2>
+                <p id="step5Subtitle" class="font-body-sm text-body-sm text-on-surface-variant">Live execution metrics,
+                  cache performance, and spatial query telemetry for the current query</p>
               </div>
             </div>
             <span class="badge badge-accent">DuckDB Spatial Engine Telemetry</span>
@@ -568,7 +739,8 @@
             </div>
 
             <div class="space-y-3">
-              <h3 id="step5BreakdownTitle" class="font-headline-sm text-headline-sm text-on-surface">Spatial Analytical Breakdown</h3>
+              <h3 id="step5BreakdownTitle" class="font-headline-sm text-headline-sm text-on-surface">Spatial Analytical
+                Breakdown</h3>
               <div class="table-wrapper">
                 <table class="data-table">
                   <thead id="step5BreakdownHead"></thead>
@@ -585,8 +757,10 @@
             <div class="flex items-center gap-3">
               <span class="step-tag">STEP 06</span>
               <div>
-                <h2 class="font-headline-md text-headline-md text-on-surface">Multi-Scale Spatial Context &amp; Disconnected Field Package</h2>
-                <p class="font-body-sm text-body-sm text-on-surface-variant">Seamless cross-scale navigation from local facility impact to national grid exposure and offline emergency packs</p>
+                <h2 class="font-headline-md text-headline-md text-on-surface">Multi-Scale Spatial Context &amp;
+                  Disconnected Field Package</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Seamless cross-scale navigation from local
+                  facility impact to national grid exposure and offline emergency packs</p>
               </div>
             </div>
             <span class="badge">NExT &amp; Multi-Agency</span>
@@ -605,9 +779,11 @@
       <div class="px-5 py-3 bg-primary text-on-primary flex items-center justify-between gap-3">
         <div class="flex items-center gap-2 min-w-0">
           <span class="material-symbols-outlined text-secondary-fixed text-[20px]">info</span>
-          <h3 id="metaModalTitle" class="font-headline-sm text-base font-bold truncate">Layer Metadata &amp; Lineage</h3>
+          <h3 id="metaModalTitle" class="font-headline-sm text-base font-bold truncate">Layer Metadata &amp; Lineage
+          </h3>
         </div>
-        <button type="button" class="px-2 py-1 rounded bg-primary-container hover:bg-error text-white text-xs font-bold" data-close-modal="metaModal">✕ Close</button>
+        <button type="button" class="px-2 py-1 rounded bg-primary-container hover:bg-error text-white text-xs font-bold"
+          data-close-modal="metaModal">✕ Close</button>
       </div>
       <div id="metaModalBody" class="p-5 overflow-y-auto space-y-4 text-xs"></div>
     </div>
@@ -621,11 +797,14 @@
           <span class="material-symbols-outlined text-secondary-fixed text-[20px]">bar_chart</span>
           <h3 id="chartModalTitle" class="font-headline-sm text-base font-bold truncate">Attribute Distribution</h3>
         </div>
-        <button type="button" class="px-2 py-1 rounded bg-primary-container hover:bg-error text-white text-xs font-bold" data-close-modal="chartModal">✕ Close</button>
+        <button type="button" class="px-2 py-1 rounded bg-primary-container hover:bg-error text-white text-xs font-bold"
+          data-close-modal="chartModal">✕ Close</button>
       </div>
       <div class="px-5 py-2.5 bg-surface-container-low flex items-center gap-2 text-xs">
-        <label for="chartFieldSelect" class="font-bold text-on-surface-variant uppercase tracking-wider text-[11px]">Attribute:</label>
-        <select id="chartFieldSelect" class="h-8 px-2 rounded bg-surface-container-lowest border border-outline-variant text-xs font-semibold"></select>
+        <label for="chartFieldSelect"
+          class="font-bold text-on-surface-variant uppercase tracking-wider text-[11px]">Attribute:</label>
+        <select id="chartFieldSelect"
+          class="h-8 px-2 rounded bg-surface-container-lowest border border-outline-variant text-xs font-semibold"></select>
         <span id="chartFieldInfo" class="text-on-surface-variant font-mono text-[11px]"></span>
       </div>
       <div id="chartModalBody" class="p-5 overflow-y-auto"></div>
@@ -640,10 +819,12 @@
           <span class="material-symbols-outlined text-secondary-fixed text-[20px]">database</span>
           <h3 class="font-headline-sm text-base font-bold">Add / Manage Catalogue Layers (GCS GeoParquet)</h3>
         </div>
-        <button type="button" class="px-2 py-1 rounded bg-primary-container hover:bg-error text-white text-xs font-bold" data-close-modal="catalogModal">✕ Close</button>
+        <button type="button" class="px-2 py-1 rounded bg-primary-container hover:bg-error text-white text-xs font-bold"
+          data-close-modal="catalogModal">✕ Close</button>
       </div>
       <div class="px-5 py-2.5 bg-surface-container-low flex flex-wrap items-center gap-2">
-        <input id="catalogSearchInput" type="search" placeholder="Search datasets..." class="h-8 px-2.5 rounded bg-surface-container-lowest border border-outline-variant text-xs w-56"/>
+        <input id="catalogSearchInput" type="search" placeholder="Search datasets..."
+          class="h-8 px-2.5 rounded bg-surface-container-lowest border border-outline-variant text-xs w-56" />
         <button type="button" class="chip chip-featured" data-geom-filter="all">All</button>
         <button type="button" class="chip" data-geom-filter="fill">▭ Polygons</button>
         <button type="button" class="chip" data-geom-filter="line">─ Lines</button>
@@ -653,6 +834,9 @@
     </div>
   </div>
 
+  <!-- JSZip (for client-side KMZ unzip) & shpjs (for zipped shapefiles) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
   <!-- MapLibre GL JS -->
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <!-- AURA-style Layer Control, Identify, Metadata, Charts & Attribute Table -->
@@ -660,4 +844,5 @@
   <!-- Main Workbench App Script -->
   <script src="app.js"></script>
 </body>
+
 </html>

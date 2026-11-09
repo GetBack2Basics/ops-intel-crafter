@@ -9,10 +9,23 @@ Invariants enforced:
 
 import hashlib
 import json
+import os
 import time
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+# Ensure PROJ data directory is discovered in OSGeo4W or standard paths
+if not os.environ.get("PROJ_DATA"):
+    for cand in [Path("C:/OSGeo4W/share/proj"), Path("/usr/share/proj")]:
+        if cand.exists():
+            os.environ["PROJ_DATA"] = str(cand)
+            try:
+                import pyproj.datadir
+                pyproj.datadir.set_data_dir(str(cand))
+            except Exception:
+                pass
+            break
 
 import duckdb
 import pandas as pd

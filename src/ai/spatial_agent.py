@@ -138,3 +138,51 @@ class AISpatialAgent:
             sample_rows=exec_res["rows"][:25],
         )
 
+    def assess_uploaded_spatial_file(
+        self,
+        file_path_or_bytes: Any,
+        filename: str,
+        assets: Optional[list[dict[str, Any]]] = None,
+        radii_km: Optional[dict[str, float]] = None,
+    ) -> dict[str, Any]:
+        """Parses user-uploaded KMZ/KML/GeoJSON/Shapefile and generates cyclone hazard zone asset intelligence."""
+        from src.analysis.spatial_uploader import (
+            assess_asset_in_cyclone,
+            build_cyclone_hazard_zones,
+            generate_cyclone_intelligence_reply,
+            parse_uploaded_spatial_file,
+        )
+
+        geo = parse_uploaded_spatial_file(file_path_or_bytes, filename)
+        zones = build_cyclone_hazard_zones(geo, radii_km=radii_km)
+
+        # Default real Australian critical assets along the track (QLD, SA, NSW Riverina)
+        target_assets = assets or [
+            {"asset_id": "SUB_WAGGA", "asset_name": "Wagga Wagga 132kV Transmission Substation", "lat": -35.12, "lon": 147.37},
+            {"asset_id": "HOSP_RIV", "asset_name": "Riverina Base Referral Hospital (Wagga Wagga)", "lat": -35.11, "lon": 147.35},
+            {"asset_id": "GAS_MOOMBA", "asset_name": "Moomba Gas & Energy Processing Hub (SA)", "lat": -28.10, "lon": 140.20},
+            {"asset_id": "SUB_BHILL", "asset_name": "Broken Hill Regional Transmission Substation", "lat": -31.95, "lon": 141.46},
+        ]
+
+        evaluated_assets = [
+            assess_asset_in_cyclone(
+                asset_id=a.get("asset_id", a.get("id", f"A_{i}")),
+                asset_name=a.get("asset_name", a.get("name", "Unnamed Asset")),
+                lat=float(a.get("latitude", a.get("lat", 0.0))),
+                lon=float(a.get("longitude", a.get("lon", 0.0))),
+                cyclone_geojson=geo,
+                radii_km=radii_km,
+            )
+            for i, a in enumerate(target_assets)
+        ]
+
+        reply = generate_cyclone_intelligence_reply(geo, evaluated_assets)
+        return {
+            "status": "SUCCESS",
+            "parsed_geojson": geo,
+            "hazard_zones_geojson": zones,
+            "reply": reply,
+            "evaluated_assets": evaluated_assets,
+        }
+
+

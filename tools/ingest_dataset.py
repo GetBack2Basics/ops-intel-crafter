@@ -19,7 +19,7 @@ def main() -> int:
     parser.add_argument("--dataset", "-d", help="Specific dataset_key to ingest (or --all)")
     parser.add_argument("--all", action="store_true", help="Ingest all datasets in config/dataset_manifest.json")
     parser.add_argument("--upload-gcs", action="store_true", help="Upload artifacts to GCS bucket after local staging")
-    parser.add_argument("--max-pages", type=int, default=3, help="Max pagination pages per ArcGIS layer")
+    parser.add_argument("--max-pages", type=int, default=100, help="Max pagination pages per ArcGIS layer")
     args = parser.parse_args()
 
     registry = DatasetRegistry()

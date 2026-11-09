@@ -1,0 +1,191 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "title": "WP302026 (Advisory #48) - Forecast Track",
+    "cyclone_name": "Typhoon In-Fa (WP302026)",
+    "advisory": "48",
+    "geometry_kinds": [
+      "Point",
+      "LineString"
+    ]
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            138.5,
+            -25.5
+          ],
+          [
+            139.0,
+            -26.9
+          ],
+          [
+            141.7,
+            -30.1
+          ],
+          [
+            147.6,
+            -35.1
+          ],
+          [
+            155.9,
+            -41.7
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Forecast Track",
+        "snippet": "empty",
+        "cyclone_name": "Typhoon In-Fa (WP302026)",
+        "advisory_number": "48",
+        "forecast_horizon": "Forecast Track"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            138.5,
+            -25.5
+          ],
+          [
+            139.0,
+            -26.9
+          ],
+          [
+            141.7,
+            -30.1
+          ],
+          [
+            147.6,
+            -35.1
+          ],
+          [
+            155.9,
+            -41.7
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Forecast Track",
+        "snippet": "empty",
+        "cyclone_name": "Typhoon In-Fa (WP302026)",
+        "advisory_number": "48",
+        "forecast_horizon": "Forecast Track"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          138.5,
+          -25.5
+        ]
+      },
+      "properties": {
+        "name": "Advisory Information",
+        "snippet": "empty",
+        "cyclone_name": "Typhoon In-Fa (WP302026)",
+        "advisory_number": "48",
+        "valid_time": "6:00 PM JST November 04, 2026",
+        "forecast_horizon": "Advisory Information",
+        "max_wind_knots": 80,
+        "max_wind_str": "80 kt (90 mph)",
+        "wind_gusts_knots": 95,
+        "min_pressure_mb": 974,
+        "motion": "N"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.0,
+          -26.9
+        ]
+      },
+      "properties": {
+        "name": "12 hr Forecast",
+        "snippet": "empty",
+        "cyclone_name": "Typhoon In-Fa (WP302026)",
+        "advisory_number": "48",
+        "valid_time": "3:00 AM JST November 05, 2026",
+        "forecast_horizon": "12 hr Forecast",
+        "max_wind_knots": 75,
+        "max_wind_str": "75 kt (85 mph)",
+        "wind_gusts_knots": 90
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          141.7,
+          -30.1
+        ]
+      },
+      "properties": {
+        "name": "24 hr Forecast",
+        "snippet": "empty",
+        "cyclone_name": "Typhoon In-Fa (WP302026)",
+        "advisory_number": "48",
+        "valid_time": "3:00 PM JST November 05, 2026",
+        "forecast_horizon": "24 hr Forecast",
+        "max_wind_knots": 70,
+        "max_wind_str": "70 kt (80 mph)",
+        "wind_gusts_knots": 85
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          147.6,
+          -35.1
+        ]
+      },
+      "properties": {
+        "name": "36 hr Forecast",
+        "snippet": "empty",
+        "cyclone_name": "Typhoon In-Fa (WP302026)",
+        "advisory_number": "48",
+        "valid_time": "3:00 AM JST November 06, 2026",
+        "forecast_horizon": "36 hr Forecast",
+        "max_wind_knots": 65,
+        "max_wind_str": "65 kt (75 mph)",
+        "wind_gusts_knots": 80
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          155.9,
+          -41.7
+        ]
+      },
+      "properties": {
+        "name": "48 hr Forecast",
+        "snippet": "empty",
+        "cyclone_name": "Typhoon In-Fa (WP302026)",
+        "advisory_number": "48",
+        "valid_time": "3:00 PM JST November 06, 2026",
+        "forecast_horizon": "48 hr Forecast",
+        "max_wind_knots": 65,
+        "max_wind_str": "65 kt (75 mph)",
+        "wind_gusts_knots": 80
+      }
+    }
+  ]
+}

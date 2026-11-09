@@ -30,7 +30,13 @@
     { key: "nsw_lga_boundaries", title: "NSW LGA Boundaries (Spatial Services)", kind: "fill", color: "#0b2545", path: "qa/data/nsw_lga_boundaries.geojson", theme: "Administrative Boundaries", scale: "state", hollow: true },
     { key: "nsw_rfs_major_incidents_live", title: "NSW RFS Major Incidents (Live)", kind: "circle", color: "#dc2626", path: "qa/data/nsw_rfs_major_incidents_live.geojson", theme: "Live Hazard Feeds", scale: "state", radius: 7 },
     { key: "ga_major_power_stations", title: "GA Major Power Stations", kind: "circle", color: "#7c3aed", path: "qa/data/ga_major_power_stations.geojson", theme: "Critical Infrastructure", scale: "national", radius: 5 },
-    { key: "ga_seismic_hazard_pga_10pct", title: "NSHA 2018 Seismic PGA Contours", kind: "line", color: "#be185d", path: "qa/data/ga_seismic_hazard_pga_10pct.geojson", theme: "Hazards", scale: "national", dash: true }
+    { key: "ga_seismic_hazard_pga_10pct", title: "NSHA 2018 Seismic PGA Contours", kind: "line", color: "#be185d", path: "qa/data/ga_seismic_hazard_pga_10pct.geojson", theme: "Hazards", scale: "national", dash: true },
+    // ---------- AURA Linked Datasets (Zero Storage Duplication) ----------
+    { key: "national_healthcare_nhsd_v2", title: "AURA: National Hospitals (NHSD)", kind: "circle", color: "#059669", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3", theme: "AURA: Sensitive Receptors", scale: "national", radius: 5 },
+    { key: "national_schools_acara_v2", title: "AURA: National Schools (ACARA)", kind: "circle", color: "#2563eb", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3", theme: "AURA: Sensitive Receptors", scale: "national", radius: 4 },
+    { key: "qld_transmission_grid_v2", title: "AURA: QLD Transmission Grid", kind: "line", color: "#f59e0b", endpoint: "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2", theme: "AURA: Transmission Grid", scale: "state" },
+    { key: "national_cyclone_hazard_tcha_v2", title: "AURA: Tropical Cyclone Hazard (TCHA)", kind: "line", color: "#06b6d4", endpoint: "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/15", theme: "AURA: Cyclone Hazard", scale: "national", dash: true },
+    { key: "nsw_coastal_inundation_hazard_v2", title: "AURA: NSW Coastal Inundation & Surge", kind: "fill", color: "#0284c7", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7", theme: "AURA: Coastal Hazard", scale: "state", opacity: 0.45 }
   ];
   const BY_KEY = Object.fromEntries(CATALOG.map(c => [c.key, c]));
   const TITLE_FIELDS = ["feature_name", "title", "incident_title", "LGA_NAME_2025", "lga_name", "lganame", "sa2_name_2021", "hydroname", "cell_id", "contour_id", "generalname", "name"];
@@ -87,9 +93,31 @@
     const st = state[key];
     if (st.data) return Promise.resolve(st.data);
     if (st.loading) return st.loading;
-    st.loading = fetch(BY_KEY[key].path)
-      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${BY_KEY[key].path}`); return r.json(); })
-      .then(gj => {
+    const c = BY_KEY[key];
+    const fetchUrl = c.path ? c.path : (c.endpoint.replace(/\/+$/, '') + '/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=2000');
+    st.loading = fetch(fetchUrl)
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${fetchUrl}`); return r.json(); })
+      .then(data => {
+        let gj = data;
+        if (data && data.features && data.type !== "FeatureCollection") {
+          // Normalize Esri JSON format to GeoJSON FeatureCollection
+          gj = {
+            type: "FeatureCollection",
+            features: data.features.map(f => {
+              let geom = null;
+              if (f.geometry) {
+                if (f.geometry.x !== undefined && f.geometry.y !== undefined) {
+                  geom = { type: "Point", coordinates: [f.geometry.x, f.geometry.y] };
+                } else if (f.geometry.paths) {
+                  geom = { type: f.geometry.paths.length === 1 ? "LineString" : "MultiLineString", coordinates: f.geometry.paths.length === 1 ? f.geometry.paths[0] : f.geometry.paths };
+                } else if (f.geometry.rings) {
+                  geom = { type: f.geometry.rings.length === 1 ? "Polygon" : "MultiPolygon", coordinates: f.geometry.rings.length === 1 ? f.geometry.rings : [f.geometry.rings] };
+                }
+              }
+              return { type: "Feature", properties: f.attributes || {}, geometry: geom };
+            })
+          };
+        }
         (gj.features || []).forEach((f, i) => { f.properties = f.properties || {}; f.properties.__fid = i; });
         st.data = gj;
         return gj;
@@ -880,7 +908,27 @@
     };
   }
 
+  // Register a dynamic or user-uploaded GeoJSON layer into the catalogue & MapLibre
+  function registerLayer(config, data) {
+    if (!BY_KEY[config.key]) {
+      CATALOG.push(config);
+      BY_KEY[config.key] = config;
+    }
+    state[config.key] = {
+      data: data || null,
+      loading: null,
+      visible: false,
+      opacity: config.opacity !== undefined ? config.opacity : (config.hollow ? 0.08 : (config.kind === "fill" ? 0.35 : 1)),
+      inList: false
+    };
+    if (data && data.features) {
+      data.features.forEach((f, i) => { f.properties = f.properties || {}; f.properties.__fid = i; });
+    }
+    renderLayerControl();
+    return config.key;
+  }
+
   document.addEventListener("DOMContentLoaded", wireUi);
 
-  window.OICLayers = { attach, activate, clear, openMeta, openChart, openTable, zoomToFeatureByProp, bindResultsRows, catalog: CATALOG };
+  window.OICLayers = { attach, activate, clear, openMeta, openChart, openTable, zoomToFeatureByProp, bindResultsRows, registerLayer, catalog: CATALOG };
 })();

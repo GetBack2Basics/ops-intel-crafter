@@ -35,9 +35,9 @@ def _export_qa_geojson_preview(
     parquet_path: Path,
     dataset_key: str,
     project_root: Path,
-    max_features: int = 1500,
+    max_features: int = 100000,
 ) -> Dict[str, Any]:
-    """Exports an RFC 7946 WGS84 (EPSG:4326) GeoJSON file for the MapLibre QA Inspector."""
+    """Exports an RFC 7946 WGS84 (EPSG:4326) GeoJSON file for the MapLibre QA Inspector and Workbench."""
     gdf = gpd.read_parquet(parquet_path)
     total_count = len(gdf)
     if gdf.crs and str(gdf.crs).upper() != "EPSG:4326":
@@ -47,6 +47,15 @@ def _export_qa_geojson_preview(
     drop_cols = [c for c in gdf.columns if c.startswith("_bbox_")]
     if drop_cols:
         gdf = gdf.drop(columns=drop_cols)
+
+    # For heavy polygon layers, apply lightweight simplification for the web preview
+    # so MapLibre stays snappy in browser, while GeoParquet preserves full raw precision.
+    if any(gt in ("Polygon", "MultiPolygon") for gt in gdf.geom_type.unique()):
+        gdf["geometry"] = gdf.geometry.simplify(0.0005, preserve_topology=True)
+
+    # Convert any datetime columns to string for clean GeoJSON serialization
+    for col in gdf.select_dtypes(include=["datetime64", "datetimetz"]).columns:
+        gdf[col] = gdf[col].astype(str)
 
     preview_gdf = gdf.head(max_features) if total_count > max_features else gdf
     qa_data_dir = project_root / "docs" / "qa" / "data"
@@ -66,7 +75,7 @@ def ingest_dataset_snapshot(
     storage: Optional[GCSLakeStorage] = None,
     bbox: Optional[List[float]] = None,
     upload_cloud: bool = False,
-    max_pages: int = 5,
+    max_pages: int = 100,
 ) -> Dict[str, Any]:
     """Ingests a single dataset into an immutable timestamped GeoParquet snapshot with full 3-level QA."""
     reg = registry or DatasetRegistry()

@@ -1,5 +1,5 @@
 {
-  "files_scanned": 47,
+  "files_scanned": 49,
   "secret_leaks_detected": 0,
   "mock_violations_detected": 0,
   "secret_hits": [],
@@ -22,6 +22,7 @@
       "src.ai.execution_audit",
       "src.ai.query_planner",
       "src.ai.sql_validator",
+      "src.analysis.spatial_uploader",
       "src.catalogue.dataset_registry",
       "src.engines.duckdb_engine",
       "src.ingestion.telemetry",
@@ -58,9 +59,29 @@
       "time",
       "typing"
     ],
+    "src/analysis/spatial_uploader.py": [
+      "dataclasses",
+      "geopandas",
+      "io",
+      "json",
+      "math",
+      "pathlib",
+      "re",
+      "typing",
+      "xml.etree.ElementTree",
+      "zipfile"
+    ],
     "src/analysis/__init__.py": [],
+    "src/catalogue/aura_bridge.py": [
+      "json",
+      "os",
+      "pathlib",
+      "src.catalogue.manifest_loader",
+      "typing"
+    ],
     "src/catalogue/dataset_registry.py": [
       "pathlib",
+      "src.catalogue.aura_bridge",
       "src.catalogue.manifest_loader",
       "typing"
     ],
@@ -92,11 +113,13 @@
       "functools",
       "hashlib",
       "json",
+      "os",
       "pandas",
       "pathlib",
       "pyarrow",
       "pyarrow.parquet",
       "pyproj",
+      "pyproj.datadir",
       "shapely",
       "shapely.geometry",
       "shapely.ops",

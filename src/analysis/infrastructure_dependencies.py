@@ -30,8 +30,11 @@ def run_infrastructure_dependency_analysis(
 
     sql = """
     WITH inund_3112 AS (
-        SELECT ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
+        SELECT
+            _bbox_minx, _bbox_miny, _bbox_maxx, _bbox_maxy,
+            ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
         FROM inundation
+        WHERE _bbox_maxx >= 151.30 AND _bbox_minx <= 151.95 AND _bbox_maxy >= -33.30 AND _bbox_miny <= -32.60
     ),
     sub_3112 AS (
         SELECT
@@ -47,6 +50,7 @@ def run_infrastructure_dependency_analysis(
             ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112,
             ST_AsGeoJSON(geom) AS geojson_7844
         FROM substations
+        WHERE _bbox_maxx >= 151.30 AND _bbox_minx <= 151.95 AND _bbox_maxy >= -33.30 AND _bbox_miny <= -32.60
     ),
     sub_flood_dist AS (
         SELECT
@@ -61,9 +65,11 @@ def run_infrastructure_dependency_analysis(
             s._bbox_maxy,
             s.geom_3112,
             s.geojson_7844,
-            ROUND(MIN(ST_Distance(s.geom_3112, i.geom_3112)), 1) AS distance_to_inundation_m
+            COALESCE(ROUND(MIN(ST_Distance(s.geom_3112, i.geom_3112)), 1), 99999.0) AS distance_to_inundation_m
         FROM sub_3112 s
-        CROSS JOIN inund_3112 i
+        LEFT JOIN inund_3112 i
+          ON s._bbox_maxx >= (i._bbox_minx - 0.15) AND s._bbox_minx <= (i._bbox_maxx + 0.15)
+         AND s._bbox_maxy >= (i._bbox_miny - 0.15) AND s._bbox_miny <= (i._bbox_maxy + 0.15)
         GROUP BY
             s.substation_id, s.substation_name, s.voltage_kv, s.locality, s.state,
             s._bbox_minx, s._bbox_miny, s._bbox_maxx, s._bbox_maxy, s.geom_3112, s.geojson_7844

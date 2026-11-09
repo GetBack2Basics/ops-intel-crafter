@@ -41,7 +41,7 @@ def _esri_geom_to_shapely(esri_geom: Optional[Dict[str, Any]]) -> Any:
 def fetch_arcgis_layer(
     entry: DatasetEntry,
     bbox: Optional[List[float]] = None,
-    max_pages: int = 10,
+    max_pages: int = 100,
     page_size: int = 1000,
 ) -> Tuple[gpd.GeoDataFrame, bytes, Dict[str, Any]]:
     """Fetches features from an ArcGIS MapServer or FeatureServer layer with pagination."""

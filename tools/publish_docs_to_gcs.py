@@ -19,6 +19,9 @@ def upload_web_assets():
         ("layers.js", "application/javascript; charset=utf-8"),
         ("index.html", "text/html; charset=utf-8"),
         ("style.css", "text/css; charset=utf-8"),
+        ("data/WP302026_TRACK_latest.kmz", "application/vnd.google-earth.kmz"),
+        ("data/WP302026_TRACK_latest.geojson", "application/geo+json; charset=utf-8"),
+        ("data/WP302026_CYCLONE_ZONES.geojson", "application/geo+json; charset=utf-8"),
     ]
 
     for rel_path, content_type in files_to_upload:

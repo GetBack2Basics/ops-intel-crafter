@@ -2,7 +2,7 @@
   "manifest_version": "1.0.0",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
-  "updated_at_utc": "2026-11-08T22:33:54Z",
+  "updated_at_utc": "2026-11-09T07:33:10Z",
   "default_stored_crs": "EPSG:7844",
   "default_metric_crs": "EPSG:3112",
   "default_export_crs": "EPSG:4326",
@@ -49,18 +49,14 @@
         "locality": "LOCALITY"
       },
       "known_limitations": [
-        "Substation capacity and operational status reflect published national foundation snapshots, not real-time SCADA telemetry."
+        "Substation capacity and operational status reflect published national foundation snapshots, not real-time SCADA telemetry.",
+        "Contains authoritative power substations across Australian States and Territories."
       ],
       "operational_suitability": "Suitable for national and regional infrastructure exposure and grid dependency screening.",
-      "default_bbox": [
-        151.1,
-        -33.2,
-        152.2,
-        -32.4
-      ],
+      "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T222800Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-08T22:28:00Z"
+      "latest_snapshot_path": "data/lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-09T07:30:13Z"
     },
     "ga_major_power_stations": {
       "dataset_key": "ga_major_power_stations",
@@ -110,8 +106,8 @@
       "operational_suitability": "Suitable for national and state power generation hazard exposure analysis.",
       "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261108T223144Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-08T22:31:44Z"
+      "latest_snapshot_path": "data/lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-09T07:30:26Z"
     },
     "ga_electricity_transmission_lines": {
       "dataset_key": "ga_electricity_transmission_lines",
@@ -155,18 +151,13 @@
         "class": "FEATURE_SUBTYPE"
       },
       "known_limitations": [
-        "Contains 16,139 national transmission segments; Hunter/Newcastle regional slice ingested by default when default_bbox is applied."
+        "Contains authoritative high-voltage transmission segments across Australian States and Territories."
       ],
       "operational_suitability": "Suitable for transmission corridor bushfire, flood, and wind exposure assessment.",
-      "default_bbox": [
-        150.5,
-        -33.6,
-        152.5,
-        -32.0
-      ],
+      "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261108T223354Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-08T22:33:54Z"
+      "latest_snapshot_path": "data/lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-09T07:30:16Z"
     },
     "ga_seismic_hazard_pga_10pct": {
       "dataset_key": "ga_seismic_hazard_pga_10pct",
@@ -210,8 +201,8 @@
       "operational_suitability": "Suitable for national seismic hazard screening and multi-hazard critical infrastructure overlay.",
       "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261108T222802Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-08T22:28:02Z"
+      "latest_snapshot_path": "data/lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-09T07:30:27Z"
     },
     "next_lga_boundaries_asgs2025": {
       "dataset_key": "next_lga_boundaries_asgs2025",
@@ -255,25 +246,20 @@
         "area_sqkm": "AREA_ALBERS_SQKM"
       },
       "known_limitations": [
-        "Filtered to Hunter/Newcastle/Central Coast operational bounding box by default unless full national ingestion is requested."
+        "Authoritative ABS ASGS 2025 Local Government Area boundaries covering all of Australia."
       ],
       "operational_suitability": "Authoritative administrative boundary baseline for emergency management LGA aggregation.",
-      "default_bbox": [
-        150.8,
-        -33.4,
-        152.3,
-        -32.4
-      ],
-      "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261108T222813Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-08T22:28:13Z"
+      "default_bbox": null,
+      "qa_status": "WARNING",
+      "latest_snapshot_path": "data/lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-09T07:30:27Z"
     },
     "next_sa2_boundaries_asgs2021": {
       "dataset_key": "next_sa2_boundaries_asgs2021",
       "title": "ABS ASGS 2021 \u2014 Statistical Areas Level 2 (SA2 Population & Vulnerability Baseline)",
       "category": "periodically_refreshed_authoritative",
       "theme": "NExT Population & Geography",
-      "scale": "regional",
+      "scale": "national",
       "jurisdiction": "NATIONAL",
       "provider": "Australian Bureau of Statistics",
       "source_agency": "Australian Bureau of Statistics (ABS)",
@@ -309,18 +295,13 @@
         "state_name": "state_name_2021"
       },
       "known_limitations": [
-        "Statistical geography backbone for NExT population density and SEIFA vulnerability comparisons; default bbox covers Newcastle/Lake Macquarie/Lower Hunter."
+        "Authoritative ABS ASGS 2021 Statistical Areas Level 2 covering all of Australia."
       ],
-      "operational_suitability": "Suitable for regional population exposure and Method A/B/C statistical comparison.",
-      "default_bbox": [
-        151.3,
-        -33.2,
-        152.0,
-        -32.6
-      ],
-      "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261108T222817Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-08T22:28:17Z"
+      "operational_suitability": "Suitable for national and regional population exposure and Method A/B/C statistical comparison.",
+      "default_bbox": null,
+      "qa_status": "WARNING",
+      "latest_snapshot_path": "data/lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-09T07:30:56Z"
     },
     "nsw_lga_boundaries": {
       "dataset_key": "nsw_lga_boundaries",
@@ -363,18 +344,13 @@
         "abs_code": "abscode"
       },
       "known_limitations": [
-        "Statewide NSW service contains 198 records; default bbox retrieves Lower Hunter / Newcastle / Lake Macquarie LGAs."
+        "Authoritative NSW Spatial Services Local Government Area boundaries covering all of New South Wales."
       ],
       "operational_suitability": "Authoritative NSW state emergency management LGA boundary layer.",
-      "default_bbox": [
-        151.1,
-        -33.2,
-        152.2,
-        -32.5
-      ],
+      "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261108T222820Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-08T22:28:20Z"
+      "latest_snapshot_path": "data/lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-09T07:32:49Z"
     },
     "nsw_water_inundation_areas": {
       "dataset_key": "nsw_water_inundation_areas",
@@ -417,25 +393,20 @@
       },
       "known_limitations": [
         "Source CRS is EPSG:4283 (GDA94); transformed to EPSG:7844 (GDA2020) during GeoParquet normalization.",
-        "Default ingestion filters to the Lower Hunter / Lake Macquarie / Newcastle operational bounding box."
+        "Authoritative water inundation areas across New South Wales."
       ],
       "operational_suitability": "Suitable for flood inundation corridor buffering, population exposure, and road isolation modelling.",
-      "default_bbox": [
-        151.45,
-        -33.15,
-        151.85,
-        -32.75
-      ],
+      "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261108T222823Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-08T22:28:23Z"
+      "latest_snapshot_path": "data/lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-09T07:33:10Z"
     },
     "nsw_foi_building_complexes": {
       "dataset_key": "nsw_foi_building_complexes",
       "title": "NSW Features of Interest \u2014 Emergency, Health, Education & Community Facilities",
       "category": "periodically_refreshed_authoritative",
       "theme": "Emergency & Health Facilities",
-      "scale": "local",
+      "scale": "state",
       "jurisdiction": "NSW",
       "provider": "NSW Spatial Services (DCS)",
       "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
@@ -471,18 +442,13 @@
         "urbanity": "urbanity"
       },
       "known_limitations": [
-        "Includes hospitals, ambulance/fire/police stations, schools, and community complexes across NSW; filtered to Lower Hunter / Newcastle / Lake Macquarie operational corridor by default."
+        "Includes hospitals, ambulance/fire/police stations, schools, and community complexes across New South Wales."
       ],
-      "operational_suitability": "Suitable for local and regional emergency facility accessibility, evacuation centre siting, and critical asset exposure.",
-      "default_bbox": [
-        151.35,
-        -33.2,
-        151.9,
-        -32.7
-      ],
-      "qa_status": "WARNING",
-      "latest_snapshot_path": "data/lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261108T222818Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-08T22:28:18Z"
+      "operational_suitability": "Suitable for statewide emergency facility accessibility, evacuation centre siting, and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-09T07:31:28Z"
     },
     "nsw_rfs_major_incidents_live": {
       "dataset_key": "nsw_rfs_major_incidents_live",
@@ -532,8 +498,8 @@
       "operational_suitability": "Suitable for demonstrating live just-in-time feed ingestion alongside versioned stored snapshots (not an operational warning tool).",
       "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261108T222823Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-08T22:28:23Z"
+      "latest_snapshot_path": "data/lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-09T07:33:10Z"
     },
     "nsw_emergency_management_restricted": {
       "dataset_key": "nsw_emergency_management_restricted",
@@ -574,7 +540,7 @@
       "default_bbox": null,
       "qa_status": "FAIL",
       "latest_snapshot_path": null,
-      "latest_retrieval_utc": "2026-11-08T22:28:18Z"
+      "latest_retrieval_utc": "2026-11-09T07:31:28Z"
     }
   }
 }

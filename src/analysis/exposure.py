@@ -44,6 +44,7 @@ def run_multi_scale_exposure_analysis(
             _bbox_maxy + 0.005 AS bmaxy,
             ST_Buffer(ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true), 250.0) AS hazard_buf_3112
         FROM inundation
+        WHERE _bbox_maxx >= 151.40 AND _bbox_minx <= 151.90 AND _bbox_maxy >= -33.20 AND _bbox_miny <= -32.65
     ),
     foi_3112 AS (
         SELECT
@@ -57,6 +58,7 @@ def run_multi_scale_exposure_analysis(
             ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112,
             ST_AsGeoJSON(geom) AS geojson_7844
         FROM foi_buildings
+        WHERE _bbox_maxx >= 151.40 AND _bbox_minx <= 151.90 AND _bbox_maxy >= -33.20 AND _bbox_miny <= -32.65
     )
     SELECT
         f.objectid,
@@ -75,9 +77,13 @@ def run_multi_scale_exposure_analysis(
 
     # 2. REGIONAL / STATE SCALE: LGA & SA2 Emergency Exposure Rollup (Inundation + Substations + FOI Buildings)
     regional_sql = """
-    WITH lga_sub AS (
+    WITH nsw_lga AS (
+        SELECT * FROM lga_asgs
+        WHERE state_name_2021 = 'New South Wales' OR state_name_2021 IS NULL
+    ),
+    lga_sub AS (
         SELECT l.lga_code_2025, COUNT(DISTINCT s.objectid) AS substations_count
-        FROM lga_asgs l
+        FROM nsw_lga l
         LEFT JOIN substations s
           ON s._bbox_maxx >= l._bbox_minx AND s._bbox_minx <= l._bbox_maxx
          AND s._bbox_maxy >= l._bbox_miny AND s._bbox_miny <= l._bbox_maxy
@@ -86,7 +92,7 @@ def run_multi_scale_exposure_analysis(
     ),
     lga_inund AS (
         SELECT l.lga_code_2025, COUNT(DISTINCT i.objectid) AS inundation_polygons_count
-        FROM lga_asgs l
+        FROM nsw_lga l
         LEFT JOIN inundation i
           ON i._bbox_maxx >= l._bbox_minx AND i._bbox_minx <= l._bbox_maxx
          AND i._bbox_maxy >= l._bbox_miny AND i._bbox_miny <= l._bbox_maxy
@@ -95,7 +101,7 @@ def run_multi_scale_exposure_analysis(
     ),
     lga_foi AS (
         SELECT l.lga_code_2025, COUNT(DISTINCT f.objectid) AS foi_complexes_count
-        FROM lga_asgs l
+        FROM nsw_lga l
         LEFT JOIN foi_buildings f
           ON f._bbox_maxx >= l._bbox_minx AND f._bbox_minx <= l._bbox_maxx
          AND f._bbox_maxy >= l._bbox_miny AND f._bbox_miny <= l._bbox_maxy
@@ -109,7 +115,7 @@ def run_multi_scale_exposure_analysis(
         COALESCE(ls.substations_count, 0) AS substations_count,
         COALESCE(li.inundation_polygons_count, 0) AS inundation_polygons_count,
         COALESCE(lf.foi_complexes_count, 0) AS foi_complexes_count
-    FROM lga_asgs l
+    FROM nsw_lga l
     LEFT JOIN lga_sub ls ON l.lga_code_2025 = ls.lga_code_2025
     LEFT JOIN lga_inund li ON l.lga_code_2025 = li.lga_code_2025
     LEFT JOIN lga_foi lf ON l.lga_code_2025 = lf.lga_code_2025
