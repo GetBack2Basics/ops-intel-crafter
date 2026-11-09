@@ -57,8 +57,13 @@ def main() -> None:
                 "Implement Emergency Spatial Workbench, 3-level QA, NExT pop methods A/B/C, and plain-text query options",
             ]
         )
-    else:
-        print("[GIT] Working tree clean; nothing new to commit.")
+
+    # Fetch and merge any initial commit on remote main (e.g., initial GitHub README/LICENSE) preferring our working tree
+    run_git(["fetch", "origin", "main"], check=False)
+    run_git(
+        ["merge", "origin/main", "--allow-unrelated-histories", "-X", "ours", "-m", "Merge remote-tracking branch 'origin/main'"],
+        check=False,
+    )
 
     run_git(["push", "-u", "origin", "main"])
     print(f"[GIT] Successfully pushed to {REMOTE_URL}")
