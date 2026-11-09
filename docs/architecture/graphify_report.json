@@ -1,5 +1,5 @@
 {
-  "files_scanned": 50,
+  "files_scanned": 51,
   "secret_leaks_detected": 0,
   "mock_violations_detected": 0,
   "secret_hits": [],
@@ -286,6 +286,11 @@
       "src.ingestion.source_connectors.wfs_connector"
     ],
     "tools/build_geolibre_spec.py": [
+      "json",
+      "pathlib"
+    ],
+    "tools/build_locality_gazetteer.py": [
+      "duckdb",
       "json",
       "pathlib"
     ],

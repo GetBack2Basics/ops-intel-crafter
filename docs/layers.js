@@ -340,108 +340,205 @@
     return null;
   }
 
-  const KNOWN_LOCALITY_BBOXES = {
-    nsw: [141.0, -37.5, 153.6, -28.1],
-    "new south wales": [141.0, -37.5, 153.6, -28.1],
-    hunter: [151.45, -32.95, 151.82, -32.68],
-    "lower hunter": [151.45, -32.95, 151.82, -32.68],
-    maitland: [151.45, -32.82, 151.66, -32.65],
-    newcastle: [151.66, -33.02, 151.85, -32.84],
-    cessnock: [151.15, -33.05, 151.50, -32.70],
-    "port stephens": [151.68, -32.85, 152.22, -32.60],
-    "lake macquarie": [151.38, -33.20, 151.75, -32.92],
-    "central coast": [151.10, -33.60, 151.60, -33.10],
-    campbelltown: [150.70, -34.20, 150.95, -33.95],
-    tablelands: [144.35, -18.25, 145.85, -16.85],
-    cyclone: [136.0, -43.0, 158.0, -24.0],
-    qld: [137.9, -29.2, 153.6, -9.1],
-    queensland: [137.9, -29.2, 153.6, -9.1],
-    vic: [140.9, -39.2, 149.9, -33.9],
-    victoria: [140.9, -39.2, 149.9, -33.9],
-    wa: [112.9, -35.2, 129.0, -13.7],
-    "western australia": [112.9, -35.2, 129.0, -13.7],
-    sa: [129.0, -38.1, 141.0, -25.9],
-    "south australia": [129.0, -38.1, 141.0, -25.9],
-    tas: [143.8, -43.7, 148.5, -39.5],
-    tasmania: [143.8, -43.7, 148.5, -39.5],
-    nt: [129.0, -26.0, 138.0, -10.8],
-    "northern territory": [129.0, -26.0, 138.0, -10.8],
-    act: [148.7, -35.9, 149.4, -35.1],
-    australia: [112.9, -43.7, 153.7, -10.0],
-    national: [112.9, -43.7, 153.7, -10.0]
+  // ---------- Smoothed Extent Polygon Generator (Rounded Corners) ----------
+  function createSmoothedExtentPolygon(bbox, numArcPoints = 6) {
+    if (!bbox || bbox.length !== 4) return null;
+    const [minX, minY, maxX, maxY] = bbox;
+    const w = maxX - minX;
+    const h = maxY - minY;
+    // Fillet radius: 12% of shorter dimension
+    const r = Math.min(w, h) * 0.12;
+    const ring = [];
+
+    function addArc(cx, cy, startAng, endAng) {
+      for (let i = 0; i <= numArcPoints; i++) {
+        const ang = startAng + (endAng - startAng) * (i / numArcPoints);
+        const x = parseFloat((cx + r * Math.cos(ang)).toFixed(5));
+        const y = parseFloat((cy + r * Math.sin(ang)).toFixed(5));
+        ring.push([x, y]);
+      }
+    }
+
+    // Top-left arc: PI down to PI/2
+    addArc(minX + r, maxY - r, Math.PI, Math.PI / 2);
+    // Top-right arc: PI/2 down to 0
+    addArc(maxX - r, maxY - r, Math.PI / 2, 0);
+    // Bottom-right arc: 2*PI down to 1.5*PI
+    addArc(maxX - r, minY + r, 2 * Math.PI, 1.5 * Math.PI);
+    // Bottom-left arc: 1.5*PI down to PI
+    addArc(minX + r, minY + r, 1.5 * Math.PI, Math.PI);
+
+    // Close ring
+    if (ring[0][0] !== ring[ring.length - 1][0] || ring[0][1] !== ring[ring.length - 1][1]) {
+      ring.push([ring[0][0], ring[0][1]]);
+    }
+
+    return {
+      type: "Polygon",
+      coordinates: [ring]
+    };
+  }
+
+  // Authoritative Australian Administrative & Locality Gazetteer (ABS ASGS 2025/2021 & GA)
+  const GAZETTEER = {
+    // States & Territories
+    nsw: { name: "New South Wales", state: "NSW", stateCode: "NSW", isState: true, bbox: [141.0, -37.5, 153.6, -28.1], center: [147.3, -32.8] },
+    "new south wales": { name: "New South Wales", state: "NSW", stateCode: "NSW", isState: true, bbox: [141.0, -37.5, 153.6, -28.1], center: [147.3, -32.8] },
+    vic: { name: "Victoria", state: "VIC", stateCode: "VIC", isState: true, bbox: [140.9, -39.2, 149.9, -33.9], center: [145.4, -36.5] },
+    victoria: { name: "Victoria", state: "VIC", stateCode: "VIC", isState: true, bbox: [140.9, -39.2, 149.9, -33.9], center: [145.4, -36.5] },
+    qld: { name: "Queensland", state: "QLD", stateCode: "QLD", isState: true, bbox: [137.9, -29.2, 153.6, -9.1], center: [145.7, -19.1] },
+    queensland: { name: "Queensland", state: "QLD", stateCode: "QLD", isState: true, bbox: [137.9, -29.2, 153.6, -9.1], center: [145.7, -19.1] },
+    wa: { name: "Western Australia", state: "WA", stateCode: "WA", isState: true, bbox: [112.9, -35.2, 129.0, -13.7], center: [120.9, -24.4] },
+    "western australia": { name: "Western Australia", state: "WA", stateCode: "WA", isState: true, bbox: [112.9, -35.2, 129.0, -13.7], center: [120.9, -24.4] },
+    sa: { name: "South Australia", state: "SA", stateCode: "SA", isState: true, bbox: [129.0, -38.1, 141.0, -25.9], center: [135.0, -32.0] },
+    "south australia": { name: "South Australia", state: "SA", stateCode: "SA", isState: true, bbox: [129.0, -38.1, 141.0, -25.9], center: [135.0, -32.0] },
+    tas: { name: "Tasmania", state: "TAS", stateCode: "TAS", isState: true, bbox: [143.8, -43.7, 148.5, -39.5], center: [146.1, -41.6] },
+    tasmania: { name: "Tasmania", state: "TAS", stateCode: "TAS", isState: true, bbox: [143.8, -43.7, 148.5, -39.5], center: [146.1, -41.6] },
+    nt: { name: "Northern Territory", state: "NT", stateCode: "NT", isState: true, bbox: [129.0, -26.0, 138.0, -10.8], center: [133.5, -18.4] },
+    "northern territory": { name: "Northern Territory", state: "NT", stateCode: "NT", isState: true, bbox: [129.0, -26.0, 138.0, -10.8], center: [133.5, -18.4] },
+    act: { name: "Australian Capital Territory", state: "ACT", stateCode: "ACT", isState: true, bbox: [148.7, -35.9, 149.4, -35.1], center: [149.05, -35.5] },
+    australia: { name: "Australia National", state: "National", stateCode: "NAT", isState: false, bbox: [112.9, -43.7, 153.7, -10.0], center: [133.3, -26.8] },
+    national: { name: "Australia National", state: "National", stateCode: "NAT", isState: false, bbox: [112.9, -43.7, 153.7, -10.0], center: [133.3, -26.8] },
+
+    // Major Cities & Metropolitan Hubs
+    sydney: { name: "Greater Sydney", state: "NSW", stateCode: "NSW", isState: false, bbox: [150.60, -34.15, 151.35, -33.60], center: [151.2, -33.87] },
+    melbourne: { name: "Greater Melbourne", state: "VIC", stateCode: "VIC", isState: false, bbox: [144.50, -38.25, 145.50, -37.50], center: [144.96, -37.81] },
+    brisbane: { name: "Greater Brisbane", state: "QLD", stateCode: "QLD", isState: false, bbox: [152.65, -27.75, 153.35, -27.05], center: [153.02, -27.47] },
+    perth: { name: "Greater Perth", state: "WA", stateCode: "WA", isState: false, bbox: [115.55, -32.45, 116.15, -31.60], center: [115.86, -31.95] },
+    adelaide: { name: "Greater Adelaide", state: "SA", stateCode: "SA", isState: false, bbox: [138.40, -35.25, 138.80, -34.65], center: [138.60, -34.93] },
+    canberra: { name: "Canberra / ACT", state: "ACT", stateCode: "ACT", isState: false, bbox: [148.95, -35.48, 149.25, -35.15], center: [149.13, -35.28] },
+    hobart: { name: "Greater Hobart", state: "TAS", stateCode: "TAS", isState: false, bbox: [147.15, -43.00, 147.50, -42.75], center: [147.33, -42.88] },
+    darwin: { name: "Greater Darwin", state: "NT", stateCode: "NT", isState: false, bbox: [130.75, -12.55, 131.05, -12.30], center: [130.84, -12.46] },
+
+    // Regional NSW & Hunter Hubs
+    newcastle: { name: "Newcastle", state: "NSW", stateCode: "NSW", isState: false, bbox: [151.60, -33.02, 151.85, -32.80], center: [151.77, -32.93] },
+    hunter: { name: "Hunter Region", state: "NSW", stateCode: "NSW", isState: false, bbox: [150.80, -33.20, 152.20, -31.90], center: [151.50, -32.70] },
+    "lower hunter": { name: "Lower Hunter", state: "NSW", stateCode: "NSW", isState: false, bbox: [151.45, -32.95, 151.82, -32.68], center: [151.65, -32.82] },
+    maitland: { name: "Maitland", state: "NSW", stateCode: "NSW", isState: false, bbox: [151.45, -32.82, 151.66, -32.65], center: [151.55, -32.73] },
+    cessnock: { name: "Cessnock", state: "NSW", stateCode: "NSW", isState: false, bbox: [151.15, -33.05, 151.50, -32.70], center: [151.35, -32.83] },
+    "port stephens": { name: "Port Stephens", state: "NSW", stateCode: "NSW", isState: false, bbox: [151.68, -32.85, 152.22, -32.60], center: [151.95, -32.72] },
+    "lake macquarie": { name: "Lake Macquarie", state: "NSW", stateCode: "NSW", isState: false, bbox: [151.38, -33.20, 151.75, -32.92], center: [151.58, -33.05] },
+    "central coast": { name: "Central Coast", state: "NSW", stateCode: "NSW", isState: false, bbox: [151.10, -33.60, 151.60, -33.10], center: [151.35, -33.35] },
+    wollongong: { name: "Wollongong", state: "NSW", stateCode: "NSW", isState: false, bbox: [150.75, -34.55, 151.00, -34.30], center: [150.89, -34.42] },
+    parramatta: { name: "Parramatta", state: "NSW", stateCode: "NSW", isState: false, bbox: [150.94, -33.86, 151.10, -33.75], center: [151.02, -33.81] },
+    penrith: { name: "Penrith", state: "NSW", stateCode: "NSW", isState: false, bbox: [150.60, -33.85, 150.80, -33.68], center: [150.70, -33.75] },
+    blacktown: { name: "Blacktown", state: "NSW", stateCode: "NSW", isState: false, bbox: [150.82, -33.82, 150.98, -33.68], center: [150.90, -33.75] },
+    campbelltown: { name: "Campbelltown", state: "NSW", stateCode: "NSW", isState: false, bbox: [150.70, -34.20, 150.95, -33.95], center: [150.81, -34.07] },
+    tablelands: { name: "Tablelands", state: "QLD", stateCode: "QLD", isState: false, bbox: [144.35, -18.25, 145.85, -16.85], center: [145.38, -17.27] },
+    cyclone: { name: "Cyclone Zone", state: "QLD", stateCode: "QLD", isState: false, bbox: [136.0, -43.0, 158.0, -24.0], center: [147.0, -33.5] }
   };
 
-  function normalizeGeometryInput(input) {
-    if (!input) return null;
+  // Asynchronously load full 3,562 ABS ASGS LGA and SA2 Gazetteer
+  fetch("data/locality_gazetteer.json")
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (data && typeof data === "object") {
+        Object.entries(data).forEach(([k, v]) => {
+          if (!GAZETTEER[k]) GAZETTEER[k] = v;
+        });
+      }
+    })
+    .catch(err => console.warn("locality_gazetteer.json load warning (using embedded core):", err));
 
-    // GeoJSON objects
+  function resolveLocalityExtent(input) {
+    if (!input) return null;
     if (typeof input === "object" && !Array.isArray(input)) {
       if (input.type === "FeatureCollection" || input.type === "Feature" ||
           input.type === "Polygon" || input.type === "MultiPolygon") {
-        return input;
+        const bbox = geomBounds(input.geometry || input);
+        return { polygon: input, bbox };
       }
-      if (input.geometry) return normalizeGeometryInput(input.geometry);
       if (input.bbox && Array.isArray(input.bbox) && input.bbox.length === 4) {
-        return input.bbox;
+        return { bbox: input.bbox, polygon: createSmoothedExtentPolygon(input.bbox) };
       }
     }
-
-    // [[x0, y0], [x1, y1]] format (MapLibre LngLatBounds)
-    if (Array.isArray(input) && input.length === 2 && Array.isArray(input[0]) && Array.isArray(input[1])) {
-      return [input[0][0], input[0][1], input[1][0], input[1][1]];
-    }
-
-    // [minX, minY, maxX, maxY]
     if (Array.isArray(input) && input.length === 4 && typeof input[0] === "number") {
-      return input;
+      return { bbox: input, polygon: createSmoothedExtentPolygon(input) };
     }
-
-    // Strings (WKT, coordinate tuples, or locality names)
+    if (Array.isArray(input) && input.length === 2 && Array.isArray(input[0])) {
+      const bbox = [input[0][0], input[0][1], input[1][0], input[1][1]];
+      return { bbox, polygon: createSmoothedExtentPolygon(bbox) };
+    }
     if (typeof input === "string") {
       const clean = input.trim();
       const upper = clean.toUpperCase();
       if (upper.startsWith("POLYGON") || upper.startsWith("MULTIPOLYGON")) {
         const parsed = parseWktPolygon(clean);
-        if (parsed) return parsed;
+        if (parsed) return { polygon: parsed, bbox: geomBounds(parsed) };
       }
-
-      // Check if string contains 4 bounding box numbers (minX, minY, maxX, maxY)
       const numMatch = clean.match(/(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)/);
       if (numMatch) {
-        const minX = parseFloat(numMatch[1]);
-        const minY = parseFloat(numMatch[2]);
-        const maxX = parseFloat(numMatch[3]);
-        const maxY = parseFloat(numMatch[4]);
-        if (!isNaN(minX) && !isNaN(minY) && !isNaN(maxX) && !isNaN(maxY)) {
-          return [minX, minY, maxX, maxY];
+        const bbox = [parseFloat(numMatch[1]), parseFloat(numMatch[2]), parseFloat(numMatch[3]), parseFloat(numMatch[4])];
+        if (bbox.every(n => !isNaN(n))) {
+          return { bbox, polygon: createSmoothedExtentPolygon(bbox) };
         }
       }
 
-      // Check against known localities (support unioning multiple matches e.g. "Newcastle, Maitland, Cessnock")
       const lower = clean.toLowerCase();
-      let matchedBboxes = [];
-      for (const [key, bbox] of Object.entries(KNOWN_LOCALITY_BBOXES)) {
-        const re = new RegExp(`\\b${key}\\b`, "i");
-        if (re.test(lower) || lower.includes(key)) {
-          matchedBboxes.push(bbox);
-        }
-      }
-      if (matchedBboxes.length > 0) {
-        const minX = Math.min(...matchedBboxes.map(b => b[0]));
-        const minY = Math.min(...matchedBboxes.map(b => b[1]));
-        const maxX = Math.max(...matchedBboxes.map(b => b[2]));
-        const maxY = Math.max(...matchedBboxes.map(b => b[3]));
-        return [minX, minY, maxX, maxY];
+      // 1. Direct gazetteer key match
+      if (GAZETTEER[lower]) {
+        const g = GAZETTEER[lower];
+        return {
+          name: g.name || clean,
+          state: g.state,
+          stateCode: g.stateCode || (g.state ? g.state.toUpperCase() : null),
+          isState: !!g.isState,
+          bbox: g.bbox,
+          center: g.center,
+          polygon: createSmoothedExtentPolygon(g.bbox)
+        };
       }
 
-      if (lower.includes("statewide")) {
-        return KNOWN_LOCALITY_BBOXES.nsw;
+      // 2. Substring or multi-token match in gazetteer
+      const tokens = lower.split(/[,;/]+/).map(s => s.trim()).filter(Boolean);
+      let matched = [];
+      for (const tok of tokens) {
+        if (GAZETTEER[tok]) {
+          matched.push(GAZETTEER[tok]);
+          continue;
+        }
+        for (const [k, v] of Object.entries(GAZETTEER)) {
+          if (k.length > 3 && (tok.includes(k) || k.includes(tok))) {
+            matched.push(v);
+            break;
+          }
+        }
       }
-      if (lower.includes("national")) {
-        return KNOWN_LOCALITY_BBOXES.australia;
+      if (matched.length > 0) {
+        const minX = Math.min(...matched.map(m => m.bbox[0]));
+        const minY = Math.min(...matched.map(m => m.bbox[1]));
+        const maxX = Math.max(...matched.map(m => m.bbox[2]));
+        const maxY = Math.max(...matched.map(m => m.bbox[3]));
+        const bbox = [minX, minY, maxX, maxY];
+        const primary = matched[0];
+        return {
+          name: matched.map(m => m.name || m.code).join(", "),
+          state: primary.state,
+          stateCode: primary.stateCode || (primary.state ? primary.state.toUpperCase() : null),
+          isState: matched.length === 1 && !!primary.isState,
+          bbox,
+          polygon: createSmoothedExtentPolygon(bbox)
+        };
+      }
+
+      // Fallbacks
+      if (lower.includes("statewide") || lower.includes("nsw")) {
+        const g = GAZETTEER.nsw;
+        return { name: "New South Wales", state: "NSW", stateCode: "NSW", isState: true, bbox: g.bbox, polygon: createSmoothedExtentPolygon(g.bbox) };
+      }
+      if (lower.includes("national") || lower.includes("australia")) {
+        const g = GAZETTEER.australia;
+        return { name: "Australia", isState: false, bbox: g.bbox, polygon: createSmoothedExtentPolygon(g.bbox) };
       }
     }
+    return null;
+  }
 
+  function normalizeGeometryInput(input) {
+    if (!input) return null;
+    const resolved = resolveLocalityExtent(input);
+    if (resolved && resolved.polygon) return resolved.polygon;
+    if (resolved && resolved.bbox) return createSmoothedExtentPolygon(resolved.bbox);
     return null;
   }
 
@@ -564,7 +661,7 @@
     if (currentAoiGeometry) {
       setAoiMask(currentAoiGeometry);
     } else {
-      updateMaskButtonUi();
+      setAoiMask(DEFAULT_HUNTER_AOI_WKT);
     }
   }
 
@@ -1304,6 +1401,8 @@
     setAoiMask,
     clearAoiMask,
     toggleAoiMask,
+    resolveLocalityExtent,
+    createSmoothedExtentPolygon,
     createInvertedMaskGeoJSON,
     isAoiMaskEnabled: () => aoiMaskEnabled,
     getCurrentAoiGeometry: () => currentAoiGeometry,

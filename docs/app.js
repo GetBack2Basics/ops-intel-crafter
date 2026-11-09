@@ -169,7 +169,7 @@
   function clearMapLayers() {
     if (window.OICLayers) {
       window.OICLayers.clear();
-      window.OICLayers.clearAoiMask();
+      // AOI mask preserved across query execution to avoid visual flicker
     }
   }
 
@@ -185,11 +185,41 @@
   function parseAreaWhereClause(areaText, columnExpr) {
     const raw = (areaText || "").trim();
     if (!raw) return "-- No additional area filter";
+
+    // 1. Explicit 4-coordinate bounding box numbers
     const bboxMatch = raw.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
     if (bboxMatch) {
       const [, minX, minY, maxX, maxY] = bboxMatch;
-      return `AND _bbox_xmax >= ${minX} AND _bbox_xmin <= ${maxX} AND _bbox_ymax >= ${minY} AND _bbox_ymin <= ${maxY}`;
+      return `AND _bbox_maxx >= ${minX} AND _bbox_minx <= ${maxX} AND _bbox_maxy >= ${minY} AND _bbox_miny <= ${maxY}`;
     }
+
+    // 2. Resolve via Locality & Administrative Gazetteer
+    const resolved = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(raw) : null;
+    if (resolved && resolved.bbox) {
+      const [minX, minY, maxX, maxY] = resolved.bbox;
+      const isStateCol = /state/i.test(columnExpr);
+
+      // If querying a state column AND input is an actual State/Territory (e.g. NSW, VIC, QLD)
+      if (isStateCol && resolved.isState && resolved.stateCode) {
+        return `AND (COALESCE(state, '') = '${resolved.stateCode}')\n  -- Area scope: ${resolved.name}`;
+      }
+
+      // If querying a state column BUT input is a city or locality (e.g. Sydney, Parramatta, Newcastle):
+      // State is never equal to Sydney as it is a city/locality. Search spatially within the resolved extent!
+      if (isStateCol && !resolved.isState) {
+        return `AND _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)} AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Area scope: ${resolved.name} (Smoothed extent in ${resolved.state || 'Australia'})`;
+      }
+
+      // For LGA boundary queries
+      if (columnExpr && columnExpr.includes("lga")) {
+        return `AND (l.lga_name_2025 ILIKE '%${raw.replace(/'/g, "")}%' OR (_bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)} AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}))`;
+      }
+
+      // General spatial bbox predicate
+      return `AND _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)} AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Area scope: ${resolved.name}`;
+    }
+
+    // 3. Fallback token ILIKE
     const tokens = raw
       .split(/[,;/]+/)
       .map(s => s.trim())
@@ -1924,11 +1954,22 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       `;
     } else if (runKey === "national_power") {
       const nat = bundle.multi_scale_exposure.national_scale;
-      const rows = filterRowsByPlainTextArea(nat.state_rollup || [], r => r.state_name);
+      const resolved = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(userParams.area) : null;
+      let rows = nat.state_rollup || [];
+      if (resolved && resolved.isState && resolved.stateCode) {
+        rows = rows.filter(r => (r.state_name || "").toUpperCase() === resolved.stateCode);
+      } else if (resolved && !resolved.isState && resolved.stateCode) {
+        rows = rows.filter(r => (r.state_name || "").toUpperCase() === resolved.stateCode);
+      } else {
+        rows = filterRowsByPlainTextArea(rows, r => r.state_name);
+      }
+
       document.getElementById("resultsTitle").textContent = `National Power Generation & Seismic Hazard — Area: ${userParams.area || "Australia"}`;
-      document.getElementById("resultsSubtitle").textContent = `Options: ${userParams.options || "All fuel types"} | Geoscience Australia Major Power Stations`;
+      document.getElementById("resultsSubtitle").textContent = resolved && !resolved.isState
+        ? `Locality Focus: ${resolved.name} (${resolved.state}) | Extent: [${resolved.bbox.map(n => n.toFixed(2)).join(", ")}] | GA Major Power Stations`
+        : `Options: ${userParams.options || "All fuel types"} | Geoscience Australia Major Power Stations`;
       document.getElementById("execTimeBadge").textContent = `${nat.execution_ms} ms`;
-      document.getElementById("mapFeatureCountBadge").textContent = `${rows.length} States Displayed`;
+      document.getElementById("mapFeatureCountBadge").textContent = `${rows.length} Jurisdiction Rollup`;
 
       const totalMw = rows.reduce((acc, r) => acc + Number(r.total_capacity_mw || 0), 0);
       const totalSt = rows.reduce((acc, r) => acc + Number(r.power_station_count || 0), 0);
@@ -1954,7 +1995,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         .map(
           r => `
         <tr>
-          <td class="font-semibold">${r.state_name}</td>
+          <td class="font-semibold">${r.state_name} ${resolved && !resolved.isState ? `(${resolved.name})` : ""}</td>
           <td><code>${r.power_station_count}</code> stations</td>
           <td><strong>${Number(r.total_capacity_mw).toLocaleString()} MW</strong></td>
           <td>${r.fuel_types_count} fuel classes</td>
@@ -1966,16 +2007,15 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
 
       if (map && mapReady) {
         showQueryLayers(["ga_major_power_stations", "ga_seismic_hazard_pga_10pct"]);
-        const stateNames = rows.map(r => (r.state_name || "").toLowerCase());
-        if (rows.length === 1 && stateNames[0].includes("nsw")) {
-          map.fitBounds([[141.0, -37.5], [153.6, -28.1]], { padding: 40, duration: 800 });
+        if (resolved && resolved.bbox) {
+          map.fitBounds([[resolved.bbox[0], resolved.bbox[1]], [resolved.bbox[2], resolved.bbox[3]]], { padding: 40, duration: 800 });
         } else {
           map.fitBounds([[112.9, -43.7], [153.7, -10.0]], { padding: 30, duration: 800 });
         }
       }
       if (window.OICLayers) {
         window.OICLayers.bindResultsRows(tbody, null, null);
-        window.OICLayers.setAoiMask(userParams.area || [112.9, -43.7, 153.7, -10.0]);
+        window.OICLayers.setAoiMask(userParams.area || (resolved && resolved.polygon) || [112.9, -43.7, 153.7, -10.0]);
       }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#7c3aed]"></span><span>GA Major Power Station</span></div>
@@ -4599,6 +4639,18 @@ th { color: var(--muted); font-weight: 600; }
         if (txt && navigator.clipboard) {
           navigator.clipboard.writeText(txt);
           showToast("SQL copied to clipboard", "info");
+        }
+      });
+    }
+
+    const sqlInput = document.getElementById("sqlInput");
+    if (sqlInput) {
+      sqlInput.addEventListener("input", () => {
+        const sql = sqlInput.value || "";
+        const detected = detectScenarioFromSql(sql);
+        if (detected.area) {
+          userParams.area = detected.area;
+          if (window.OICLayers) window.OICLayers.setAoiMask(detected.area);
         }
       });
     }
