@@ -148,26 +148,14 @@
         },
         layers: [{ id: "osm-standard-layer", type: "raster", source: "osm-standard" }]
       },
-      center: [151.68, -32.82],
-      zoom: 10.2
+      center: [151.2, -32.9],
+      zoom: 6.2
     });
     map.addControl(new maplibregl.NavigationControl(), "top-right");
-    map.on("load", async () => {
+    map.on("load", () => {
       mapReady = true;
       // AURA-style layer control, click-to-identify popups, metadata, charts & attribute table (docs/layers.js)
       if (window.OICLayers) window.OICLayers.attach(map);
-
-      // Auto-load default scenario (Lower Hunter Floodplain) so map is immediately populated and masked
-      if (!activeScenarioKey) {
-        if (!bundle) bundle = await bundlePromise;
-        activeScenarioKey = "ambiguous_pop";
-        userParams.area = "Maitland / Lower Hunter Floodplain";
-        userParams.distance = "0m (Inside flood polygon)";
-        userParams.options = "Method B (1 km² Polygon Intersect), Regime 2 (Observed Flood Basin)";
-        document.getElementById("sqlInput").value = buildSqlForScenario("ambiguous_pop");
-        highlightActivePresetChip("ambiguous_pop");
-        await runActiveQuery();
-      }
     });
   }
 
