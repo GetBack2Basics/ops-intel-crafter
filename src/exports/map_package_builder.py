@@ -178,6 +178,62 @@ OFFLINE_VECTOR_MAP_JS = """/* Zero-Dependency Offline HTML5 Canvas Vector Map En
   let view = { minLon: bbox[0], minLat: bbox[1], maxLon: bbox[2], maxLat: bbox[3] };
   let activeRegimeIdx = 1; // Default to Regime 2 (Observed NSW Inundation Basin)
   let activeMethod = 'B';
+  let maskEnabled = true;
+
+  function parseWktPolygon(wkt) {
+    if (!wkt) return null;
+    const m = wkt.match(/POLYGON\\s*\\(\\s*\\((.+?)\\)\\s*\\)/i);
+    if (!m) return null;
+    return m[1].split(',').map(pair => {
+      const parts = pair.trim().split(/\\s+/).map(Number);
+      return [parts[0], parts[1]];
+    });
+  }
+
+  function drawAoiMask(wktOrGeom) {
+    if (!maskEnabled) return;
+    let rings = [];
+    if (typeof wktOrGeom === 'string') {
+      const r = parseWktPolygon(wktOrGeom);
+      if (r) rings.push(r);
+    } else if (wktOrGeom && wktOrGeom.coordinates) {
+      if (wktOrGeom.type === 'Polygon') rings.push(wktOrGeom.coordinates[0]);
+      else if (wktOrGeom.type === 'MultiPolygon') wktOrGeom.coordinates.forEach(c => rings.push(c[0]));
+    }
+    if (!rings.length) return;
+
+    ctx.save();
+    // Tuffs-style focus mask: #030712 @ 80% opacity
+    ctx.fillStyle = 'rgba(3, 7, 18, 0.80)';
+    ctx.beginPath();
+    // Outer canvas world bounds
+    ctx.rect(0, 0, canvas.width, canvas.height);
+    // Draw AOI rings to be cut out via even-odd rule
+    rings.forEach(ring => {
+      ring.forEach((pt, idx) => {
+        const [x, y] = project(pt[0], pt[1]);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+    });
+    ctx.fill('evenodd');
+
+    // Highlight border around AOI (#54e1f0 cyan, 2.8px)
+    ctx.strokeStyle = '#54e1f0';
+    ctx.lineWidth = 2.8;
+    rings.forEach(ring => {
+      ctx.beginPath();
+      ring.forEach((pt, idx) => {
+        const [x, y] = project(pt[0], pt[1]);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
 
   const visibility = {
     population_grid_1km: true,
@@ -366,6 +422,11 @@ OFFLINE_VECTOR_MAP_JS = """/* Zero-Dependency Offline HTML5 Canvas Vector Map En
       });
     }
 
+    // 7. Tuffs-Style Territory / Incident AOI Focus Mask (#030712 @ 80% Opacity)
+    if (regime && regime.incident_wkt_7844) {
+      drawAoiMask(regime.incident_wkt_7844);
+    }
+
     updateStatsPanel(regime);
   }
 
@@ -451,14 +512,24 @@ OFFLINE_VECTOR_MAP_JS = """/* Zero-Dependency Offline HTML5 Canvas Vector Map En
     draw();
   });
 
-  document.querySelectorAll('.method-btn').forEach(btn => {
+  document.querySelectorAll('.method-btn[data-method]').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.method-btn[data-method]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeMethod = btn.getAttribute('data-method');
       draw();
     });
   });
+
+  const btnMask = document.getElementById('btnToggleMask');
+  if (btnMask) {
+    btnMask.addEventListener('click', () => {
+      maskEnabled = !maskEnabled;
+      btnMask.textContent = maskEnabled ? '🎭 Focus Mask: 80%' : '🎭 Focus Mask: Off';
+      btnMask.classList.toggle('active', maskEnabled);
+      draw();
+    });
+  }
 
   document.querySelectorAll('[data-layer]').forEach(cb => {
     cb.addEventListener('change', () => {
@@ -631,6 +702,7 @@ def build_offline_map_package(
       <button class="method-btn" data-method="A">Method A — Centroid ST_Contains</button>
       <button class="method-btn active" data-method="B">Method B — Cell Polygon ST_Intersects</button>
       <button class="method-btn" data-method="C">Method C — Area-Weighted (Modelled)</button>
+      <button id="btnToggleMask" class="method-btn active" style="margin-top:8px; border-color:#54e1f0;">🎭 Focus Mask: 80%</button>
     </div>
 
     <div class="sidebar-section">

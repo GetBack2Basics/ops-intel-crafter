@@ -15,6 +15,13 @@
   let selectedPopMethod = "B";
   let selectedRegimeIdx = 1; // Default Regime 2: Observed NSW Inundation Basin
 
+  // Uploaded and custom spatial state
+  let uploadedCycloneData = null;
+  let uploadedCycloneZones = null;
+  let uploadedCycloneAssessments = null;
+  let uploadedSpatialAssets = null;
+  let uploadedAoiData = null;
+
   // Current user-defined plain-text parameters
   let userParams = {
     area: "",
@@ -141,14 +148,26 @@
         },
         layers: [{ id: "osm-standard-layer", type: "raster", source: "osm-standard" }]
       },
-      center: [151.2, -32.9],
-      zoom: 6.2
+      center: [151.68, -32.82],
+      zoom: 10.2
     });
     map.addControl(new maplibregl.NavigationControl(), "top-right");
-    map.on("load", () => {
+    map.on("load", async () => {
       mapReady = true;
       // AURA-style layer control, click-to-identify popups, metadata, charts & attribute table (docs/layers.js)
       if (window.OICLayers) window.OICLayers.attach(map);
+
+      // Auto-load default scenario (Lower Hunter Floodplain) so map is immediately populated and masked
+      if (!activeScenarioKey) {
+        if (!bundle) bundle = await bundlePromise;
+        activeScenarioKey = "ambiguous_pop";
+        userParams.area = "Maitland / Lower Hunter Floodplain";
+        userParams.distance = "0m (Inside flood polygon)";
+        userParams.options = "Method B (1 km² Polygon Intersect), Regime 2 (Observed Flood Basin)";
+        document.getElementById("sqlInput").value = buildSqlForScenario("ambiguous_pop");
+        highlightActivePresetChip("ambiguous_pop");
+        await runActiveQuery();
+      }
     });
   }
 
@@ -158,7 +177,10 @@
   }
 
   function clearMapLayers() {
-    if (window.OICLayers) window.OICLayers.clear();
+    if (window.OICLayers) {
+      window.OICLayers.clear();
+      window.OICLayers.clearAoiMask();
+    }
   }
 
   function parseNumericDistance(text, fallbackMeters) {
@@ -1672,7 +1694,12 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         const coords = cells.map(c => [parseFloat(c.centroid_lon), parseFloat(c.centroid_lat)]).filter(pt => !isNaN(pt[0]) && !isNaN(pt[1]));
         fitMapToResultsExtent(coords, [151.63, -32.79], 10.6);
       }
-      if (window.OICLayers) window.OICLayers.bindResultsRows(tbody, "derived_hunter_1km_population_grid", "cell_id");
+      if (window.OICLayers) {
+        window.OICLayers.bindResultsRows(tbody, "derived_hunter_1km_population_grid", "cell_id");
+        if (reg && reg.incident_wkt_7844) {
+          window.OICLayers.setAoiMask(reg.incident_wkt_7844);
+        }
+      }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#006973]"></span><span>Fully Contained 1km² Cell (A &amp; B)</span></div>
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#0284c7]"></span><span>Boundary Straddling — Centroid In</span></div>
@@ -1731,7 +1758,11 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         }).filter(pt => pt && !isNaN(pt[0]) && !isNaN(pt[1]));
         fitMapToResultsExtent(coords, [151.63, -32.82], 10.3);
       }
-      if (window.OICLayers) window.OICLayers.bindResultsRows(tbody, "hunter_substation_flood_dependency", "feature_name");
+      if (window.OICLayers) {
+        window.OICLayers.bindResultsRows(tbody, "hunter_substation_flood_dependency", "feature_name");
+        const floodAoi = (bundle && bundle.population_study && bundle.population_study.regimes && bundle.population_study.regimes[1].incident_wkt_7844) || null;
+        if (floodAoi) window.OICLayers.setAoiMask(floodAoi);
+      }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#ea580c]"></span><span>GA Power Substation</span></div>
         <div class="flex items-center gap-2"><span class="w-3.5 h-1 rounded bg-[#eab308]"></span><span>GA Transmission Line</span></div>
@@ -1792,7 +1823,10 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
           map.fitBounds([[141.0, -37.5], [153.6, -28.1]], { padding: 40, duration: 800 });
         }
       }
-      if (window.OICLayers) window.OICLayers.bindResultsRows(tbody, "next_lga_boundaries_asgs2025", "lga_code");
+      if (window.OICLayers) {
+        window.OICLayers.bindResultsRows(tbody, "next_lga_boundaries_asgs2025", "lga_code");
+        window.OICLayers.setAoiMask([151.10, -33.35, 151.95, -32.55]);
+      }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3.5 h-1 rounded bg-[#006973]"></span><span>ABS ASGS 2025 LGA Boundary</span></div>
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#0284c7]"></span><span>NSW Flood &amp; Water Inundation</span></div>
@@ -1919,6 +1953,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
 
       const assessed = assessAssetsAgainstCyclone(cyclone || { features: [] }, sampleAssets);
       uploadedCycloneAssessments = assessed;
+      uploadedSpatialAssets = assessed;
 
       const z1Count = assessed.filter(a => a.zone_code === "ZONE_1").length;
       const z2Count = assessed.filter(a => a.zone_code === "ZONE_2").length;
@@ -2027,6 +2062,9 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
           fitMapToResultsExtent(coords, [145.0, -33.5], 5.2);
         }
         window.OICLayers.bindResultsRows(tbody, "uploaded_cyclone_assets", "asset_id");
+        if (zones && window.OICLayers) {
+          window.OICLayers.setAoiMask(zones);
+        }
       }
 
       legendItems.innerHTML = `
@@ -2093,6 +2131,9 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
             scale: "local",
             paint: { "fill-color": "#0284c7", "fill-opacity": 0.4 }
           }, { type: "FeatureCollection", features: [aoiPoly] });
+          window.OICLayers.setAoiMask(aoiPoly);
+        } else if (aoi && aoi.features && aoi.features.length) {
+          window.OICLayers.setAoiMask(aoi);
         }
         showQueryLayers(["uploaded_custom_aoi", "ga_electricity_substations", "nsw_foi_building_complexes"]);
         if (aoi.bbox && map) {
@@ -2603,11 +2644,6 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     document.getElementById("panel-ai-steps").style.display = "none";
   }
 
-  let uploadedCycloneData = null;
-  let uploadedCycloneZones = null;
-  let uploadedCycloneAssessments = null;
-  let uploadedAoiData = null;
-
   function normalizeCoord(rawLon, rawLat, forceAusLat = true) {
     let lon = Number(rawLon);
     while (lon < -180.0) lon += 360.0;
@@ -3003,6 +3039,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       if (hasPolygons && !isCycloneTrack) {
         // Operational Intelligence Area of Interest (AOI) Mode
         uploadedAoiData = geojson;
+        if (window.OICLayers) window.OICLayers.setAoiMask(geojson);
         const aoiName = (geojson.metadata && (geojson.metadata.title || geojson.metadata.cyclone_name)) || file.name.replace(/\.[^/.]+$/, "");
         uploadedAoiData.name = aoiName;
 
@@ -3351,6 +3388,9 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     if (uploadedCycloneZones && uploadedCycloneZones.bbox) {
       return uploadedCycloneZones.bbox.slice();
     }
+    if (uploadedAoiData && uploadedAoiData.bbox) {
+      return uploadedAoiData.bbox.slice();
+    }
     if (map && mapReady) {
       const b = map.getBounds();
       return [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()];
@@ -3382,7 +3422,8 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     // Also include any user-uploaded layers
     if (uploadedCycloneData) targetKeys.add("uploaded_cyclone_track");
     if (uploadedCycloneZones) targetKeys.add("uploaded_cyclone_zones");
-    if (uploadedSpatialAssets) targetKeys.add("uploaded_cyclone_assets");
+    if (uploadedCycloneAssessments || uploadedSpatialAssets) targetKeys.add("uploaded_cyclone_assets");
+    if (uploadedAoiData) targetKeys.add("uploaded_custom_aoi");
 
     const layers = {};
     const isInsideBbox = (pt, b) => pt[0] >= b[0] && pt[0] <= b[2] && pt[1] >= b[1] && pt[1] <= b[3];
@@ -3444,7 +3485,8 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       nsw_rfs_major_incidents_live: { title: "NSW RFS Active Incidents", kind: "circle", color: "#dc2626", radius: 6 },
       uploaded_cyclone_track: { title: "Observed & Forecast Cyclone Track", kind: "line", color: "#ef4444", lineWidth: 3 },
       uploaded_cyclone_zones: { title: "Cyclone Wind Hazard Zones", kind: "fill", color: "#ef4444", opacity: 0.25 },
-      uploaded_cyclone_assets: { title: "Exposed Infrastructure Assets", kind: "circle", color: "#ec4899", radius: 5 }
+      uploaded_cyclone_assets: { title: "Exposed Infrastructure Assets", kind: "circle", color: "#ec4899", radius: 5 },
+      uploaded_custom_aoi: { title: "Custom Area of Interest (AOI)", kind: "fill", color: "#0284c7", opacity: 0.4 }
     };
 
     for (const [key, fc] of Object.entries(layers)) {
@@ -3463,6 +3505,20 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       });
     }
 
+    let aoiGeom = (window.OICLayers && window.OICLayers.getCurrentAoiGeometry && window.OICLayers.getCurrentAoiGeometry()) || null;
+    if (!aoiGeom && bundle && bundle.population_study && bundle.population_study.regimes) {
+      const reg = bundle.population_study.regimes[selectedRegimeIdx] || bundle.population_study.regimes[1];
+      if (reg && reg.incident_wkt_7844) aoiGeom = reg.incident_wkt_7844;
+    }
+    if (!aoiGeom && uploadedCycloneZones) aoiGeom = uploadedCycloneZones;
+    if (!aoiGeom && uploadedAoiData) aoiGeom = uploadedAoiData;
+    if (!aoiGeom && bbox && bbox.length === 4) {
+      aoiGeom = {
+        type: "Polygon",
+        coordinates: [[[bbox[0], bbox[1]], [bbox[2], bbox[1]], [bbox[2], bbox[3]], [bbox[0], bbox[3]], [bbox[0], bbox[1]]]]
+      };
+    }
+
     const manifest = {
       package_id: packageId,
       title: title,
@@ -3476,6 +3532,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         sql: document.getElementById("sqlInput")?.value || ""
       },
       bbox: bbox,
+      aoi_geometry: aoiGeom,
       display_crs: "EPSG:4326",
       stored_crs: "EPSG:7844",
       metric_crs: "EPSG:3112",
@@ -3624,6 +3681,67 @@ th { color: var(--muted); font-weight: 600; }
     });
   }
 
+  let maskEnabled = true;
+
+  function parseWktPolygon(wkt) {
+    if (!wkt || typeof wkt !== 'string') return null;
+    const m = wkt.match(/POLYGON\\s*\\(\\s*\\((.+?)\\)\\s*\\)/i);
+    if (!m) return null;
+    return m[1].split(',').map(pair => {
+      const parts = pair.trim().split(/\\s+/).map(Number);
+      return [parts[0], parts[1]];
+    });
+  }
+
+  function drawAoiMask(wktOrGeom) {
+    if (!maskEnabled || !wktOrGeom) return;
+    let rings = [];
+    if (typeof wktOrGeom === 'string') {
+      const r = parseWktPolygon(wktOrGeom);
+      if (r) rings.push(r);
+    } else if (wktOrGeom && wktOrGeom.type === 'FeatureCollection' && Array.isArray(wktOrGeom.features)) {
+      wktOrGeom.features.forEach(f => {
+        if (!f || !f.geometry) return;
+        if (f.geometry.type === 'Polygon') rings.push(f.geometry.coordinates[0]);
+        else if (f.geometry.type === 'MultiPolygon') f.geometry.coordinates.forEach(c => rings.push(c[0]));
+      });
+    } else if (wktOrGeom && wktOrGeom.coordinates) {
+      if (wktOrGeom.type === 'Polygon') rings.push(wktOrGeom.coordinates[0]);
+      else if (wktOrGeom.type === 'MultiPolygon') wktOrGeom.coordinates.forEach(c => rings.push(c[0]));
+    }
+    if (!rings.length) return;
+
+    ctx.save();
+    // Tuffs-style focus mask: #030712 @ 80% opacity
+    ctx.fillStyle = 'rgba(3, 7, 18, 0.80)';
+    ctx.beginPath();
+    ctx.rect(0, 0, canvas.width, canvas.height);
+    rings.forEach(ring => {
+      ring.forEach((pt, idx) => {
+        const [x, y] = project(pt[0], pt[1]);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+    });
+    ctx.fill('evenodd');
+
+    // Highlight border around AOI (#54e1f0 cyan, 2.8px)
+    ctx.strokeStyle = '#54e1f0';
+    ctx.lineWidth = 2.8;
+    rings.forEach(ring => {
+      ctx.beginPath();
+      ring.forEach((pt, idx) => {
+        const [x, y] = project(pt[0], pt[1]);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
   function resize() {
     canvas.width = canvas.parentElement.clientWidth || 800;
     canvas.height = canvas.parentElement.clientHeight || 600;
@@ -3745,6 +3863,11 @@ th { color: var(--muted); font-weight: 600; }
         }
       });
     });
+
+    // Tuffs-Style Territory / Incident AOI Focus Mask (#030712 @ 80% Opacity)
+    if (pkg.manifest && pkg.manifest.aoi_geometry) {
+      drawAoiMask(pkg.manifest.aoi_geometry);
+    }
   }
 
   // Pan & Zoom
@@ -3827,6 +3950,17 @@ th { color: var(--muted); font-weight: 600; }
     draw();
   });
 
+  const btnMask = document.getElementById('btnToggleMask');
+  if (btnMask) {
+    btnMask.addEventListener('click', () => {
+      maskEnabled = !maskEnabled;
+      btnMask.textContent = maskEnabled ? '🎭 Focus Mask: 80%' : '🎭 Focus Mask: Off';
+      btnMask.style.borderColor = maskEnabled ? '#54e1f0' : '';
+      btnMask.style.opacity = maskEnabled ? '1.0' : '0.6';
+      draw();
+    });
+  }
+
   if (layerContainer) {
     layerContainer.addEventListener('change', e => {
       const cb = e.target.closest('input[data-layer]');
@@ -3889,6 +4023,7 @@ th { color: var(--muted); font-weight: 600; }
           <button id="btnZoomIn" title="Zoom In">+</button>
           <button id="btnZoomOut" title="Zoom Out">&minus;</button>
           <button id="btnResetBbox" title="Reset Extent">&#8634;</button>
+          <button id="btnToggleMask" class="active" style="border-color:#54e1f0;background:rgba(3,7,18,0.9);color:#54e1f0;font-weight:700;">🎭 Focus Mask: 80%</button>
         </div>
         <div id="mapHud" class="map-hud">AIR-GAPPED VECTOR MAP ENGINE ACTIVE</div>
       </div>
@@ -3965,6 +4100,7 @@ th { color: var(--muted); font-weight: 600; }
           <button id="btnZoomIn" title="Zoom In">+</button>
           <button id="btnZoomOut" title="Zoom Out">&minus;</button>
           <button id="btnResetBbox" title="Reset Extent">&#8634;</button>
+          <button id="btnToggleMask" class="active" style="border-color:#54e1f0;background:rgba(3,7,18,0.9);color:#54e1f0;font-weight:700;">🎭 Focus Mask: 80%</button>
         </div>
         <div id="mapHud" class="map-hud">AIR-GAPPED VECTOR MAP ENGINE ACTIVE</div>
       </div>

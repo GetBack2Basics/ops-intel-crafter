@@ -211,6 +211,11 @@
     const rank = { fill: 0, line: 1, circle: 2 };
     const bottomFirst = order.slice().reverse().sort((a, b) => rank[BY_KEY[a].kind] - rank[BY_KEY[b].kind]);
     bottomFirst.forEach(k => mapIds(k).forEach(id => { if (map.getLayer(id)) map.moveLayer(id); }));
+
+    // Keep Tuffs Territory / AOI Focus Mask and boundary on top of data layers
+    if (map.getLayer("territory-mask-fill")) map.moveLayer("territory-mask-fill");
+    if (map.getLayer("aoi-boundary-line")) map.moveLayer("aoi-boundary-line");
+
     ["oic-hl-fill", "oic-hl-line", "oic-hl-point"].forEach(id => { if (map.getLayer(id)) map.moveLayer(id); });
   }
 
@@ -274,6 +279,248 @@
     basemapOpacity = o;
     const lid = `${activeBasemap}-layer`;
     if (map && map.getLayer(lid)) map.setPaintProperty(lid, "raster-opacity", o);
+  }
+
+  // ---------- Tuffs-Style Territory / AOI Focus Mask (#030712 @ 80% Opacity) ----------
+  const DEFAULT_HUNTER_AOI_WKT =
+    "POLYGON ((151.79677994467662 -32.81913824355183, 151.78397271217995 -32.82029275994482, 151.7726097748274 -32.825222751525864, 151.76982765107 -32.8295542986488, 151.7715143673733 -32.83154661495801, 151.7736883388699 -32.83660964116112, 151.77043816949327 -32.84175382709676, 151.76633422689753 -32.84059984932129, 151.76443347799463 -32.84215919648963, 151.7602722812743 -32.842867296375566, 151.74421211977642 -32.843063553762725, 151.74145444097448 -32.843935444319655, 151.74369442247482 -32.84437906260999, 151.73954665466962 -32.84406935728741, 151.7440268521305 -32.84552967054209, 151.74373571084186 -32.84577034398082, 151.74204220866488 -32.845725694875966, 151.74181992953098 -32.845881094584264, 151.75259536778938 -32.84549255933217, 151.75311654246946 -32.84582679965913, 151.7521811959344 -32.84607632947809, 151.7552171530484 -32.84724986711033, 151.75247880060147 -32.84666650014506, 151.75388222779006 -32.84826960974522, 151.75601342330947 -32.84861825476914, 151.75715134622934 -32.85485542719534, 151.76869721291308 -32.85517563849434, 151.77376474777137 -32.85627575246893, 151.7756692704968 -32.85838266373424, 151.77970852001897 -32.8664385121965, 151.7777537365534 -32.86822683514129, 151.7760223883535 -32.86839791268702, 151.7764484646827 -32.87231350399591, 151.77545253935807 -32.87238006184951, 151.77739804592167 -32.87423117737012, 151.78073798843624 -32.87434952005207, 151.7789989317929 -32.875020097432724, 151.77925117782635 -32.87772934381088, 151.78176345935051 -32.881420056376456, 151.78324367183467 -32.88236529007135, 151.78415427786857 -32.889162586325924, 151.78291820771568 -32.89405244572854, 151.77768060829936 -32.90179613224216, 151.77485085047573 -32.902307124050104, 151.77372929486032 -32.9013553821394, 151.77334969736398 -32.8944421191881, 151.77460862514926 -32.88957848754901, 151.76251680824993 -32.8856558323314, 151.76044595885634 -32.88909843986314, 151.76460527180956 -32.89165304851319, 151.7680285896606 -32.894877535433416, 151.76931762717751 -32.897303618754556, 151.7716700445137 -32.913722859714206, 151.77333364267324 -32.91804447503354, 151.7769593123302 -32.923448060688784, 151.77415926987783 -32.922887516469544, 151.7723943965515 -32.91975848686534, 151.77136568182073 -32.91967780230686, 151.7702547487836 -32.91632884110931, 151.7685624117215 -32.91677993532892, 151.76854566712458 -32.921446359171064, 151.766928063606 -32.92263652507709, 151.76527794736228 -32.92270129874724, 151.76527742723775 -32.92100559151838, 151.76424524321337 -32.92206483831959, 151.76157121642905 -32.91762719326368, 151.7598113988211 -32.917611793170906, 151.7615814527317 -32.922699559153926, 151.7650322356742 -32.92524752598405, 151.77324084760266 -32.92479340149, 151.78166368976017 -32.9256243983137, 151.78551423917378 -32.92552514970958, 151.78713786679472 -32.9247431497577, 151.78521851737548 -32.92023973625069, 151.78186088882964 -32.91945962756841, 151.7802147970384 -32.918303784969645, 151.77976079837524 -32.91697699059947, 151.7792294134437 -32.917242450303796, 151.77761125386783 -32.91142569658315, 151.78038481668065 -32.90638286648878, 151.78650226651035 -32.89929435712408, 151.78602028263123 -32.89889728014649, 151.79100296442434 -32.890899814073336, 151.79395431012006 -32.88345055919914, 151.79375550665947 -32.882857367516316, 151.79196017415686 -32.884326518719405, 151.78951042615623 -32.88479151611785, 151.78911038210566 -32.88580892841249, 151.78889001099347 -32.88320389707869, 151.79134759409996 -32.882024004057065, 151.79256823658613 -32.88310266666914, 151.79429197425895 -32.87937398260146, 151.79346958278597 -32.872833406441906, 151.78977134991536 -32.86563784914153, 151.7902726601495 -32.86069864288168, 151.79281631533496 -32.85646491022585, 151.8024382961073 -32.85137495614685, 151.80596088857706 -32.84817781828668, 151.80856479017538 -32.84503123731239, 151.80856849303098 -32.8438321169918, 151.81170241681662 -32.84070709377984, 151.81417420677934 -32.839510088744056, 151.8185786133797 -32.83115038941542, 151.817054746366 -32.823944192291826, 151.80869080584344 -32.820563122564586, 151.79677994467662 -32.81913824355183))";
+  let aoiMaskEnabled = true;
+  let currentAoiGeometry = DEFAULT_HUNTER_AOI_WKT;
+
+  function ensureRingWinding(ring, wantClockwise) {
+    if (!ring || ring.length < 3) return ring;
+    let sum = 0;
+    for (let i = 0; i < ring.length - 1; i++) {
+      sum += (ring[i + 1][0] - ring[i][0]) * (ring[i + 1][1] + ring[i][1]);
+    }
+    const isClockwise = sum > 0;
+    if (wantClockwise && !isClockwise) return ring.slice().reverse();
+    if (!wantClockwise && isClockwise) return ring.slice().reverse();
+    return ring;
+  }
+
+  function parseWktPolygon(wkt) {
+    if (!wkt || typeof wkt !== "string") return null;
+    const clean = wkt.trim();
+    let match = clean.match(/POLYGON\s*\(\s*\(([\s\S]+?)\)\s*\)/i);
+    if (match) {
+      const coords = match[1].split(",").map(pair => {
+        const parts = pair.trim().split(/\s+/).map(Number);
+        return [parts[0], parts[1]];
+      }).filter(pt => !isNaN(pt[0]) && !isNaN(pt[1]));
+      if (coords.length > 2) {
+        const first = coords[0];
+        const last = coords[coords.length - 1];
+        if (first[0] !== last[0] || first[1] !== last[1]) {
+          coords.push([first[0], first[1]]);
+        }
+        return { type: "Polygon", coordinates: [coords] };
+      }
+    }
+    let mMulti = clean.match(/MULTIPOLYGON\s*\(\s*\(\s*\(([\s\S]+?)\)\s*\)\s*\)/i);
+    if (mMulti) {
+      const coords = mMulti[1].split(",").map(pair => {
+        const parts = pair.trim().split(/\s+/).map(Number);
+        return [parts[0], parts[1]];
+      }).filter(pt => !isNaN(pt[0]) && !isNaN(pt[1]));
+      if (coords.length > 2) {
+        return { type: "MultiPolygon", coordinates: [[coords]] };
+      }
+    }
+    return null;
+  }
+
+  function createInvertedMaskGeoJSON(geomOrInput) {
+    const worldRing = ensureRingWinding([
+      [-180, -85],
+      [180, -85],
+      [180, 85],
+      [-180, 85],
+      [-180, -85]
+    ], false); // Exterior world ring must be counter-clockwise
+
+    if (!geomOrInput) return { type: "FeatureCollection", features: [] };
+
+    let geom = geomOrInput;
+    if (typeof geom === "string") {
+      const clean = geom.trim().toUpperCase();
+      if (clean.startsWith("POLYGON") || clean.startsWith("MULTIPOLYGON")) {
+        geom = parseWktPolygon(geom);
+      }
+    }
+    if (!geom) return { type: "FeatureCollection", features: [] };
+
+    const holes = [];
+    function addPolyHoles(polyCoords) {
+      if (polyCoords && polyCoords[0] && polyCoords[0].length >= 3) {
+        holes.push(ensureRingWinding(polyCoords[0], true)); // Interior holes must be clockwise
+      }
+    }
+
+    if (geom.type === "FeatureCollection" && Array.isArray(geom.features)) {
+      geom.features.forEach(f => {
+        if (!f || !f.geometry) return;
+        if (f.geometry.type === "Polygon") addPolyHoles(f.geometry.coordinates);
+        else if (f.geometry.type === "MultiPolygon") f.geometry.coordinates.forEach(addPolyHoles);
+      });
+    } else if (geom.type === "Feature" && geom.geometry) {
+      if (geom.geometry.type === "Polygon") addPolyHoles(geom.geometry.coordinates);
+      else if (geom.geometry.type === "MultiPolygon") geom.geometry.coordinates.forEach(addPolyHoles);
+    } else if (geom.type === "Polygon") {
+      addPolyHoles(geom.coordinates);
+    } else if (geom.type === "MultiPolygon") {
+      geom.coordinates.forEach(addPolyHoles);
+    } else if (Array.isArray(geom) && geom.length === 4 && typeof geom[0] === "number") {
+      const [minX, minY, maxX, maxY] = geom;
+      addPolyHoles([[[minX, minY], [maxX, minY], [maxX, maxY], [minX, maxY], [minX, minY]]]);
+    }
+
+    if (!holes.length) return { type: "FeatureCollection", features: [] };
+
+    return {
+      type: "FeatureCollection",
+      features: [{
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: [worldRing, ...holes]
+        }
+      }]
+    };
+  }
+
+  function extractBoundaryGeoJSON(geomOrInput) {
+    if (!geomOrInput) return { type: "FeatureCollection", features: [] };
+    let geom = geomOrInput;
+    if (typeof geom === "string") {
+      const clean = geom.trim().toUpperCase();
+      if (clean.startsWith("POLYGON") || clean.startsWith("MULTIPOLYGON")) {
+        geom = parseWktPolygon(geom);
+      }
+    }
+    if (!geom) return { type: "FeatureCollection", features: [] };
+    if (geom.type === "FeatureCollection") return geom;
+    if (geom.type === "Feature") return { type: "FeatureCollection", features: [geom] };
+    if (geom.type === "Polygon" || geom.type === "MultiPolygon") {
+      return { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: geom }] };
+    }
+    if (Array.isArray(geom) && geom.length === 4 && typeof geom[0] === "number") {
+      const [minX, minY, maxX, maxY] = geom;
+      return {
+        type: "FeatureCollection",
+        features: [{
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Polygon",
+            coordinates: [[[minX, minY], [maxX, minY], [maxX, maxY], [minX, maxY], [minX, minY]]]
+          }
+        }]
+      };
+    }
+    return { type: "FeatureCollection", features: [] };
+  }
+
+  function installAoiMask() {
+    // 1. Territory Focus Mask source & fill layer (#030712 @ 80% opacity from Tuffs)
+    if (!map.getSource("territory-mask")) {
+      map.addSource("territory-mask", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] }
+      });
+      map.addLayer({
+        id: "territory-mask-fill",
+        type: "fill",
+        source: "territory-mask",
+        paint: {
+          "fill-color": "#030712",
+          "fill-opacity": 0.80
+        }
+      });
+    }
+
+    // 2. Selected Territory / AOI Highlight Boundary Line (bright cyan #54e1f0, 2.8px)
+    if (!map.getSource("aoi-boundary")) {
+      map.addSource("aoi-boundary", {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] }
+      });
+      map.addLayer({
+        id: "aoi-boundary-line",
+        type: "line",
+        source: "aoi-boundary",
+        paint: {
+          "line-color": "#54e1f0",
+          "line-width": 2.8,
+          "line-opacity": 1.0
+        }
+      });
+    }
+
+    setAoiMask(currentAoiGeometry || DEFAULT_HUNTER_AOI_WKT);
+  }
+
+  function setAoiMask(geomOrInput) {
+    currentAoiGeometry = geomOrInput;
+    if (!map || !map.getSource("territory-mask")) return;
+    if (!aoiMaskEnabled || !geomOrInput) {
+      map.getSource("territory-mask").setData({ type: "FeatureCollection", features: [] });
+      if (map.getSource("aoi-boundary")) map.getSource("aoi-boundary").setData({ type: "FeatureCollection", features: [] });
+      updateMaskButtonUi();
+      return;
+    }
+    const maskData = createInvertedMaskGeoJSON(geomOrInput);
+    map.getSource("territory-mask").setData(maskData);
+    if (map.getSource("aoi-boundary")) {
+      map.getSource("aoi-boundary").setData(extractBoundaryGeoJSON(geomOrInput));
+    }
+    if (map.getLayer("territory-mask-fill")) map.moveLayer("territory-mask-fill");
+    if (map.getLayer("aoi-boundary-line")) map.moveLayer("aoi-boundary-line");
+    ["oic-hl-fill", "oic-hl-line", "oic-hl-point"].forEach(id => { if (map.getLayer(id)) map.moveLayer(id); });
+    updateMaskButtonUi();
+  }
+
+  function clearAoiMask() {
+    currentAoiGeometry = null;
+    if (map && map.getSource("territory-mask")) {
+      map.getSource("territory-mask").setData({ type: "FeatureCollection", features: [] });
+    }
+    if (map && map.getSource("aoi-boundary")) {
+      map.getSource("aoi-boundary").setData({ type: "FeatureCollection", features: [] });
+    }
+    updateMaskButtonUi();
+  }
+
+  function toggleAoiMask() {
+    aoiMaskEnabled = !aoiMaskEnabled;
+    if (aoiMaskEnabled) {
+      setAoiMask(currentAoiGeometry || DEFAULT_HUNTER_AOI_WKT);
+    } else if (map && map.getSource("territory-mask")) {
+      map.getSource("territory-mask").setData({ type: "FeatureCollection", features: [] });
+      if (map.getSource("aoi-boundary")) map.getSource("aoi-boundary").setData({ type: "FeatureCollection", features: [] });
+    }
+    updateMaskButtonUi();
+  }
+
+  function updateMaskButtonUi() {
+    const btn = $("btnToggleAoiMask");
+    const status = $("aoiMaskStatus");
+    if (!btn || !status) return;
+    const hasAoi = !!currentAoiGeometry;
+    if (aoiMaskEnabled && hasAoi) {
+      status.textContent = "On (80%)";
+      btn.classList.add("active");
+      btn.style.borderColor = "#54e1f0";
+    } else if (aoiMaskEnabled && !hasAoi) {
+      status.textContent = "Armed";
+      btn.classList.remove("active");
+      btn.style.borderColor = "";
+    } else {
+      status.textContent = "Off";
+      btn.classList.remove("active");
+      btn.style.borderColor = "";
+    }
   }
 
   // ---------- Highlight & Identify ----------
@@ -847,6 +1094,7 @@
       if (m) openMeta(m.getAttribute("data-cat-meta"));
     });
     on("chartFieldSelect", "change", e => renderChart(e.target.value));
+    on("btnToggleAoiMask", "click", toggleAoiMask);
     on("btnOverlayLoadDefault", "click", () => activate(["nsw_water_inundation_areas", "ga_electricity_transmission_lines", "ga_electricity_substations", "nsw_foi_building_complexes"], { fit: EXTENTS.hunter }));
 
     document.querySelectorAll("[data-close-modal]").forEach(b => b.addEventListener("click", () => closeModal(b.getAttribute("data-close-modal"))));
@@ -858,6 +1106,7 @@
     map = mapInstance;
     installBasemaps();
     installHighlight();
+    installAoiMask();
     map.on("click", handleMapClick);
     map.on("mousemove", e => {
       const r = $("mapCoordReadout");
@@ -887,6 +1136,7 @@
 
   function clear() {
     closePopup();
+    clearAoiMask();
     CATALOG.forEach(c => { state[c.key].visible = false; state[c.key].inList = false; applyVisibility(c.key); });
     order = [];
     dockKey = null;
@@ -938,6 +1188,12 @@
     attach,
     activate,
     clear,
+    setAoiMask,
+    clearAoiMask,
+    toggleAoiMask,
+    createInvertedMaskGeoJSON,
+    isAoiMaskEnabled: () => aoiMaskEnabled,
+    getCurrentAoiGeometry: () => currentAoiGeometry,
     openMeta,
     openChart,
     openTable,

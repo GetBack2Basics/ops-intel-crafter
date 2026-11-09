@@ -3,6 +3,7 @@ Engine Benchmarks, and the Google Stitch Emergency Spatial Intelligence Workbenc
 """
 
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -678,6 +679,9 @@ def main() -> None:
         output_package_dir=pack_dir,
         registry=registry,
     )
+    docs_pack_dir = docs_dir / "map_packages" / "hunter_flood_emergency_pack"
+    docs_pack_dir.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(pack_dir, docs_pack_dir, dirs_exist_ok=True)
 
     # 7. Run Execution Engine Benchmarks & Build Stitch Workbench HTML
     print("[7/7] Running Execution Engine Benchmarks and generating Stitch Workbench (docs/index.html)...")

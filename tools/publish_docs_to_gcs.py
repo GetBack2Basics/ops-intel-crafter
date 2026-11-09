@@ -22,6 +22,7 @@ def upload_web_assets():
         ("data/WP302026_TRACK_latest.kmz", "application/vnd.google-earth.kmz"),
         ("data/WP302026_TRACK_latest.geojson", "application/geo+json; charset=utf-8"),
         ("data/WP302026_CYCLONE_ZONES.geojson", "application/geo+json; charset=utf-8"),
+        ("data/workbench_bundle.json", "application/json; charset=utf-8"),
     ]
 
     # Also include map_packages

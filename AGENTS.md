@@ -27,3 +27,8 @@ All code modifications must pass:
 pytest tests/zero_mock/ tests/unit/ tests/data_quality/ -v
 ```
 
+## System Binary Locations
+- **Git**: `C:\Users\corea\AppData\Local\hermes\git\cmd\git.exe` (Git Bash: `C:\Users\corea\AppData\Local\hermes\git\bin\bash.exe`). Run with `BypassSandbox: true`.
+- **Chrome**: `C:\Program Files\Google\Chrome\Application\chrome.exe` (`--headless=new --disable-gpu --no-sandbox`).
+- **Python**: `.\.venv\Scripts\python.exe`
+
