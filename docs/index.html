@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="shell-type" content="web_dashboard"/>
+  <title>Emergency Spatial Workbench | Australian Infrastructure &amp; Hazard Analysis</title>
+  <meta name="description" content="Australian emergency management spatial analysis on GCS GeoParquet, DuckDB Spatial, and MapLibre."/>
+
+  <!-- Fonts: Plus Jakarta Sans, Space Grotesk, JetBrains Mono + Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Space+Grotesk:wght@600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet"/>
+
+  <!-- MapLibre GL CSS -->
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"/>
+
+  <!-- Tailwind (CDN) + Stitch Design Token Theme -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-tertiary-fixed-variant": "#6e3900", "on-tertiary": "#ffffff", "on-primary-fixed-variant": "#314769",
+            "on-secondary": "#ffffff", "on-tertiary-fixed": "#2f1500", "on-background": "#131b2e",
+            "on-secondary-fixed-variant": "#004f57", "on-primary": "#ffffff", "inverse-on-surface": "#eef0ff",
+            "outline": "#74777f", "inverse-primary": "#b1c7f0", "primary-container": "#0b2545",
+            "on-primary-container": "#778db2", "on-error": "#ffffff", "error": "#ba1a1a",
+            "tertiary-fixed": "#ffdcc3", "on-tertiary-container": "#d47300", "surface-dim": "#d2d9f4",
+            "surface-container-highest": "#dae2fd", "surface-bright": "#faf8ff", "surface-container-high": "#e2e7ff",
+            "primary-fixed": "#d5e3ff", "outline-variant": "#c4c6cf", "on-secondary-container": "#006d78",
+            "background": "#faf8ff", "tertiary-container": "#3c1d00", "inverse-surface": "#283044",
+            "on-error-container": "#93000a", "tertiary": "#1e0b00", "on-surface": "#131b2e",
+            "secondary": "#006973", "surface": "#faf8ff", "surface-tint": "#495f82",
+            "secondary-fixed-dim": "#66d6e5", "primary-fixed-dim": "#b1c7f0", "surface-variant": "#dae2fd",
+            "surface-container": "#eaedff", "secondary-container": "#81f0ff", "tertiary-fixed-dim": "#ffb77d",
+            "secondary-fixed": "#90f1ff", "on-secondary-fixed": "#001f23", "surface-container-lowest": "#ffffff",
+            "primary": "#001026", "error-container": "#ffdad6", "on-primary-fixed": "#001c3b",
+            "surface-container-low": "#f2f3ff", "on-surface-variant": "#44474e"
+          },
+          borderRadius: { DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px" },
+          spacing: {
+            "space-xs": "0.25rem", "space-sm": "0.5rem", "space-md": "1rem", "space-lg": "1.5rem", "space-xl": "2rem"
+          },
+          fontFamily: {
+            "headline-xl": ["Space Grotesk"], "headline-lg": ["Space Grotesk"], "headline-md": ["Space Grotesk"], "headline-sm": ["Space Grotesk"],
+            "body-lg": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"],
+            mono: ["JetBrains Mono", "Consolas", "monospace"]
+          },
+          fontSize: {
+            "headline-xl": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "headline-lg": ["28px", { lineHeight: "36px", letterSpacing: "-0.01em", fontWeight: "700" }],
+            "headline-md": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            "headline-sm": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+            "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+            "body-md": ["15px", { lineHeight: "22px", fontWeight: "400" }],
+            "body-sm": ["13px", { lineHeight: "19px", fontWeight: "400" }],
+            "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.01em", fontWeight: "600" }],
+            "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "600" }],
+            "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "700" }]
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between py-6 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+    <div class="flex flex-col gap-6">
+      <div class="px-6 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center">
+          <span class="material-symbols-outlined text-secondary-fixed text-[22px]">layers</span>
+        </div>
+        <div>
+          <span class="font-headline-sm text-headline-sm text-primary block leading-tight tracking-tight">Spatial Workbench</span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">Emergency GIS</span>
+        </div>
+      </div>
+      <nav id="sideNav" class="flex flex-col gap-1 px-3">
+        <a class="nav-link active" href="#panel-query"><span class="material-symbols-outlined text-[20px]">search</span>Query &amp; Area</a>
+        <a class="nav-link" href="#panel-sql"><span class="material-symbols-outlined text-[20px]">code</span>SQL Editor</a>
+        <a class="nav-link" href="#panel-map"><span class="material-symbols-outlined text-[20px]">map</span>Map View</a>
+        <a class="nav-link" href="#panel-recommendations"><span class="material-symbols-outlined text-[20px]">table_chart</span>Results Table</a>
+        <a class="nav-link" href="#panel-analytics"><span class="material-symbols-outlined text-[20px]">bar_chart</span>SA2 &amp; Timing</a>
+        <a class="nav-link" href="#panel-ai-steps"><span class="material-symbols-outlined text-[20px]">download</span>Exports &amp; Pack</a>
+        <div class="h-px bg-surface-container-high my-2 mx-3"></div>
+        <a class="nav-link" href="qa/index.html"><span class="material-symbols-outlined text-[20px]">fact_check</span>Data QA Overview</a>
+        <a class="nav-link" href="qa/inspect.html"><span class="material-symbols-outlined text-[20px]">travel_explore</span>Source Inspector</a>
+        <a class="nav-link" href="map_packages/hunter_flood_emergency_pack/index.html"><span class="material-symbols-outlined text-[20px]">inventory_2</span>Offline Map Pack</a>
+      </nav>
+    </div>
+    <div class="px-4 flex flex-col gap-3">
+      <div class="p-3 bg-surface-container rounded-lg flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="font-label-sm text-label-sm text-on-surface-variant">GCS Storage</span>
+          <span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-secondary"><span class="w-2 h-2 rounded-full bg-secondary-fixed-dim"></span>Online</span>
+        </div>
+        <span class="font-mono text-[10px] text-on-surface-variant truncate" title="gs://operational-intelligence-crafter-lake/">gs://operational-intelligence-crafter-lake/</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="pl-64">
+    <!-- ============ HEADER ============ -->
+    <header class="fixed top-0 left-64 right-0 z-40 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+      <div class="h-16 px-space-xl flex items-center justify-between gap-4">
+        <div class="flex items-center gap-4 flex-1 max-w-xl">
+          <div class="relative w-full">
+            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+            <input id="globalSearch" type="search" class="w-full h-10 pl-10 pr-4 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary/30 transition-all" placeholder="Search flood zone, substation, LGA, bushfire or population grid… (Enter)"/>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="qa/index.html" class="h-10 px-4 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">fact_check</span><span>Data QA</span>
+          </a>
+          <button id="btnHeaderRun" type="button" class="h-10 px-4 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-[18px]">play_arrow</span><span>Run Query</span>
+          </button>
+        </div>
+      </div>
+      <div class="h-12 px-space-xl bg-surface-container-lowest flex items-center justify-between gap-4 shadow-[0_1px_4px_rgba(0,0,0,0.02)]">
+        <div class="flex items-center gap-4 overflow-x-auto">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider shrink-0">Steps</span>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <a href="#panel-query" class="step-pill active">01 Query &amp; Area</a>
+            <a href="#panel-sql" class="step-pill">02 SQL</a>
+            <a href="#panel-map" class="step-pill">03 Map</a>
+            <a href="#panel-recommendations" class="step-pill">04 Results</a>
+            <a href="#panel-analytics" class="step-pill">05 SA2 &amp; Timing</a>
+            <a href="#panel-ai-steps" class="step-pill">06 Exports</a>
+          </div>
+        </div>
+        <div class="hidden lg:flex items-center gap-4 shrink-0 font-label-sm text-label-sm text-on-surface-variant">
+          <span>Stored CRS: EPSG:7844</span>
+          <span>Metric CRS: EPSG:3112</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ MAIN ============ -->
+    <main class="relative pt-28 w-full px-space-xl bg-surface min-h-screen">
+      <div class="flex flex-col w-full pb-16 space-y-8 pt-6">
+
+        <!-- Top Summary Bar -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-space-md bg-surface-container-lowest rounded-xl shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-primary text-on-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[24px]">layers</span>
+            </div>
+            <div>
+              <h1 class="font-headline-sm text-headline-sm text-on-surface">Emergency Spatial Workbench</h1>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Australian Hazards, Infrastructure &amp; ABS 1 km² Population Grid (Methods A, B, C)</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="ribbon-item"><span class="text-on-surface-variant font-normal">Basemap:</span><span class="font-bold">OpenStreetMap</span></div>
+            <div class="ribbon-item"><span class="text-on-surface-variant font-normal">Storage:</span><span class="font-bold font-mono">GeoParquet</span></div>
+          </div>
+        </div>
+
+        <!-- STEP 1: Spatial Query & Plain-Text Area / Options -->
+        <section id="panel-query" class="panel-card space-y-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="step-tag">STEP 01</span>
+              <h2 class="font-headline-md text-headline-md text-on-surface">Select Preset or Enter Spatial Query</h2>
+            </div>
+            <span class="font-label-sm text-label-sm text-on-surface-variant">Define area and options below before creating SQL</span>
+          </div>
+
+          <div class="flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-[22px]">search</span>
+              <input id="nlInput" type="text" value="" placeholder="Select a preset below or type a question (e.g. Substations near flood zones in Maitland)" class="w-full h-12 pl-12 pr-4 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary transition-all"/>
+            </div>
+            <button id="btnAnalyze" type="button" class="btn h-12 px-6">
+              <span class="material-symbols-outlined text-[20px]">tune</span><span>Set Area &amp; Options</span>
+            </button>
+            <button id="btnClearAll" type="button" class="btn btn-secondary h-12 px-4" title="Reset query, SQL, map and tables to blank">
+              <span class="material-symbols-outlined text-[18px]">restart_alt</span><span>Reset</span>
+            </button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider mr-1">Preset Queries:</span>
+            <button class="chip chip-featured" data-scenario="pop_comparison">1 km² Population Comparison (Methods A / B / C)</button>
+            <button class="chip" data-scenario="substation_flood">Substation Flood Proximity &amp; Facility Catchment</button>
+            <button class="chip" data-scenario="lga_multi_hazard">LGA Flood, Substation &amp; Building Summary</button>
+            <button class="chip" data-scenario="live_rfs">NSW RFS Active Bushfire Incidents</button>
+            <button class="chip" data-scenario="national_power">National Power Stations &amp; Seismic Contours</button>
+            <button class="chip" data-scenario="ambiguous_pop">Population in Flood Zone</button>
+            <button class="chip" data-scenario="uncatalogued_reject">Uncatalogued Source Check (SCADA / ICU)</button>
+          </div>
+
+          <!-- Plain-Text Area & Options Definition Box (shown before creating SQL) -->
+          <div id="clarificationBox" class="bg-surface-container-low rounded-xl p-space-md flex-col gap-4" style="display: none;">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary text-[20px]">edit_location_alt</span>
+                <h3 id="clarificationTitle" class="font-headline-sm text-headline-sm text-on-surface">Define Area &amp; Options (Plain Text) Before Creating SQL</h3>
+              </div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">Edit any field in plain text, then click Create SQL</span>
+            </div>
+            <div id="clarificationQuestions" class="space-y-4"></div>
+            <div id="clarificationActions" class="flex justify-end pt-2">
+              <button id="btnApplyClarification" type="button" class="btn btn-primary h-11 px-6">
+                <span class="material-symbols-outlined text-[18px]">code</span><span>Create SQL</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 2: SQL Query Editor -->
+        <section id="panel-sql" class="panel-card space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="step-tag">STEP 02</span>
+              <h2 class="font-headline-md text-headline-md text-on-surface">SQL Query Editor</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="btnGenerateSql" type="button" class="btn btn-secondary h-9 px-3">
+                <span class="material-symbols-outlined text-[16px]">sync</span><span>Rebuild SQL</span>
+              </button>
+              <button id="btnRunQuery" type="button" class="btn h-9 px-4">
+                <span class="material-symbols-outlined text-[18px]">play_arrow</span><span>Run Query</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- SQL Editor (Starts Blank) -->
+            <div class="lg:col-span-8 flex flex-col bg-primary text-on-primary rounded-xl overflow-hidden shadow-sm">
+              <div class="px-4 py-2.5 bg-primary-container flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="material-symbols-outlined text-[18px] text-secondary-fixed">folder_open</span>
+                  <span id="sqlTargetUri" class="font-label-sm text-label-sm text-on-primary font-mono truncate">gs://operational-intelligence-crafter-lake/geoparquet/ (awaiting query)</span>
+                </div>
+                <button id="btnCopySql" type="button" class="shrink-0 flex items-center gap-1 px-2.5 py-1 rounded bg-primary text-on-primary font-label-sm text-label-sm hover:bg-on-primary-fixed-variant transition-colors">Copy SQL</button>
+              </div>
+              <textarea id="sqlInput" class="sql-editor" spellcheck="false" placeholder="-- Select a preset or enter a query in Step 01, define your area and options in plain text, and click Create SQL..."></textarea>
+            </div>
+
+            <!-- Context Cards (Start Blank with —) -->
+            <div class="lg:col-span-4 flex flex-col justify-between gap-4">
+              <div class="context-tile">
+                <div class="flex items-center justify-between">
+                  <span class="tile-label">Target Area</span>
+                  <span class="material-symbols-outlined text-secondary text-[20px]">place</span>
+                </div>
+                <div id="ctxScaleVal" class="font-headline-md text-headline-md text-on-surface truncate">—</div>
+                <p id="ctxScaleSub" class="font-body-sm text-body-sm text-on-surface-variant">No area defined yet</p>
+              </div>
+              <div class="context-tile">
+                <div class="flex items-center justify-between">
+                  <span class="tile-label">Selected Options &amp; Method</span>
+                  <span class="material-symbols-outlined text-on-tertiary-container text-[20px]">tune</span>
+                </div>
+                <div id="ctxMethodVal" class="font-headline-md text-headline-md text-on-surface truncate">—</div>
+                <p id="ctxMethodSub" class="font-body-sm text-body-sm text-on-surface-variant">Distance / filter / population method</p>
+              </div>
+              <div class="context-tile">
+                <div class="flex items-center justify-between">
+                  <span class="tile-label">Dataset Status</span>
+                  <span class="material-symbols-outlined text-secondary text-[20px]">database</span>
+                </div>
+                <div id="ctxGateVal" class="font-headline-md text-headline-md text-secondary">—</div>
+                <p id="ctxGateSub" class="font-body-sm text-body-sm text-on-surface-variant">Stored GeoParquet on GCS</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 3: Map View (Starts Blank) -->
+        <section id="panel-map" class="panel-card space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="step-tag">STEP 03</span>
+              <h2 id="mapSectionTitle" class="font-headline-md text-headline-md text-on-surface">Map View</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="mapFeatureCountBadge" class="badge badge-accent">0 Features Loaded</span>
+              <span id="mapCrsBadge" class="badge"><span class="material-symbols-outlined text-[16px]">straighten</span>EPSG:7844 / EPSG:3112</span>
+            </div>
+          </div>
+          <div class="relative w-full h-[500px] rounded-xl overflow-hidden bg-surface-container-low">
+            <div id="map" class="w-full h-full"></div>
+            <!-- Empty-state overlay until query runs -->
+            <div id="mapEmptyOverlay" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+              <div class="bg-surface-container-lowest/95 backdrop-blur-md px-5 py-3.5 rounded-xl shadow-md border border-outline-variant/40 text-center max-w-md">
+                <div class="font-label-md text-label-md text-primary font-bold flex items-center justify-center gap-1.5">
+                  <span class="material-symbols-outlined text-secondary text-[18px]">layers</span>Map Blank — Awaiting Query Execution
+                </div>
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Define your area and options in Step 01, click <strong>Create SQL</strong>, then click <strong>Run Query</strong> in Step 02.</p>
+              </div>
+            </div>
+            <!-- Legend HUD (shown once layers load) -->
+            <div id="mapLegendHud" class="absolute bottom-4 right-4 bg-surface-container-lowest/95 backdrop-blur-md p-3.5 rounded-xl shadow-lg max-w-xs space-y-2 z-10" style="display: none;">
+              <div class="font-label-sm text-label-sm text-on-surface font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-secondary">layers</span><span>Map Layers</span>
+              </div>
+              <div id="mapLegendItems" class="grid grid-cols-1 gap-y-1.5 font-label-sm text-label-sm text-on-surface-variant"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 4: Query Results Table (Starts Blank) -->
+        <section id="panel-recommendations" class="panel-card space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="step-tag">STEP 04</span>
+              <div>
+                <h2 id="resultsTitle" class="font-headline-md text-headline-md text-on-surface">Query Results</h2>
+                <p id="resultsSubtitle" class="font-body-sm text-body-sm text-on-surface-variant">Run a query in Step 02 to populate summary metrics and feature rows</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <a id="btnExportGeojson" href="exports/hunter_population_grid_comparison/result.geojson" target="_blank" class="badge badge-accent" style="display: none;">
+                <span class="material-symbols-outlined text-[15px]">download</span>Download GeoJSON
+              </a>
+              <span id="execTimeBadge" class="badge">Not Run</span>
+            </div>
+          </div>
+
+          <!-- KPI Quad (Starts Blank with —) -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="kpi-tile">
+              <span id="kpiLabel1" class="tile-label">Metric 1</span>
+              <span id="kpiVal1" class="font-headline-lg text-headline-lg text-on-surface mt-1">—</span>
+            </div>
+            <div class="kpi-tile">
+              <span id="kpiLabel2" class="tile-label">Metric 2</span>
+              <span id="kpiVal2" class="font-headline-lg text-headline-lg text-secondary mt-1">—</span>
+            </div>
+            <div class="kpi-tile">
+              <span id="kpiLabel3" class="tile-label">Metric 3</span>
+              <span id="kpiVal3" class="font-headline-lg text-headline-lg text-on-surface mt-1">—</span>
+            </div>
+            <div class="kpi-tile">
+              <span id="kpiLabel4" class="tile-label">Area / Filter</span>
+              <span id="kpiVal4" class="font-headline-lg text-headline-lg text-on-surface mt-1">—</span>
+            </div>
+          </div>
+
+          <!-- Feature Inspector Banner (dynamic; hidden by default) -->
+          <div id="inspectorBanner" class="rounded-xl bg-primary text-on-primary p-space-md shadow-sm" style="display: none;">
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <div class="flex items-center gap-3 flex-wrap">
+                <span id="inspectorBadge" class="infra-badge">Selected Feature</span>
+                <h3 id="inspectorName" class="font-headline-sm text-headline-sm text-on-primary">—</h3>
+              </div>
+              <button id="btnCloseInspector" type="button" class="flex items-center gap-1 px-2.5 py-1 rounded bg-primary-container hover:bg-on-primary-fixed-variant text-on-primary font-label-sm text-label-sm transition-colors">
+                <span class="material-symbols-outlined text-[14px]">close</span>Close
+              </button>
+            </div>
+            <div id="inspectorGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+          </div>
+
+          <!-- Results Table (Starts Blank) -->
+          <div class="table-wrapper">
+            <table id="resultsTable" class="data-table">
+              <thead id="resultsTableHead">
+                <tr>
+                  <th>Feature / Identifier</th>
+                  <th>Location / Jurisdiction</th>
+                  <th>Primary Metric</th>
+                  <th>Secondary Metric</th>
+                  <th>Classification</th>
+                </tr>
+              </thead>
+              <tbody id="resultsTableBody">
+                <tr>
+                  <td colspan="5" class="empty-cell">No query executed yet. Select a preset in <strong>Step 01</strong>, define your area and options, click <strong>Create SQL</strong>, and click <strong>Run Query</strong>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- STEP 5: SA2 Floodplain Overlap & Query Timing (Hidden until query runs) -->
+        <section id="panel-analytics" class="panel-card space-y-6" style="display: none;">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="step-tag">STEP 05</span>
+              <h2 class="font-headline-md text-headline-md text-on-surface">Query Timing &amp; SA2 Floodplain Overlap</h2>
+            </div>
+            <span class="badge badge-accent">DuckDB Spatial over GeoParquet</span>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="space-y-3">
+              <h3 class="font-headline-sm text-headline-sm text-on-surface">GeoParquet Query Execution Times</h3>
+              <div class="table-wrapper">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Query Task</th>
+                      <th>Cold Run</th>
+                      <th>Warm Run</th>
+                      <th>Rows</th>
+                    </tr>
+                  </thead>
+                  <tbody id="benchTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <h3 class="font-headline-sm text-headline-sm text-on-surface">SA2 Floodplain Inundation Overlap (EPSG:3112)</h3>
+              <div class="table-wrapper">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>SA2 Code</th>
+                      <th>SA2 Name</th>
+                      <th>Inundated km²</th>
+                      <th>SA2 Overlap</th>
+                      <th>Risk Tier</th>
+                    </tr>
+                  </thead>
+                  <tbody id="isolationTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 6: Related Queries & Offline Field Package (Hidden until query runs) -->
+        <section id="panel-ai-steps" class="panel-card space-y-6" style="display: none;">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="step-tag">STEP 06</span>
+              <h2 class="font-headline-md text-headline-md text-on-surface">Related Queries &amp; Offline Field Package</h2>
+            </div>
+          </div>
+          <div id="scenarioCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MapLibre GL JS -->
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <!-- Main Workbench App Script -->
+  <script src="app.js"></script>
+</body>
+</html>

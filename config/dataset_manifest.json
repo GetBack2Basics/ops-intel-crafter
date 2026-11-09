@@ -1,0 +1,580 @@
+{
+  "manifest_version": "1.0.0",
+  "project_name": "operational_intelligence_crafter",
+  "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
+  "updated_at_utc": "2026-11-08T22:33:54Z",
+  "default_stored_crs": "EPSG:7844",
+  "default_metric_crs": "EPSG:3112",
+  "default_export_crs": "EPSG:4326",
+  "datasets": {
+    "ga_electricity_substations": {
+      "dataset_key": "ga_electricity_substations",
+      "title": "National Electricity Infrastructure \u2014 Power Substations",
+      "category": "static_authoritative",
+      "theme": "Critical Infrastructure",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "Geoscience Australia",
+      "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/0",
+      "layer_id": 0,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) \u2014 Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2024-06-01",
+      "source_vintage": "2024-GA-NEI",
+      "refresh_policy": "quarterly_snapshot",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Point",
+      "primary_key": "OBJECTID",
+      "required_fields": [
+        "OBJECTID",
+        "FEATURE_NAME",
+        "VOLTAGE_KV",
+        "STATE"
+      ],
+      "schema_mapping": {
+        "substation_id": "OBJECTID",
+        "name": "FEATURE_NAME",
+        "voltage_kv": "VOLTAGE_KV",
+        "state": "STATE",
+        "locality": "LOCALITY"
+      },
+      "known_limitations": [
+        "Substation capacity and operational status reflect published national foundation snapshots, not real-time SCADA telemetry."
+      ],
+      "operational_suitability": "Suitable for national and regional infrastructure exposure and grid dependency screening.",
+      "default_bbox": [
+        151.1,
+        -33.2,
+        152.2,
+        -32.4
+      ],
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T222800Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-08T22:28:00Z"
+    },
+    "ga_major_power_stations": {
+      "dataset_key": "ga_major_power_stations",
+      "title": "National Electricity Infrastructure \u2014 Major Power Stations",
+      "category": "static_authoritative",
+      "theme": "Critical Infrastructure",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "Geoscience Australia",
+      "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/1",
+      "layer_id": 1,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) \u2014 Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2024-06-01",
+      "source_vintage": "2024-GA-NEI",
+      "refresh_policy": "quarterly_snapshot",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Point",
+      "primary_key": "objectid",
+      "required_fields": [
+        "objectid",
+        "feature_name",
+        "primary_fuel_type",
+        "generation_capacity_mw"
+      ],
+      "schema_mapping": {
+        "station_id": "objectid",
+        "name": "feature_name",
+        "fuel_type": "primary_fuel_type",
+        "capacity_mw": "generation_capacity_mw",
+        "state": "state"
+      },
+      "known_limitations": [
+        "Field names in Layer 1 are lowercase (objectid, feature_name) unlike Layer 0/2 uppercase.",
+        "Contains 379 major power generation facilities across Australia."
+      ],
+      "operational_suitability": "Suitable for national and state power generation hazard exposure analysis.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261108T223144Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-08T22:31:44Z"
+    },
+    "ga_electricity_transmission_lines": {
+      "dataset_key": "ga_electricity_transmission_lines",
+      "title": "National Electricity Infrastructure \u2014 High-Voltage Transmission Lines",
+      "category": "static_authoritative",
+      "theme": "Critical Infrastructure",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "Geoscience Australia",
+      "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2",
+      "layer_id": 2,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) \u2014 Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2024-06-01",
+      "source_vintage": "2024-GA-NEI",
+      "refresh_policy": "quarterly_snapshot",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "LineString",
+      "primary_key": "OBJECTID",
+      "required_fields": [
+        "OBJECTID",
+        "FEATURE_NAME",
+        "CAPACITY_KV",
+        "STATE"
+      ],
+      "schema_mapping": {
+        "line_id": "OBJECTID",
+        "name": "FEATURE_NAME",
+        "capacity_kv": "CAPACITY_KV",
+        "state": "STATE",
+        "class": "FEATURE_SUBTYPE"
+      },
+      "known_limitations": [
+        "Contains 16,139 national transmission segments; Hunter/Newcastle regional slice ingested by default when default_bbox is applied."
+      ],
+      "operational_suitability": "Suitable for transmission corridor bushfire, flood, and wind exposure assessment.",
+      "default_bbox": [
+        150.5,
+        -33.6,
+        152.5,
+        -32.0
+      ],
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261108T223354Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-08T22:33:54Z"
+    },
+    "ga_seismic_hazard_pga_10pct": {
+      "dataset_key": "ga_seismic_hazard_pga_10pct",
+      "title": "National Seismic Hazard Assessment 2018 \u2014 PGA Contours (10% in 50 Years)",
+      "category": "static_authoritative",
+      "theme": "Hazards",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "Geoscience Australia",
+      "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/15",
+      "layer_id": 15,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) NSHA 2018 \u2014 CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2018-10-01",
+      "source_vintage": "NSHA-2018",
+      "refresh_policy": "static_release",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "LineString",
+      "primary_key": "objectid",
+      "required_fields": [
+        "objectid",
+        "levels"
+      ],
+      "schema_mapping": {
+        "contour_id": "objectid",
+        "pga_level_g": "levels"
+      },
+      "known_limitations": [
+        "Layer 15 provides Peak Ground Acceleration (PGA) 10% in 50-year exceedance probability contours (100 national contour features); reprojected from EPSG:4283 to EPSG:7844."
+      ],
+      "operational_suitability": "Suitable for national seismic hazard screening and multi-hazard critical infrastructure overlay.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261108T222802Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-08T22:28:02Z"
+    },
+    "next_lga_boundaries_asgs2025": {
+      "dataset_key": "next_lga_boundaries_asgs2025",
+      "title": "ABS ASGS Edition 3 (2025) \u2014 Local Government Areas (NExT Administrative Baseline)",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "NExT Administrative & Statistical",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "Australian Bureau of Statistics",
+      "source_agency": "Australian Bureau of Statistics (ABS)",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://geo.abs.gov.au/arcgis/rest/services/ASGS2025/LGA/MapServer/0",
+      "layer_id": 0,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 Australian Bureau of Statistics (ASGS 2025) \u2014 CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2025-07-01",
+      "source_vintage": "ASGS-2025",
+      "refresh_policy": "annual_release",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Polygon",
+      "primary_key": "OBJECTID",
+      "required_fields": [
+        "OBJECTID",
+        "LGA_CODE_2025",
+        "LGA_NAME_2025",
+        "STATE_NAME_2021",
+        "AREA_ALBERS_SQKM"
+      ],
+      "schema_mapping": {
+        "lga_code": "LGA_CODE_2025",
+        "lga_name": "LGA_NAME_2025",
+        "state_name": "STATE_NAME_2021",
+        "area_sqkm": "AREA_ALBERS_SQKM"
+      },
+      "known_limitations": [
+        "Filtered to Hunter/Newcastle/Central Coast operational bounding box by default unless full national ingestion is requested."
+      ],
+      "operational_suitability": "Authoritative administrative boundary baseline for emergency management LGA aggregation.",
+      "default_bbox": [
+        150.8,
+        -33.4,
+        152.3,
+        -32.4
+      ],
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261108T222813Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-08T22:28:13Z"
+    },
+    "next_sa2_boundaries_asgs2021": {
+      "dataset_key": "next_sa2_boundaries_asgs2021",
+      "title": "ABS ASGS 2021 \u2014 Statistical Areas Level 2 (SA2 Population & Vulnerability Baseline)",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "NExT Population & Geography",
+      "scale": "regional",
+      "jurisdiction": "NATIONAL",
+      "provider": "Australian Bureau of Statistics",
+      "source_agency": "Australian Bureau of Statistics (ABS)",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://geo.abs.gov.au/arcgis/rest/services/ASGS2021/SA2/MapServer/0",
+      "layer_id": 0,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 Australian Bureau of Statistics (ASGS 2021) \u2014 CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2021-07-20",
+      "source_vintage": "ASGS-2021",
+      "refresh_policy": "census_release",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Polygon",
+      "primary_key": "objectid",
+      "required_fields": [
+        "objectid",
+        "sa2_code_2021",
+        "sa2_name_2021",
+        "state_name_2021"
+      ],
+      "schema_mapping": {
+        "sa2_code": "sa2_code_2021",
+        "sa2_name": "sa2_name_2021",
+        "sa3_name": "sa3_name_2021",
+        "state_name": "state_name_2021"
+      },
+      "known_limitations": [
+        "Statistical geography backbone for NExT population density and SEIFA vulnerability comparisons; default bbox covers Newcastle/Lake Macquarie/Lower Hunter."
+      ],
+      "operational_suitability": "Suitable for regional population exposure and Method A/B/C statistical comparison.",
+      "default_bbox": [
+        151.3,
+        -33.2,
+        152.0,
+        -32.6
+      ],
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261108T222817Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-08T22:28:17Z"
+    },
+    "nsw_lga_boundaries": {
+      "dataset_key": "nsw_lga_boundaries",
+      "title": "NSW Spatial Services \u2014 Local Government Area Boundaries",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "Administrative Boundaries",
+      "scale": "state",
+      "jurisdiction": "NSW",
+      "provider": "NSW Spatial Services (DCS)",
+      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
+      "service_type": "arcgis_featureserver",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Administrative_Boundaries_Theme/FeatureServer/8",
+      "layer_id": 8,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 State of New South Wales (Spatial Services, a business unit of the Department of Customer Service NSW) \u2014 CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2026-01-01",
+      "source_vintage": "2026-NSW-DCS",
+      "refresh_policy": "monthly_snapshot",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Polygon",
+      "primary_key": "rid",
+      "required_fields": [
+        "rid",
+        "lganame",
+        "councilname",
+        "abscode"
+      ],
+      "schema_mapping": {
+        "lga_id": "rid",
+        "lga_name": "lganame",
+        "council_name": "councilname",
+        "abs_code": "abscode"
+      },
+      "known_limitations": [
+        "Statewide NSW service contains 198 records; default bbox retrieves Lower Hunter / Newcastle / Lake Macquarie LGAs."
+      ],
+      "operational_suitability": "Authoritative NSW state emergency management LGA boundary layer.",
+      "default_bbox": [
+        151.1,
+        -33.2,
+        152.2,
+        -32.5
+      ],
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261108T222820Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-08T22:28:20Z"
+    },
+    "nsw_water_inundation_areas": {
+      "dataset_key": "nsw_water_inundation_areas",
+      "title": "NSW Spatial Services \u2014 Fuzzy Extent Water & Flood Inundation Areas",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "Flood & Hydrography",
+      "scale": "state",
+      "jurisdiction": "NSW",
+      "provider": "NSW Spatial Services (DCS)",
+      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
+      "service_type": "arcgis_featureserver",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7",
+      "layer_id": 7,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 State of New South Wales (Spatial Services, DCS) \u2014 CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2026-01-01",
+      "source_vintage": "2026-NSW-Water",
+      "refresh_policy": "monthly_snapshot",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Polygon",
+      "primary_key": "OBJECTID",
+      "required_fields": [
+        "OBJECTID",
+        "hydroname",
+        "classsubtype"
+      ],
+      "schema_mapping": {
+        "water_id": "OBJECTID",
+        "waterbody_name": "hydroname",
+        "subtype": "classsubtype",
+        "hydro_type": "hydronametype"
+      },
+      "known_limitations": [
+        "Source CRS is EPSG:4283 (GDA94); transformed to EPSG:7844 (GDA2020) during GeoParquet normalization.",
+        "Default ingestion filters to the Lower Hunter / Lake Macquarie / Newcastle operational bounding box."
+      ],
+      "operational_suitability": "Suitable for flood inundation corridor buffering, population exposure, and road isolation modelling.",
+      "default_bbox": [
+        151.45,
+        -33.15,
+        151.85,
+        -32.75
+      ],
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261108T222823Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-08T22:28:23Z"
+    },
+    "nsw_foi_building_complexes": {
+      "dataset_key": "nsw_foi_building_complexes",
+      "title": "NSW Features of Interest \u2014 Emergency, Health, Education & Community Facilities",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "Emergency & Health Facilities",
+      "scale": "local",
+      "jurisdiction": "NSW",
+      "provider": "NSW Spatial Services (DCS)",
+      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
+      "service_type": "arcgis_featureserver",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3",
+      "layer_id": 3,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 State of New South Wales (Spatial Services, DCS) \u2014 CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2026-01-01",
+      "source_vintage": "2026-NSW-FOI",
+      "refresh_policy": "monthly_snapshot",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Point",
+      "primary_key": "OBJECTID",
+      "required_fields": [
+        "OBJECTID",
+        "generalname",
+        "classsubtype",
+        "urbanity"
+      ],
+      "schema_mapping": {
+        "facility_id": "OBJECTID",
+        "facility_name": "generalname",
+        "facility_subtype": "classsubtype",
+        "urbanity": "urbanity"
+      },
+      "known_limitations": [
+        "Includes hospitals, ambulance/fire/police stations, schools, and community complexes across NSW; filtered to Lower Hunter / Newcastle / Lake Macquarie operational corridor by default."
+      ],
+      "operational_suitability": "Suitable for local and regional emergency facility accessibility, evacuation centre siting, and critical asset exposure.",
+      "default_bbox": [
+        151.35,
+        -33.2,
+        151.9,
+        -32.7
+      ],
+      "qa_status": "WARNING",
+      "latest_snapshot_path": "data/lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261108T222818Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-08T22:28:18Z"
+    },
+    "nsw_rfs_major_incidents_live": {
+      "dataset_key": "nsw_rfs_major_incidents_live",
+      "title": "NSW Rural Fire Service \u2014 Current Major Bushfire & Emergency Incidents Feed",
+      "category": "live_operational_feed",
+      "theme": "Live Hazard Feeds",
+      "scale": "state",
+      "jurisdiction": "NSW",
+      "provider": "NSW Rural Fire Service (RFS)",
+      "source_agency": "NSW Rural Fire Service",
+      "service_type": "geojson_feed",
+      "endpoint": "https://www.rfs.nsw.gov.au/feeds/majorIncidents.json",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 State of New South Wales (NSW Rural Fire Service) \u2014 CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": null,
+      "source_vintage": "LIVE-FEED",
+      "refresh_policy": "just_in_time_live",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Geometry",
+      "primary_key": "guid",
+      "required_fields": [
+        "title",
+        "category",
+        "guid",
+        "pubDate",
+        "description"
+      ],
+      "schema_mapping": {
+        "incident_id": "guid",
+        "title": "title",
+        "alert_level": "category",
+        "published_at": "pubDate",
+        "details": "description"
+      },
+      "known_limitations": [
+        "Live RFS GeoJSON feed uses GeometryCollection (combining incident Point + burn perimeter Polygons) and Point geometries; GeometryCollections are unpacked/normalized so valid vector geometry is preserved in GeoParquet."
+      ],
+      "operational_suitability": "Suitable for demonstrating live just-in-time feed ingestion alongside versioned stored snapshots (not an operational warning tool).",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261108T222823Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-08T22:28:23Z"
+    },
+    "nsw_emergency_management_restricted": {
+      "dataset_key": "nsw_emergency_management_restricted",
+      "title": "NSW Spatial Services \u2014 Emergency Management Restricted Service (Failed Source Contract Test)",
+      "category": "live_operational_feed",
+      "theme": "Emergency Management (Restricted)",
+      "scale": "state",
+      "jurisdiction": "NSW",
+      "provider": "NSW Spatial Services (DCS)",
+      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
+      "service_type": "arcgis_featureserver",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Emergency_Management_Category/FeatureServer/0",
+      "layer_id": 0,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 State of New South Wales (Spatial Services, DCS)",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": null,
+      "source_vintage": "RESTRICTED-2026",
+      "refresh_policy": "just_in_time_live",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Point",
+      "primary_key": "OBJECTID",
+      "required_fields": [
+        "OBJECTID"
+      ],
+      "schema_mapping": {},
+      "known_limitations": [
+        "Retained in catalogue to demonstrate anti-mock Level 1 Source Contract validation on an endpoint returning HTTP 200 with embedded ArcGIS error 499 ('Token Required'). Never substituted with mock data."
+      ],
+      "operational_suitability": "Unusable without NSW Spatial Services portal token; explicitly surfaced as FAIL in QA reports per Acceptance Test #17.",
+      "default_bbox": null,
+      "qa_status": "FAIL",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": "2026-11-08T22:28:18Z"
+    }
+  }
+}

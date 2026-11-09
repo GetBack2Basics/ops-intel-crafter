@@ -1,0 +1,357 @@
+/*
+  docs/style.css
+  Google Stitch web_dashboard stylesheet harmonized with NSW Transit Crafter.
+*/
+
+:root {
+  --primary: #001026;
+  --primary-container: #0b2545;
+  --secondary: #006973;
+  --secondary-container: #81f0ff;
+  --surface: #faf8ff;
+  --surface-container-low: #f2f3ff;
+  --surface-container: #eaedff;
+  --surface-container-high: #e2e7ff;
+  --surface-container-lowest: #ffffff;
+  --on-surface: #131b2e;
+  --on-surface-variant: #44474e;
+  --on-tertiary-container: #d47300;
+  --text-dim: #74777f;
+
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-sans); background: var(--surface); color: var(--on-surface); }
+section[id^="panel-"] { scroll-margin-top: 8rem; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #c4c6cf; border-radius: 9999px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- Shell: sidebar nav ---------- */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--on-surface-variant);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.nav-link:hover { background: var(--surface-container-high); color: var(--on-surface); }
+.nav-link.active {
+  background: var(--primary-container);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Shell: header workflow pills ---------- */
+.step-pill {
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: var(--surface-container);
+  color: var(--on-surface);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.step-pill:hover { background: var(--surface-container-high); }
+.step-pill.active { background: var(--primary-container); color: #ffffff; }
+
+.ribbon-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--surface-container);
+  color: var(--on-surface);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ---------- Panels ---------- */
+.panel-card {
+  background: var(--surface-container-lowest);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.step-tag {
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.25rem;
+  background: var(--primary);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tile-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+}
+
+.context-tile,
+.kpi-tile {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: var(--surface-container-low);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.kpi-tile { gap: 0.125rem; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  padding: 0 1.25rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: var(--secondary);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  white-space: nowrap;
+}
+.btn:hover { background: #00575f; }
+.btn:disabled { opacity: 0.65; cursor: progress; }
+.btn-primary { background: var(--primary); }
+.btn-primary:hover { background: var(--primary-container); }
+.btn-secondary { background: var(--surface-container); color: var(--on-surface); box-shadow: none; }
+.btn-secondary:hover { background: var(--surface-container-high); }
+
+.btn-pulse {
+  animation: pulse-glow 1.8s infinite;
+}
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(0, 105, 115, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 105, 115, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 105, 115, 0); }
+}
+
+/* ---------- Chips ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  background: var(--surface-container);
+  color: var(--on-surface);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.chip:hover { background: var(--surface-container-high); }
+.chip-featured { background: var(--primary); color: #ffffff; }
+.chip-featured:hover { background: var(--primary-container); }
+
+/* ---------- Badges ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  background: var(--surface-container);
+  color: var(--on-surface-variant);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.badge-accent { background: rgba(0, 105, 115, 0.1); color: var(--secondary); }
+
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.badge-tag.optimal { background: rgba(0, 105, 115, 0.12); color: var(--secondary); }
+.badge-tag.tight { background: rgba(212, 115, 0, 0.14); color: #a35700; }
+.badge-tag.long { background: rgba(186, 26, 26, 0.1); color: #ba1a1a; }
+
+/* ---------- Clarification Options ---------- */
+.options-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+}
+.option-btn {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border: 2px solid transparent;
+  border-radius: 0.75rem;
+  background: var(--surface-container-lowest);
+  color: var(--on-surface);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.45;
+  cursor: pointer;
+  opacity: 0.88;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s ease;
+}
+.option-btn:hover { opacity: 1; box-shadow: 0 4px 12px rgba(0, 16, 38, 0.08); }
+.option-btn.selected {
+  border-color: #006973 !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 105, 115, 0.14) !important;
+  opacity: 1 !important;
+}
+
+/* ---------- SQL editor ---------- */
+.sql-editor {
+  width: 100%;
+  min-height: 280px;
+  flex: 1;
+  padding: 1rem;
+  background: transparent;
+  color: #e2e8f0;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.65;
+  tab-size: 2;
+}
+.sql-editor::placeholder { color: #778db2; }
+
+/* ---------- Inspector banner (dark card) ---------- */
+.inspector-item {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--primary-container);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.inspector-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #778db2;
+}
+.inspector-val { font-size: 13px; font-weight: 600; color: #ffffff; font-family: var(--font-mono); }
+
+.infra-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(129, 240, 255, 0.2);
+  color: #81f0ff;
+}
+
+/* ---------- Data tables ---------- */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  background: var(--surface-container-low);
+}
+.data-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; line-height: 20px; }
+.data-table thead { background: var(--surface-container); }
+.data-table th {
+  padding: 0.75rem 1rem;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  white-space: nowrap;
+}
+.data-table td { padding: 0.75rem 1rem; color: var(--on-surface); border-top: 1px solid var(--surface-container); vertical-align: middle; }
+.data-table tbody tr { transition: background-color 0.12s ease; }
+.data-table tbody tr:hover { background: rgba(234, 237, 255, 0.6); }
+.data-table code { font-family: var(--font-mono); font-size: 12px; color: var(--on-surface-variant); }
+.data-table .empty-cell { text-align: center; color: var(--text-dim); padding: 2.25rem; }
+
+/* ---------- Scenario cards (Step 6) ---------- */
+.scenario-step-card {
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--surface-container-low);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.1rem;
+  transition: box-shadow 0.15s ease;
+}
+.scenario-step-card:hover { box-shadow: 0 4px 12px rgba(0, 16, 38, 0.08); }
+.scenario-step-top { display: flex; flex-direction: column; gap: 0.65rem; }
+.scenario-step-meta { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.scenario-step-badge {
+  padding: 0.25rem 0.625rem;
+  border-radius: 0.25rem;
+  background: var(--surface-container);
+  color: var(--on-surface);
+  font-size: 11px;
+  font-weight: 700;
+}
+.scenario-step-tag {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  background: rgba(0, 105, 115, 0.1);
+  color: var(--secondary);
+  font-size: 11px;
+  font-weight: 700;
+}
+.scenario-step-title { font-family: var(--font-heading); font-size: 17px; line-height: 23px; font-weight: 600; color: var(--on-surface); }
+.scenario-step-desc { font-size: 13px; line-height: 1.55; color: var(--on-surface-variant); }
+.scenario-step-btn {
+  width: 100%;
+  height: 2.4rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: var(--surface-container);
+  color: var(--on-surface);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.scenario-step-card:hover .scenario-step-btn { background: var(--primary); color: #ffffff; }
+

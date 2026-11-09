@@ -1,0 +1,3914 @@
+{
+  "report_id": "qa-report-20261109T014538Z",
+  "generated_at_utc": "2026-11-09T01:45:38Z",
+  "project_name": "operational_intelligence_crafter",
+  "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
+  "total_datasets": 11,
+  "status_counts": {
+    "PASS": 9,
+    "WARNING": 1,
+    "FAIL": 1,
+    "NOT TESTED": 0,
+    "NOT APPLICABLE": 0
+  },
+  "coverage_by_scale": {
+    "national": 5,
+    "regional": 1,
+    "state": 4,
+    "local": 1
+  },
+  "coverage_by_theme": {
+    "Critical Infrastructure": 3,
+    "Hazards": 1,
+    "NExT Administrative & Statistical": 1,
+    "NExT Population & Geography": 1,
+    "Emergency Management (Restricted)": 1,
+    "Emergency & Health Facilities": 1,
+    "Administrative Boundaries": 1,
+    "Live Hazard Feeds": 1,
+    "Flood & Hydrography": 1
+  },
+  "total_features_stored": 2829,
+  "total_bytes_stored": 9594288,
+  "datasets": [
+    {
+      "dataset_key": "ga_electricity_substations",
+      "title": "National Electricity Infrastructure — Power Substations",
+      "provider": "Geoscience Australia",
+      "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+      "category": "static_authoritative",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "theme": "Critical Infrastructure",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/0",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© Commonwealth of Australia (Geoscience Australia) — Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2024-06-01",
+      "source_vintage": "2024-GA-NEI",
+      "retrieval_timestamp_utc": "2026-11-08T22:28:00Z",
+      "retrieval_id": "20261108T222800Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "Point",
+      "feature_count": 28,
+      "bbox": [
+        151.327666,
+        -33.188847,
+        152.126391,
+        -32.59514
+      ],
+      "file_size_bytes": 27323,
+      "sha256": "e8f2c1f83668abe338a5127b48a36605df8f1a890fde73e6c5f6b3cdf22a2aa9",
+      "gcs_generation": "1794188732676114",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T222800Z/part-00000.parquet",
+      "local_parquet_path": "data/lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T222800Z/part-00000.parquet",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_electricity_substations/20261108T222800Z/source_payload.json",
+      "raw_payload_sha256": "e38faf6266cf8dc2e7369d7f0de6d317f5946dd626675b6eecfd4dd9c3b963c3",
+      "preview_geojson": {
+        "preview_geojson_path": "data/ga_electricity_substations.geojson",
+        "preview_feature_count": 28,
+        "total_feature_count": 28
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "PASS",
+        "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/0",
+        "layer_name": "Substations",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 285.99,
+        "max_record_count": 2000,
+        "source_feature_count": 28,
+        "query_bbox": [
+          151.1,
+          -33.2,
+          152.2,
+          -32.4
+        ],
+        "available_fields": [
+          "OBJECTID",
+          "FEATURE_TYPE",
+          "FEATURE_SUBTYPE",
+          "FEATURE_NAME",
+          "FEATURE_DESCRIPTION",
+          "STATUS",
+          "VOLTAGE_KV",
+          "LOCALITY",
+          "STATE",
+          "FEATURE_SOURCE",
+          "FEATURE_SOURCE_DATE",
+          "ATTRIBUTE_SOURCE",
+          "ATTRIBUTE_SOURCE_DATE",
+          "SPATIAL_CONFIDENCE",
+          "LATITUDE",
+          "LONGITUDE",
+          "CREATED_DATE",
+          "LAST_EDITED_ON",
+          "GLOBALID",
+          "SHAPE"
+        ],
+        "error_message": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (173.9 ms)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS Layer JSON metadata returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "Layer 'Substations' reports esriGeometryPoint (canonical: Point, expected: Point)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 4 required fields verified (OBJECTID, FEATURE_NAME, VOLTAGE_KV, STATE)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Source reports 28 features in query scope (maxRecordCount=2000)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_electricity_substations\\2024-GA-NEI\\20261108T222800Z\\part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T222800Z/part-00000.parquet",
+        "gcs_generation": "1794188732676114",
+        "file_size_bytes": 27323,
+        "sha256": "e8f2c1f83668abe338a5127b48a36605df8f1a890fde73e6c5f6b3cdf22a2aa9",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "Point"
+        ],
+        "feature_count": 28,
+        "bbox": [
+          151.327666,
+          -33.188847,
+          152.126391,
+          -32.59514
+        ],
+        "geometry_validation": {
+          "total_rows": 28,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 28,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "objectid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "Point"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "objectid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "feature_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_subtype",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_description",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "status",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "voltage_kv",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "locality",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "state",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_source",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_source_date",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "attribute_source",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "attribute_source_date",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "spatial_confidence",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "latitude",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "longitude",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "created_date",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "last_edited_on",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "globalid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "substation_id",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 28 rows in 1 row group(s) (27323 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['Point']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [151.32767, -33.18885, 152.12639, -32.59514] within Australian geographic envelope"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'objectid': 0 duplicates across 28 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=e8f2c1f83668abe3... | generation=1794188732676114"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 28,
+        "stored_feature_count": 28,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "Spatial envelope filter applied: bbox=[151.1, -33.2, 152.2, -32.4] (WGS84/GDA2020)",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 28 stored / 28 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 4 required native fields and 5 mapped aliases (29 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Stored extent [151.327666, -33.188847, 152.126391, -32.59514] overlaps query envelope [151.1, -33.2, 152.2, -32.4]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Substation capacity and operational status reflect published national foundation snapshots, not real-time SCADA telemetry."
+      ],
+      "refresh_policy": "quarterly_snapshot",
+      "operational_suitability": "Suitable for national and regional infrastructure exposure and grid dependency screening.",
+      "telemetry": {
+        "dataset_key": "ga_electricity_substations",
+        "retrieval_timestamp_utc": "2026-11-08T22:28:00Z",
+        "http_requests_count": 3,
+        "source_download_ms": 225.99,
+        "normalization_ms": 0.0,
+        "parquet_write_ms": 194.62,
+        "validation_ms": 336.76,
+        "total_elapsed_ms": 1102.37,
+        "bytes_downloaded": 21657,
+        "bytes_written": 27323,
+        "notes": []
+      }
+    },
+    {
+      "dataset_key": "ga_electricity_transmission_lines",
+      "title": "National Electricity Infrastructure — High-Voltage Transmission Lines",
+      "provider": "Geoscience Australia",
+      "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+      "category": "static_authoritative",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "theme": "Critical Infrastructure",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© Commonwealth of Australia (Geoscience Australia) — Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2024-06-01",
+      "source_vintage": "2024-GA-NEI",
+      "retrieval_timestamp_utc": "2026-11-08T22:33:54Z",
+      "retrieval_id": "20261108T223354Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "LineString",
+      "feature_count": 131,
+      "bbox": [
+        149.8625,
+        -33.900638,
+        152.565368,
+        -31.145403
+      ],
+      "file_size_bytes": 291586,
+      "sha256": "f8734f1c88ed8a3ae66fe4563762502fa12c6af9811aa3cdae2bf0ddeaa1c723",
+      "gcs_generation": "1794188733033970",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261108T223354Z/part-00000.parquet",
+      "local_parquet_path": "data/lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261108T223354Z/part-00000.parquet",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_electricity_transmission_lines/20261108T223354Z/source_payload.json",
+      "raw_payload_sha256": "d5d1b0b7f80c2a9d600064b82e7853ed48bd33c758e8687950651ac4b50ef5e6",
+      "preview_geojson": {
+        "preview_geojson_path": "data/ga_electricity_transmission_lines.geojson",
+        "preview_feature_count": 131,
+        "total_feature_count": 131
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "PASS",
+        "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2",
+        "layer_name": "Power Lines",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 231.19,
+        "max_record_count": 2000,
+        "source_feature_count": 131,
+        "query_bbox": [
+          150.5,
+          -33.6,
+          152.5,
+          -32.0
+        ],
+        "available_fields": [
+          "OBJECTID",
+          "FEATURE_TYPE",
+          "FEATURE_SUBTYPE",
+          "FEATURE_NAME",
+          "FEATURE_DESCRIPTION",
+          "STATUS",
+          "CAPACITY_KV",
+          "STATE",
+          "FEATURE_SOURCE",
+          "FEATURE_SOURCE_DATE",
+          "ATTRIBUTE_SOURCE",
+          "ATTRIBUTE_SOURCE_DATE",
+          "SPATIAL_CONFIDENCE",
+          "SUPPLIED_FEATURE_EDITS",
+          "CREATED_DATE",
+          "LAST_EDITED_ON",
+          "GLOBALID",
+          "SHAPE",
+          "st_length(shape)"
+        ],
+        "error_message": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (94.05 ms)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS Layer JSON metadata returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "Layer 'Power Lines' reports esriGeometryPolyline (canonical: LineString, expected: LineString)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 4 required fields verified (OBJECTID, FEATURE_NAME, CAPACITY_KV, STATE)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Source reports 131 features in query scope (maxRecordCount=2000)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_electricity_transmission_lines\\2024-GA-NEI\\20261108T223354Z\\part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261108T223354Z/part-00000.parquet",
+        "gcs_generation": "1794188733033970",
+        "file_size_bytes": 291586,
+        "sha256": "f8734f1c88ed8a3ae66fe4563762502fa12c6af9811aa3cdae2bf0ddeaa1c723",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "LineString"
+        ],
+        "feature_count": 131,
+        "bbox": [
+          149.8625,
+          -33.900638,
+          152.565368,
+          -31.145403
+        ],
+        "geometry_validation": {
+          "total_rows": 131,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 131,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "objectid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "LineString"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "objectid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "feature_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_subtype",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_description",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "status",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "capacity_kv",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "state",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_source",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_source_date",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "attribute_source",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "attribute_source_date",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "spatial_confidence",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "supplied_feature_edits",
+            "type": "null",
+            "nullable": true
+          },
+          {
+            "name": "created_date",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "last_edited_on",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "globalid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "st_length(shape)",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "line_id",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "class",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 131 rows in 1 row group(s) (291586 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['LineString']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [149.8625, -33.90064, 152.56537, -31.1454] within Australian geographic envelope"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'objectid': 0 duplicates across 131 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=f8734f1c88ed8a3a... | generation=1794188733033970"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 131,
+        "stored_feature_count": 131,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "Spatial envelope filter applied: bbox=[150.5, -33.6, 152.5, -32.0] (WGS84/GDA2020)",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 131 stored / 131 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 4 required native fields and 5 mapped aliases (29 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Stored extent [149.8625, -33.900638, 152.565368, -31.145403] overlaps query envelope [150.5, -33.6, 152.5, -32.0]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Contains 16,139 national transmission segments; Hunter/Newcastle regional slice ingested by default when default_bbox is applied."
+      ],
+      "refresh_policy": "quarterly_snapshot",
+      "operational_suitability": "Suitable for transmission corridor bushfire, flood, and wind exposure assessment.",
+      "telemetry": {
+        "dataset_key": "ga_electricity_transmission_lines",
+        "retrieval_timestamp_utc": "2026-11-08T22:33:54Z",
+        "http_requests_count": 3,
+        "source_download_ms": 399.44,
+        "normalization_ms": 0.0,
+        "parquet_write_ms": 121.55,
+        "validation_ms": 373.46,
+        "total_elapsed_ms": 1269.66,
+        "bytes_downloaded": 723253,
+        "bytes_written": 291586,
+        "notes": []
+      }
+    },
+    {
+      "dataset_key": "ga_major_power_stations",
+      "title": "National Electricity Infrastructure — Major Power Stations",
+      "provider": "Geoscience Australia",
+      "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+      "category": "static_authoritative",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "theme": "Critical Infrastructure",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/1",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© Commonwealth of Australia (Geoscience Australia) — Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2024-06-01",
+      "source_vintage": "2024-GA-NEI",
+      "retrieval_timestamp_utc": "2026-11-08T22:31:44Z",
+      "retrieval_id": "20261108T223144Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "Point",
+      "feature_count": 430,
+      "bbox": [
+        113.675386,
+        -42.740505,
+        153.434116,
+        -12.188925
+      ],
+      "file_size_bytes": 108601,
+      "sha256": "519451ea6818d4ed48006b39cea9c764cc2a00d05c59916b2d028851e8429910",
+      "gcs_generation": "1794188733167283",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261108T223144Z/part-00000.parquet",
+      "local_parquet_path": "data/lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261108T223144Z/part-00000.parquet",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_major_power_stations/20261108T223144Z/source_payload.json",
+      "raw_payload_sha256": "0c669543a4e622bee77f8196a6fd3ba3fee7f8aa47b687f804f83970892523ca",
+      "preview_geojson": {
+        "preview_geojson_path": "data/ga_major_power_stations.geojson",
+        "preview_feature_count": 430,
+        "total_feature_count": 430
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "PASS",
+        "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/1",
+        "layer_name": "Major Power Stations",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 599.7,
+        "max_record_count": 2000,
+        "source_feature_count": 430,
+        "query_bbox": null,
+        "available_fields": [
+          "objectid",
+          "feature_type",
+          "feature_subtype",
+          "feature_name",
+          "feature_description",
+          "status",
+          "owner",
+          "primary_fuel_type",
+          "primary_fuel_type_descriptor",
+          "technology_type",
+          "generation_capacity_mw",
+          "number_of_units",
+          "locality",
+          "state",
+          "feature_source",
+          "feature_source_date",
+          "attribute_source",
+          "attribute_source_date",
+          "spatial_confidence",
+          "latitude",
+          "longitude",
+          "created_date",
+          "last_edited_on",
+          "globalid",
+          "shape"
+        ],
+        "error_message": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (345.23 ms)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS Layer JSON metadata returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "Layer 'Major Power Stations' reports esriGeometryPoint (canonical: Point, expected: Point)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 4 required fields verified (objectid, feature_name, primary_fuel_type, generation_capacity_mw)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Source reports 430 features in query scope (maxRecordCount=2000)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_major_power_stations\\2024-GA-NEI\\20261108T223144Z\\part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261108T223144Z/part-00000.parquet",
+        "gcs_generation": "1794188733167283",
+        "file_size_bytes": 108601,
+        "sha256": "519451ea6818d4ed48006b39cea9c764cc2a00d05c59916b2d028851e8429910",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "Point"
+        ],
+        "feature_count": 430,
+        "bbox": [
+          113.675386,
+          -42.740505,
+          153.434116,
+          -12.188925
+        ],
+        "geometry_validation": {
+          "total_rows": 430,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 430,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "objectid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "Point"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "objectid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "feature_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_subtype",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_description",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "status",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "owner",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "primary_fuel_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "primary_fuel_type_descriptor",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "technology_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "generation_capacity_mw",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "number_of_units",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "locality",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "state",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_source",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_source_date",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "attribute_source",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "attribute_source_date",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "spatial_confidence",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "latitude",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "longitude",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "created_date",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "last_edited_on",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "globalid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "station_id",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "fuel_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "capacity_mw",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 430 rows in 1 row group(s) (108601 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['Point']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [113.67539, -42.74051, 153.43412, -12.18892] within Australian geographic envelope"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'objectid': 0 duplicates across 430 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=519451ea6818d4ed... | generation=1794188733167283"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 430,
+        "stored_feature_count": 430,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 430 stored / 430 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 4 required native fields and 5 mapped aliases (36 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Full dataset extent recorded: [113.675386, -42.740505, 153.434116, -12.188925]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Field names in Layer 1 are lowercase (objectid, feature_name) unlike Layer 0/2 uppercase.",
+        "Contains 379 major power generation facilities across Australia."
+      ],
+      "refresh_policy": "quarterly_snapshot",
+      "operational_suitability": "Suitable for national and state power generation hazard exposure analysis.",
+      "telemetry": {
+        "dataset_key": "ga_major_power_stations",
+        "retrieval_timestamp_utc": "2026-11-08T22:31:44Z",
+        "http_requests_count": 3,
+        "source_download_ms": 680.75,
+        "normalization_ms": 0.0,
+        "parquet_write_ms": 156.01,
+        "validation_ms": 698.5999999999999,
+        "total_elapsed_ms": 1918.46,
+        "bytes_downloaded": 399741,
+        "bytes_written": 108601,
+        "notes": []
+      }
+    },
+    {
+      "dataset_key": "ga_seismic_hazard_pga_10pct",
+      "title": "National Seismic Hazard Assessment 2018 — PGA Contours (10% in 50 Years)",
+      "provider": "Geoscience Australia",
+      "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+      "category": "static_authoritative",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "theme": "Hazards",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/15",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© Commonwealth of Australia (Geoscience Australia) NSHA 2018 — CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2018-10-01",
+      "source_vintage": "NSHA-2018",
+      "retrieval_timestamp_utc": "2026-11-08T22:28:02Z",
+      "retrieval_id": "20261108T222802Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "LineString",
+      "feature_count": 100,
+      "bbox": [
+        109.238477,
+        -45.896,
+        156.5,
+        -8.961483
+      ],
+      "file_size_bytes": 224737,
+      "sha256": "18a3d1f24d4b7e0409cbfb5bb0b335e365a7e7b5b91cf5c5c2cc5d55672826e2",
+      "gcs_generation": "1794188733498327",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261108T222802Z/part-00000.parquet",
+      "local_parquet_path": "data/lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261108T222802Z/part-00000.parquet",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_seismic_hazard_pga_10pct/20261108T222802Z/source_payload.json",
+      "raw_payload_sha256": "aaa965c27fa991069dedb91717e26f142ad9d9e943f87af52cdb22e3bab11ec3",
+      "preview_geojson": {
+        "preview_geojson_path": "data/ga_seismic_hazard_pga_10pct.geojson",
+        "preview_feature_count": 100,
+        "total_feature_count": 100
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "PASS",
+        "endpoint": "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/15",
+        "layer_name": "Peak_Ground_Acceleration_contours_10pct",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 9295.65,
+        "max_record_count": 2000,
+        "source_feature_count": 100,
+        "query_bbox": null,
+        "available_fields": [
+          "objectid",
+          "shape",
+          "levels",
+          "shape_Length"
+        ],
+        "error_message": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (78.63 ms)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS Layer JSON metadata returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "Layer 'Peak_Ground_Acceleration_contours_10pct' reports esriGeometryPolyline (canonical: LineString, expected: LineString)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 2 required fields verified (objectid, levels)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Source reports 100 features in query scope (maxRecordCount=2000)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_seismic_hazard_pga_10pct\\NSHA-2018\\20261108T222802Z\\part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261108T222802Z/part-00000.parquet",
+        "gcs_generation": "1794188733498327",
+        "file_size_bytes": 224737,
+        "sha256": "18a3d1f24d4b7e0409cbfb5bb0b335e365a7e7b5b91cf5c5c2cc5d55672826e2",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "LineString"
+        ],
+        "feature_count": 100,
+        "bbox": [
+          109.238477,
+          -45.896,
+          156.5,
+          -8.961483
+        ],
+        "geometry_validation": {
+          "total_rows": 100,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 100,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "objectid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "LineString"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "objectid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "levels",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "shape_Length",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "contour_id",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "pga_level_g",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 100 rows in 1 row group(s) (224737 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['LineString']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [109.23848, -45.896, 156.5, -8.96148] within Australian geographic envelope"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'objectid': 0 duplicates across 100 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=18a3d1f24d4b7e04... | generation=1794188733498327"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 100,
+        "stored_feature_count": 100,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "CRS reprojection from EPSG:4283 to canonical EPSG:7844",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 100 stored / 100 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 2 required native fields and 2 mapped aliases (13 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Full dataset extent recorded: [109.238477, -45.896, 156.5, -8.961483]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Layer 15 provides Peak Ground Acceleration (PGA) 10% in 50-year exceedance probability contours (100 national contour features); reprojected from EPSG:4283 to EPSG:7844."
+      ],
+      "refresh_policy": "static_release",
+      "operational_suitability": "Suitable for national seismic hazard screening and multi-hazard critical infrastructure overlay.",
+      "telemetry": {
+        "dataset_key": "ga_seismic_hazard_pga_10pct",
+        "retrieval_timestamp_utc": "2026-11-08T22:28:02Z",
+        "http_requests_count": 3,
+        "source_download_ms": 724.76,
+        "normalization_ms": 0.0,
+        "parquet_write_ms": 24.72,
+        "validation_ms": 9343.369999999999,
+        "total_elapsed_ms": 10181.05,
+        "bytes_downloaded": 658178,
+        "bytes_written": 224737,
+        "notes": []
+      }
+    },
+    {
+      "dataset_key": "next_lga_boundaries_asgs2025",
+      "title": "ABS ASGS Edition 3 (2025) — Local Government Areas (NExT Administrative Baseline)",
+      "provider": "Australian Bureau of Statistics",
+      "source_agency": "Australian Bureau of Statistics (ABS)",
+      "category": "periodically_refreshed_authoritative",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "theme": "NExT Administrative & Statistical",
+      "endpoint": "https://geo.abs.gov.au/arcgis/rest/services/ASGS2025/LGA/MapServer/0",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© Australian Bureau of Statistics (ASGS 2025) — CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2025-07-01",
+      "source_vintage": "ASGS-2025",
+      "retrieval_timestamp_utc": "2026-11-08T22:28:13Z",
+      "retrieval_id": "20261108T222813Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "MultiPolygon, Polygon",
+      "feature_count": 13,
+      "bbox": [
+        150.226446,
+        -33.774413,
+        152.805748,
+        -31.442392
+      ],
+      "file_size_bytes": 2571932,
+      "sha256": "10c0c56695f09ff836ad6e7059032bb81a69b334efb6ceaa5d1f4bce40042021",
+      "gcs_generation": "1794188734772611",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261108T222813Z/part-00000.parquet",
+      "local_parquet_path": "data/lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261108T222813Z/part-00000.parquet",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/next_lga_boundaries_asgs2025/20261108T222813Z/source_payload.json",
+      "raw_payload_sha256": "a4d6b05c2068cde4dbb9c07be1663cc075b12a5ec40ea80e3bec1b94b4ab5e62",
+      "preview_geojson": {
+        "preview_geojson_path": "data/next_lga_boundaries_asgs2025.geojson",
+        "preview_feature_count": 13,
+        "total_feature_count": 13
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "PASS",
+        "endpoint": "https://geo.abs.gov.au/arcgis/rest/services/ASGS2025/LGA/MapServer/0",
+        "layer_name": "LGA",
+        "http_status": 200,
+        "content_type": "application/json; charset=UTF-8",
+        "latency_ms": 438.13,
+        "max_record_count": 2000,
+        "source_feature_count": 13,
+        "query_bbox": [
+          150.8,
+          -33.4,
+          152.3,
+          -32.4
+        ],
+        "available_fields": [
+          "OBJECTID",
+          "SHAPE",
+          "LGA_CODE_2025",
+          "LGA_NAME_2025",
+          "STATE_CODE_2021",
+          "STATE_NAME_2021",
+          "AUS_CODE_2021",
+          "AUS_NAME_2021",
+          "AREA_ALBERS_SQKM",
+          "SHAPE_Length",
+          "SHAPE_Area"
+        ],
+        "error_message": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (258.95 ms)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS Layer JSON metadata returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "Layer 'LGA' reports esriGeometryPolygon (canonical: Polygon, expected: Polygon)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 5 required fields verified (OBJECTID, LGA_CODE_2025, LGA_NAME_2025, STATE_NAME_2021, AREA_ALBERS_SQKM)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Source reports 13 features in query scope (maxRecordCount=2000)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\next_lga_boundaries_asgs2025\\ASGS-2025\\20261108T222813Z\\part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261108T222813Z/part-00000.parquet",
+        "gcs_generation": "1794188734772611",
+        "file_size_bytes": 2571932,
+        "sha256": "10c0c56695f09ff836ad6e7059032bb81a69b334efb6ceaa5d1f4bce40042021",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "MultiPolygon",
+          "Polygon"
+        ],
+        "feature_count": 13,
+        "bbox": [
+          150.226446,
+          -33.774413,
+          152.805748,
+          -31.442392
+        ],
+        "geometry_validation": {
+          "total_rows": 13,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 13,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "OBJECTID",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "MultiPolygon",
+            "Polygon"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "OBJECTID",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "LGA_CODE_2025",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "LGA_NAME_2025",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "STATE_CODE_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "STATE_NAME_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "AUS_CODE_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "AUS_NAME_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "AREA_ALBERS_SQKM",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "SHAPE_Length",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "SHAPE_Area",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "lga_code",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "lga_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "state_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "area_sqkm",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 13 rows in 1 row group(s) (2571932 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['MultiPolygon', 'Polygon']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [150.22645, -33.77441, 152.80575, -31.44239] within Australian geographic envelope"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'OBJECTID': 0 duplicates across 13 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=10c0c56695f09ff8... | generation=1794188734772611"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 13,
+        "stored_feature_count": 13,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "Spatial envelope filter applied: bbox=[150.8, -33.4, 152.3, -32.4] (WGS84/GDA2020)",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 13 stored / 13 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 5 required native fields and 4 mapped aliases (22 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Stored extent [150.226446, -33.774413, 152.805748, -31.442392] overlaps query envelope [150.8, -33.4, 152.3, -32.4]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Filtered to Hunter/Newcastle/Central Coast operational bounding box by default unless full national ingestion is requested."
+      ],
+      "refresh_policy": "annual_release",
+      "operational_suitability": "Authoritative administrative boundary baseline for emergency management LGA aggregation.",
+      "telemetry": {
+        "dataset_key": "next_lga_boundaries_asgs2025",
+        "retrieval_timestamp_utc": "2026-11-08T22:28:13Z",
+        "http_requests_count": 3,
+        "source_download_ms": 3263.18,
+        "normalization_ms": 0.0,
+        "parquet_write_ms": 58.61,
+        "validation_ms": 531.25,
+        "total_elapsed_ms": 4553.37,
+        "bytes_downloaded": 6675130,
+        "bytes_written": 2571932,
+        "notes": []
+      }
+    },
+    {
+      "dataset_key": "next_sa2_boundaries_asgs2021",
+      "title": "ABS ASGS 2021 — Statistical Areas Level 2 (SA2 Population & Vulnerability Baseline)",
+      "provider": "Australian Bureau of Statistics",
+      "source_agency": "Australian Bureau of Statistics (ABS)",
+      "category": "periodically_refreshed_authoritative",
+      "scale": "regional",
+      "jurisdiction": "NATIONAL",
+      "theme": "NExT Population & Geography",
+      "endpoint": "https://geo.abs.gov.au/arcgis/rest/services/ASGS2021/SA2/MapServer/0",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© Australian Bureau of Statistics (ASGS 2021) — CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2021-07-20",
+      "source_vintage": "ASGS-2021",
+      "retrieval_timestamp_utc": "2026-11-08T22:28:17Z",
+      "retrieval_id": "20261108T222817Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "MultiPolygon, Polygon",
+      "feature_count": 54,
+      "bbox": [
+        150.548311,
+        -33.297253,
+        152.510882,
+        -32.042472
+      ],
+      "file_size_bytes": 1791042,
+      "sha256": "2802ebddc543d355fee9341038433dd11de6504f4559795e226ba9f8f16d1673",
+      "gcs_generation": "1794188735733083",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261108T222817Z/part-00000.parquet",
+      "local_parquet_path": "data/lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261108T222817Z/part-00000.parquet",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/next_sa2_boundaries_asgs2021/20261108T222817Z/source_payload.json",
+      "raw_payload_sha256": "b00b14852d97626acfff682aae850aa7c1ea9b921b1ae6e389ab09646750d70b",
+      "preview_geojson": {
+        "preview_geojson_path": "data/next_sa2_boundaries_asgs2021.geojson",
+        "preview_feature_count": 54,
+        "total_feature_count": 54
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "PASS",
+        "endpoint": "https://geo.abs.gov.au/arcgis/rest/services/ASGS2021/SA2/MapServer/0",
+        "layer_name": "SA2",
+        "http_status": 200,
+        "content_type": "application/json; charset=UTF-8",
+        "latency_ms": 95.56,
+        "max_record_count": 2000,
+        "source_feature_count": 54,
+        "query_bbox": [
+          151.3,
+          -33.2,
+          152.0,
+          -32.6
+        ],
+        "available_fields": [
+          "objectid",
+          "shape",
+          "sa2_code_2021",
+          "sa2_name_2021",
+          "change_flag_2021",
+          "change_label_2021",
+          "sa3_code_2021",
+          "sa3_name_2021",
+          "sa4_code_2021",
+          "sa4_name_2021",
+          "gccsa_code_2021",
+          "gccsa_name_2021",
+          "state_code_2021",
+          "state_name_2021",
+          "aus_code_2021",
+          "aus_name_2021",
+          "area_albers_sqkm",
+          "asgs_loci_uri_2021",
+          "st_length(shape)",
+          "st_area(shape)"
+        ],
+        "error_message": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (52.92 ms)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS Layer JSON metadata returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "Layer 'SA2' reports esriGeometryPolygon (canonical: Polygon, expected: Polygon)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 4 required fields verified (objectid, sa2_code_2021, sa2_name_2021, state_name_2021)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Source reports 54 features in query scope (maxRecordCount=2000)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\next_sa2_boundaries_asgs2021\\ASGS-2021\\20261108T222817Z\\part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261108T222817Z/part-00000.parquet",
+        "gcs_generation": "1794188735733083",
+        "file_size_bytes": 1791042,
+        "sha256": "2802ebddc543d355fee9341038433dd11de6504f4559795e226ba9f8f16d1673",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "MultiPolygon",
+          "Polygon"
+        ],
+        "feature_count": 54,
+        "bbox": [
+          150.548311,
+          -33.297253,
+          152.510882,
+          -32.042472
+        ],
+        "geometry_validation": {
+          "total_rows": 54,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 54,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "objectid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "MultiPolygon",
+            "Polygon"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "objectid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "sa2_code_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "sa2_name_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "change_flag_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "change_label_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "sa3_code_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "sa3_name_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "sa4_code_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "sa4_name_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "gccsa_code_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "gccsa_name_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "state_code_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "state_name_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "aus_code_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "aus_name_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "area_albers_sqkm",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "asgs_loci_uri_2021",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "st_length(shape)",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "st_area(shape)",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "sa2_code",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "sa2_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "sa3_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "state_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 54 rows in 1 row group(s) (1791042 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['MultiPolygon', 'Polygon']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [150.54831, -33.29725, 152.51088, -32.04247] within Australian geographic envelope"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'objectid': 0 duplicates across 54 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=2802ebddc543d355... | generation=1794188735733083"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 54,
+        "stored_feature_count": 54,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "Spatial envelope filter applied: bbox=[151.3, -33.2, 152.0, -32.6] (WGS84/GDA2020)",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 54 stored / 54 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 4 required native fields and 4 mapped aliases (31 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Stored extent [150.548311, -33.297253, 152.510882, -32.042472] overlaps query envelope [151.3, -33.2, 152.0, -32.6]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Statistical geography backbone for NExT population density and SEIFA vulnerability comparisons; default bbox covers Newcastle/Lake Macquarie/Lower Hunter."
+      ],
+      "refresh_policy": "census_release",
+      "operational_suitability": "Suitable for regional population exposure and Method A/B/C statistical comparison.",
+      "telemetry": {
+        "dataset_key": "next_sa2_boundaries_asgs2021",
+        "retrieval_timestamp_utc": "2026-11-08T22:28:17Z",
+        "http_requests_count": 3,
+        "source_download_ms": 560.48,
+        "normalization_ms": 0.0,
+        "parquet_write_ms": 45.7,
+        "validation_ms": 151.3,
+        "total_elapsed_ms": 1175.24,
+        "bytes_downloaded": 4625590,
+        "bytes_written": 1791042,
+        "notes": []
+      }
+    },
+    {
+      "dataset_key": "nsw_emergency_management_restricted",
+      "title": "NSW Spatial Services — Emergency Management Restricted Service (Failed Source Contract Test)",
+      "category": "live_operational_feed",
+      "scale": "state",
+      "jurisdiction": "NSW",
+      "provider": "NSW Spatial Services (DCS)",
+      "source_agency": "NSW Department of Customer Service — Spatial Services",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Emergency_Management_Category/FeatureServer/0",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© State of New South Wales (Spatial Services, DCS)",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": null,
+      "source_vintage": "RESTRICTED-2026",
+      "retrieval_timestamp_utc": "2026-11-08T22:28:18Z",
+      "retrieval_id": "20261108T222818Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "expected_geometry_type": "Point",
+      "overall_qa_status": "FAIL",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "FAIL",
+        "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Emergency_Management_Category/FeatureServer/0",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 134.96,
+        "source_feature_count": null,
+        "error_message": "Embedded service error in HTTP 200 payload (code=499): Token Required",
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (134.96 ms)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "FAIL",
+            "detail": "Embedded service error in HTTP 200 payload (code=499): Token Required"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "NOT APPLICABLE",
+        "error_message": "Skipped GeoParquet creation because Level 1 Source Contract failed: Embedded service error in HTTP 200 payload (code=499): Token Required",
+        "checks": []
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "NOT APPLICABLE",
+        "source_feature_count": null,
+        "stored_feature_count": null,
+        "reconciliation_rate_pct": null,
+        "expected_transformations": [],
+        "error_message": "Cannot reconcile: Level 1 Source Contract or Level 2 Stored Artifact failed.",
+        "checks": [
+          {
+            "check": "prerequisite_levels_valid",
+            "status": "FAIL",
+            "detail": "Level 1=FAIL, Level 2=NONE"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Retained in catalogue to demonstrate anti-mock Level 1 Source Contract validation on an endpoint returning HTTP 200 with embedded ArcGIS error 499 ('Token Required'). Never substituted with mock data."
+      ],
+      "refresh_policy": "just_in_time_live",
+      "telemetry": {
+        "dataset_key": "nsw_emergency_management_restricted",
+        "retrieval_timestamp_utc": "2026-11-08T22:28:18Z",
+        "http_requests_count": 2,
+        "source_download_ms": 0.0,
+        "normalization_ms": 0.0,
+        "parquet_write_ms": 0.0,
+        "validation_ms": 149.58,
+        "total_elapsed_ms": 149.67,
+        "bytes_downloaded": 0,
+        "bytes_written": 0,
+        "notes": []
+      }
+    },
+    {
+      "dataset_key": "nsw_foi_building_complexes",
+      "title": "NSW Features of Interest — Emergency, Health, Education & Community Facilities",
+      "provider": "NSW Spatial Services (DCS)",
+      "source_agency": "NSW Department of Customer Service — Spatial Services",
+      "category": "periodically_refreshed_authoritative",
+      "scale": "local",
+      "jurisdiction": "NSW",
+      "theme": "Emergency & Health Facilities",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© State of New South Wales (Spatial Services, DCS) — CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2026-01-01",
+      "source_vintage": "2026-NSW-FOI",
+      "retrieval_timestamp_utc": "2026-11-08T22:28:18Z",
+      "retrieval_id": "20261108T222818Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "Point",
+      "feature_count": 2000,
+      "bbox": [
+        151.350084,
+        -33.198384,
+        151.896035,
+        -32.700034
+      ],
+      "file_size_bytes": 333044,
+      "sha256": "4b483060ef7fe4d3df5323e269b95c4473b518a0cfc4974f04e4980dac8477c0",
+      "gcs_generation": "1794188736098828",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261108T222818Z/part-00000.parquet",
+      "local_parquet_path": "data/lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261108T222818Z/part-00000.parquet",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_foi_building_complexes/20261108T222818Z/source_payload.json",
+      "raw_payload_sha256": "6503c97198fdf7d74e6b1c324374a45d561dd40dd989e0a63ae754999dd2ca38",
+      "preview_geojson": {
+        "preview_geojson_path": "data/nsw_foi_building_complexes.geojson",
+        "preview_feature_count": 1500,
+        "total_feature_count": 2000
+      },
+      "overall_qa_status": "WARNING",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "PASS",
+        "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3",
+        "layer_name": "BuildingComplexPoint",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 253.48,
+        "max_record_count": 2000,
+        "source_feature_count": 2139,
+        "query_bbox": [
+          151.35,
+          -33.2,
+          151.9,
+          -32.7
+        ],
+        "available_fields": [
+          "objectid",
+          "topoid",
+          "createdate",
+          "objectmoddate",
+          "featuremoddate",
+          "classsubtype",
+          "featurereliabilitydate",
+          "attributereliabilitydate",
+          "capturesourcecode",
+          "capturemethodcode",
+          "planimetricaccuracy",
+          "verticalaccuracy",
+          "operationalstatus",
+          "generalnameoid",
+          "generalname",
+          "alternativelabel",
+          "buildingcomplextype",
+          "relevance",
+          "startdate",
+          "enddate",
+          "lastupdate",
+          "msoid",
+          "centroidid",
+          "shapeuuid",
+          "changetype",
+          "processstate",
+          "urbanity"
+        ],
+        "error_message": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (109.97 ms)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS Layer JSON metadata returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "Layer 'BuildingComplexPoint' reports esriGeometryPoint (canonical: Point, expected: Point)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 4 required fields verified (OBJECTID, generalname, classsubtype, urbanity)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Source reports 2139 features in query scope (maxRecordCount=2000)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_foi_building_complexes\\2026-NSW-FOI\\20261108T222818Z\\part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261108T222818Z/part-00000.parquet",
+        "gcs_generation": "1794188736098828",
+        "file_size_bytes": 333044,
+        "sha256": "4b483060ef7fe4d3df5323e269b95c4473b518a0cfc4974f04e4980dac8477c0",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "Point"
+        ],
+        "feature_count": 2000,
+        "bbox": [
+          151.350084,
+          -33.198384,
+          151.896035,
+          -32.700034
+        ],
+        "geometry_validation": {
+          "total_rows": 2000,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 2000,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "objectid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "Point"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "objectid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "topoid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "createdate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "objectmoddate",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "featuremoddate",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "classsubtype",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "featurereliabilitydate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "attributereliabilitydate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "capturesourcecode",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "capturemethodcode",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "planimetricaccuracy",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "verticalaccuracy",
+            "type": "null",
+            "nullable": true
+          },
+          {
+            "name": "operationalstatus",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "generalnameoid",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "generalname",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "alternativelabel",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "buildingcomplextype",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "relevance",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "startdate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "enddate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "lastupdate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "msoid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "centroidid",
+            "type": "null",
+            "nullable": true
+          },
+          {
+            "name": "shapeuuid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "changetype",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "processstate",
+            "type": "null",
+            "nullable": true
+          },
+          {
+            "name": "urbanity",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "facility_id",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "facility_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "facility_subtype",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 2000 rows in 1 row group(s) (333044 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['Point']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [151.35008, -33.19838, 151.89604, -32.70003] within Australian geographic envelope"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'objectid': 0 duplicates across 2000 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=4b483060ef7fe4d3... | generation=1794188736098828"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "WARNING",
+        "source_feature_count": 2139,
+        "stored_feature_count": 2000,
+        "reconciliation_rate_pct": 93.5,
+        "expected_transformations": [
+          "CRS reprojection from EPSG:4283 to canonical EPSG:7844",
+          "Spatial envelope filter applied: bbox=[151.35, -33.2, 151.9, -32.7] (WGS84/GDA2020)",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "WARNING",
+            "detail": "Stored 2000 vs source 2139 features (93.5%, pages_fetched=2)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 4 required native fields and 4 mapped aliases (38 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Stored extent [151.350084, -33.198384, 151.896035, -32.700034] overlaps query envelope [151.35, -33.2, 151.9, -32.7]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Includes hospitals, ambulance/fire/police stations, schools, and community complexes across NSW; filtered to Lower Hunter / Newcastle / Lake Macquarie operational corridor by default."
+      ],
+      "refresh_policy": "monthly_snapshot",
+      "operational_suitability": "Suitable for local and regional emergency facility accessibility, evacuation centre siting, and critical asset exposure.",
+      "telemetry": {
+        "dataset_key": "nsw_foi_building_complexes",
+        "retrieval_timestamp_utc": "2026-11-08T22:28:18Z",
+        "http_requests_count": 4,
+        "source_download_ms": 765.36,
+        "normalization_ms": 0.0,
+        "parquet_write_ms": 24.7,
+        "validation_ms": 294.04,
+        "total_elapsed_ms": 1160.02,
+        "bytes_downloaded": 1601616,
+        "bytes_written": 333044,
+        "notes": []
+      }
+    },
+    {
+      "dataset_key": "nsw_lga_boundaries",
+      "title": "NSW Spatial Services — Local Government Area Boundaries",
+      "provider": "NSW Spatial Services (DCS)",
+      "source_agency": "NSW Department of Customer Service — Spatial Services",
+      "category": "periodically_refreshed_authoritative",
+      "scale": "state",
+      "jurisdiction": "NSW",
+      "theme": "Administrative Boundaries",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Administrative_Boundaries_Theme/FeatureServer/8",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© State of New South Wales (Spatial Services, a business unit of the Department of Customer Service NSW) — CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2026-01-01",
+      "source_vintage": "2026-NSW-DCS",
+      "retrieval_timestamp_utc": "2026-11-08T22:28:20Z",
+      "retrieval_id": "20261108T222820Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "Polygon",
+      "feature_count": 10,
+      "bbox": [
+        150.335377,
+        -33.685546,
+        152.805215,
+        -31.442405
+      ],
+      "file_size_bytes": 2870368,
+      "sha256": "6f7bf4e1b7a474f7cc397e9c88baabb58fcc4084a7bdc4e737b5ddfd29d4d707",
+      "gcs_generation": "1794188736794181",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261108T222820Z/part-00000.parquet",
+      "local_parquet_path": "data/lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261108T222820Z/part-00000.parquet",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_lga_boundaries/20261108T222820Z/source_payload.json",
+      "raw_payload_sha256": "f241597879885933165ae363d40fd005c41d67aa36b2b2a6546e69697371feaa",
+      "preview_geojson": {
+        "preview_geojson_path": "data/nsw_lga_boundaries.geojson",
+        "preview_feature_count": 10,
+        "total_feature_count": 10
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "PASS",
+        "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Administrative_Boundaries_Theme/FeatureServer/8",
+        "layer_name": "LocalGovernmentArea",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 233.82,
+        "max_record_count": 2000,
+        "source_feature_count": 10,
+        "query_bbox": [
+          151.1,
+          -33.2,
+          152.2,
+          -32.5
+        ],
+        "available_fields": [
+          "rid",
+          "cadid",
+          "createdate",
+          "modifieddate",
+          "lganame",
+          "councilname",
+          "abscode",
+          "ltocode",
+          "vgcode",
+          "wbcode",
+          "startdate",
+          "enddate",
+          "lastupdate",
+          "msoid",
+          "centroidid",
+          "shapeuuid",
+          "changetype",
+          "processstate",
+          "urbanity",
+          "Shape__Length",
+          "Shape__Area"
+        ],
+        "error_message": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (92.24 ms)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS Layer JSON metadata returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "Layer 'LocalGovernmentArea' reports esriGeometryPolygon (canonical: Polygon, expected: Polygon)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 4 required fields verified (rid, lganame, councilname, abscode)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Source reports 10 features in query scope (maxRecordCount=2000)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_lga_boundaries\\2026-NSW-DCS\\20261108T222820Z\\part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261108T222820Z/part-00000.parquet",
+        "gcs_generation": "1794188736794181",
+        "file_size_bytes": 2870368,
+        "sha256": "6f7bf4e1b7a474f7cc397e9c88baabb58fcc4084a7bdc4e737b5ddfd29d4d707",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "Polygon"
+        ],
+        "feature_count": 10,
+        "bbox": [
+          150.335377,
+          -33.685546,
+          152.805215,
+          -31.442405
+        ],
+        "geometry_validation": {
+          "total_rows": 10,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 10,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "rid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "Polygon"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "rid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "cadid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "createdate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "modifieddate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "lganame",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "councilname",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "abscode",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "ltocode",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "vgcode",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "wbcode",
+            "type": "null",
+            "nullable": true
+          },
+          {
+            "name": "startdate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "enddate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "lastupdate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "msoid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "centroidid",
+            "type": "null",
+            "nullable": true
+          },
+          {
+            "name": "shapeuuid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "changetype",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "processstate",
+            "type": "null",
+            "nullable": true
+          },
+          {
+            "name": "urbanity",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "Shape__Length",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "Shape__Area",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "lga_id",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "lga_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "council_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "abs_code",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 10 rows in 1 row group(s) (2870368 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['Polygon']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [150.33538, -33.68555, 152.80521, -31.4424] within Australian geographic envelope"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'rid': 0 duplicates across 10 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=6f7bf4e1b7a474f7... | generation=1794188736794181"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 10,
+        "stored_feature_count": 10,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "Spatial envelope filter applied: bbox=[151.1, -33.2, 152.2, -32.5] (WGS84/GDA2020)",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 10 stored / 10 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 4 required native fields and 4 mapped aliases (33 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Stored extent [150.335377, -33.685546, 152.805215, -31.442405] overlaps query envelope [151.1, -33.2, 152.2, -32.5]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Statewide NSW service contains 198 records; default bbox retrieves Lower Hunter / Newcastle / Lake Macquarie LGAs."
+      ],
+      "refresh_policy": "monthly_snapshot",
+      "operational_suitability": "Authoritative NSW state emergency management LGA boundary layer.",
+      "telemetry": {
+        "dataset_key": "nsw_lga_boundaries",
+        "retrieval_timestamp_utc": "2026-11-08T22:28:20Z",
+        "http_requests_count": 3,
+        "source_download_ms": 1816.93,
+        "normalization_ms": 0.0,
+        "parquet_write_ms": 54.11,
+        "validation_ms": 290.34,
+        "total_elapsed_ms": 2920.17,
+        "bytes_downloaded": 7596443,
+        "bytes_written": 2870368,
+        "notes": []
+      }
+    },
+    {
+      "dataset_key": "nsw_rfs_major_incidents_live",
+      "title": "NSW Rural Fire Service — Current Major Bushfire & Emergency Incidents Feed",
+      "provider": "NSW Rural Fire Service (RFS)",
+      "source_agency": "NSW Rural Fire Service",
+      "category": "live_operational_feed",
+      "scale": "state",
+      "jurisdiction": "NSW",
+      "theme": "Live Hazard Feeds",
+      "endpoint": "https://www.rfs.nsw.gov.au/feeds/majorIncidents.json",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© State of New South Wales (NSW Rural Fire Service) — CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": null,
+      "source_vintage": "LIVE-FEED",
+      "retrieval_timestamp_utc": "2026-11-08T22:28:23Z",
+      "retrieval_id": "20261108T222823Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "Point",
+      "feature_count": 19,
+      "bbox": [
+        143.841999,
+        -35.700916,
+        152.259659,
+        -28.580497
+      ],
+      "file_size_bytes": 25075,
+      "sha256": "106b00b98a80ea904fcfbac8b98189b4edf19ae0eec21d0c7451d0135dea41e5",
+      "gcs_generation": "1794188737139409",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261108T222823Z/part-00000.parquet",
+      "local_parquet_path": "data/lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261108T222823Z/part-00000.parquet",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_rfs_major_incidents_live/20261108T222823Z/source_payload.json",
+      "raw_payload_sha256": "23e87b06b94e341cf8c3c4541be929763cadb67d98a67d9bcc574ef409ce418b",
+      "preview_geojson": {
+        "preview_geojson_path": "data/nsw_rfs_major_incidents_live.geojson",
+        "preview_feature_count": 19,
+        "total_feature_count": 19
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "PASS",
+        "endpoint": "https://www.rfs.nsw.gov.au/feeds/majorIncidents.json",
+        "layer_name": "NSW Rural Fire Service — Current Major Bushfire & Emergency Incidents Feed",
+        "http_status": 200,
+        "content_type": "application/json",
+        "latency_ms": 189.8,
+        "source_feature_count": 19,
+        "query_bbox": null,
+        "available_fields": [
+          "title",
+          "link",
+          "category",
+          "guid",
+          "guid_isPermaLink",
+          "pubDate",
+          "description"
+        ],
+        "error_message": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (189.8 ms)"
+          },
+          {
+            "check": "geojson_feature_collection",
+            "status": "PASS",
+            "detail": "GeoJSON type='FeatureCollection', features=19"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "Verified required fields (title, category, guid, pubDate, description)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_rfs_major_incidents_live\\LIVE-FEED\\20261108T222823Z\\part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261108T222823Z/part-00000.parquet",
+        "gcs_generation": "1794188737139409",
+        "file_size_bytes": 25075,
+        "sha256": "106b00b98a80ea904fcfbac8b98189b4edf19ae0eec21d0c7451d0135dea41e5",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "Point"
+        ],
+        "feature_count": 19,
+        "bbox": [
+          143.841999,
+          -35.700916,
+          152.259659,
+          -28.580497
+        ],
+        "geometry_validation": {
+          "total_rows": 19,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 19,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "guid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "Point"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "title",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "link",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "category",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "guid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "guid_isPermaLink",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "pubDate",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "description",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_original_geom_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_sub_geometry_count",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "incident_id",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "alert_level",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "published_at",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "details",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 19 rows in 1 row group(s) (25075 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['Point']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [143.842, -35.70092, 152.25966, -28.5805] within Australian geographic envelope"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'guid': 0 duplicates across 19 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=106b00b98a80ea90... | generation=1794188737139409"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 19,
+        "stored_feature_count": 19,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "CRS reprojection from EPSG:4326 to canonical EPSG:7844",
+          "Unpacked 11 GeometryCollection feature(s) to primary vector geometry for GeoParquet indexing",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 19 stored / 19 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 5 required native fields and 5 mapped aliases (21 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Full dataset extent recorded: [143.841999, -35.700916, 152.259659, -28.580497]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Live RFS GeoJSON feed uses GeometryCollection (combining incident Point + burn perimeter Polygons) and Point geometries; GeometryCollections are unpacked/normalized so valid vector geometry is preserved in GeoParquet."
+      ],
+      "refresh_policy": "just_in_time_live",
+      "operational_suitability": "Suitable for demonstrating live just-in-time feed ingestion alongside versioned stored snapshots (not an operational warning tool).",
+      "telemetry": {
+        "dataset_key": "nsw_rfs_major_incidents_live",
+        "retrieval_timestamp_utc": "2026-11-08T22:28:23Z",
+        "http_requests_count": 2,
+        "source_download_ms": 91.95,
+        "normalization_ms": 0.0,
+        "parquet_write_ms": 37.3,
+        "validation_ms": 229.73,
+        "total_elapsed_ms": 407.31,
+        "bytes_downloaded": 26663,
+        "bytes_written": 25075,
+        "notes": []
+      }
+    },
+    {
+      "dataset_key": "nsw_water_inundation_areas",
+      "title": "NSW Spatial Services — Fuzzy Extent Water & Flood Inundation Areas",
+      "provider": "NSW Spatial Services (DCS)",
+      "source_agency": "NSW Department of Customer Service — Spatial Services",
+      "category": "periodically_refreshed_authoritative",
+      "scale": "state",
+      "jurisdiction": "NSW",
+      "theme": "Flood & Hydrography",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© State of New South Wales (Spatial Services, DCS) — CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-09"
+      },
+      "source_publication_date": "2026-01-01",
+      "source_vintage": "2026-NSW-Water",
+      "retrieval_timestamp_utc": "2026-11-08T22:28:23Z",
+      "retrieval_id": "20261108T222823Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "Polygon",
+      "feature_count": 44,
+      "bbox": [
+        151.134731,
+        -34.125,
+        159.4999,
+        -32.5
+      ],
+      "file_size_bytes": 1350580,
+      "sha256": "441a2c0835aa0195cfe98ea3e7af11fc736cc4d7499808b12694050830750098",
+      "gcs_generation": "1794188737966488",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261108T222823Z/part-00000.parquet",
+      "local_parquet_path": "data/lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261108T222823Z/part-00000.parquet",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_water_inundation_areas/20261108T222823Z/source_payload.json",
+      "raw_payload_sha256": "3168efdc1dcb8b49aa53383c11b9d5a06ff09d60118591522e4467db659e7cd3",
+      "preview_geojson": {
+        "preview_geojson_path": "data/nsw_water_inundation_areas.geojson",
+        "preview_feature_count": 44,
+        "total_feature_count": 44
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "PASS",
+        "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7",
+        "layer_name": "FuzzyExtentWaterArea",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 287.42,
+        "max_record_count": 2000,
+        "source_feature_count": 44,
+        "query_bbox": [
+          151.45,
+          -33.15,
+          151.85,
+          -32.75
+        ],
+        "available_fields": [
+          "objectid",
+          "topoid",
+          "createdate",
+          "objectmoddate",
+          "featuremoddate",
+          "classsubtype",
+          "featurereliabilitydate",
+          "attributereliabilitydate",
+          "capturesourcecode",
+          "capturemethodcode",
+          "planimetricaccuracy",
+          "verticalaccuracy",
+          "hydronameoid",
+          "hydroname",
+          "hydronametype",
+          "relevance",
+          "startdate",
+          "enddate",
+          "lastupdate",
+          "msoid",
+          "centroidid",
+          "shapeuuid",
+          "changetype",
+          "processstate",
+          "urbanity",
+          "Shape__Length",
+          "Shape__Area"
+        ],
+        "error_message": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (133.61 ms)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS Layer JSON metadata returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "Layer 'FuzzyExtentWaterArea' reports esriGeometryPolygon (canonical: Polygon, expected: Polygon)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 3 required fields verified (OBJECTID, hydroname, classsubtype)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Source reports 44 features in query scope (maxRecordCount=2000)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_water_inundation_areas\\2026-NSW-Water\\20261108T222823Z\\part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261108T222823Z/part-00000.parquet",
+        "gcs_generation": "1794188737966488",
+        "file_size_bytes": 1350580,
+        "sha256": "441a2c0835aa0195cfe98ea3e7af11fc736cc4d7499808b12694050830750098",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "Polygon"
+        ],
+        "feature_count": 44,
+        "bbox": [
+          151.134731,
+          -34.125,
+          159.4999,
+          -32.5
+        ],
+        "geometry_validation": {
+          "total_rows": 44,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 44,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "objectid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "Polygon"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "objectid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "topoid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "createdate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "objectmoddate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "featuremoddate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "classsubtype",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "featurereliabilitydate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "attributereliabilitydate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "capturesourcecode",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "capturemethodcode",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "planimetricaccuracy",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "verticalaccuracy",
+            "type": "null",
+            "nullable": true
+          },
+          {
+            "name": "hydronameoid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "hydroname",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "hydronametype",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "relevance",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "startdate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "enddate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "lastupdate",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "msoid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "centroidid",
+            "type": "null",
+            "nullable": true
+          },
+          {
+            "name": "shapeuuid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "changetype",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "processstate",
+            "type": "null",
+            "nullable": true
+          },
+          {
+            "name": "urbanity",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "Shape__Length",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "Shape__Area",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "water_id",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "waterbody_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "subtype",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "hydro_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 44 rows in 1 row group(s) (1350580 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['Polygon']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [151.13473, -34.125, 159.4999, -32.5] within Australian geographic envelope"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'objectid': 0 duplicates across 44 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=441a2c0835aa0195... | generation=1794188737966488"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 44,
+        "stored_feature_count": 44,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "CRS reprojection from EPSG:4283 to canonical EPSG:7844",
+          "Spatial envelope filter applied: bbox=[151.45, -33.15, 151.85, -32.75] (WGS84/GDA2020)",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 44 stored / 44 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 3 required native fields and 4 mapped aliases (39 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Stored extent [151.134731, -34.125, 159.4999, -32.5] overlaps query envelope [151.45, -33.15, 151.85, -32.75]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Source CRS is EPSG:4283 (GDA94); transformed to EPSG:7844 (GDA2020) during GeoParquet normalization.",
+        "Default ingestion filters to the Lower Hunter / Lake Macquarie / Newcastle operational bounding box."
+      ],
+      "refresh_policy": "monthly_snapshot",
+      "operational_suitability": "Suitable for flood inundation corridor buffering, population exposure, and road isolation modelling.",
+      "telemetry": {
+        "dataset_key": "nsw_water_inundation_areas",
+        "retrieval_timestamp_utc": "2026-11-08T22:28:23Z",
+        "http_requests_count": 3,
+        "source_download_ms": 905.1,
+        "normalization_ms": 0.0,
+        "parquet_write_ms": 52.27,
+        "validation_ms": 358.53,
+        "total_elapsed_ms": 1617.86,
+        "bytes_downloaded": 3566847,
+        "bytes_written": 1350580,
+        "notes": []
+      }
+    }
+  ]
+}

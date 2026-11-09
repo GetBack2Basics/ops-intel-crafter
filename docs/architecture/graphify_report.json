@@ -1,0 +1,331 @@
+{
+  "files_scanned": 46,
+  "secret_leaks_detected": 0,
+  "mock_violations_detected": 0,
+  "secret_hits": [],
+  "mock_hits": [],
+  "module_dependency_graph": {
+    "src/__init__.py": [],
+    "src/ai/execution_audit.py": [
+      "dataclasses",
+      "json",
+      "pathlib",
+      "src.ingestion.telemetry",
+      "typing"
+    ],
+    "src/ai/query_planner.py": [
+      "dataclasses",
+      "typing"
+    ],
+    "src/ai/spatial_agent.py": [
+      "pathlib",
+      "src.ai.execution_audit",
+      "src.ai.query_planner",
+      "src.ai.sql_validator",
+      "src.catalogue.dataset_registry",
+      "src.engines.duckdb_engine",
+      "src.ingestion.telemetry",
+      "typing"
+    ],
+    "src/ai/sql_validator.py": [
+      "re",
+      "typing"
+    ],
+    "src/ai/__init__.py": [],
+    "src/analysis/exposure.py": [
+      "pathlib",
+      "src.engines.duckdb_engine",
+      "time",
+      "typing"
+    ],
+    "src/analysis/infrastructure_dependencies.py": [
+      "pathlib",
+      "src.engines.duckdb_engine",
+      "typing"
+    ],
+    "src/analysis/isolation.py": [
+      "pathlib",
+      "src.engines.duckdb_engine",
+      "typing"
+    ],
+    "src/analysis/population_methods.py": [
+      "geopandas",
+      "json",
+      "pathlib",
+      "shapely",
+      "shapely.geometry",
+      "src.engines.duckdb_engine",
+      "time",
+      "typing"
+    ],
+    "src/analysis/__init__.py": [],
+    "src/catalogue/dataset_registry.py": [
+      "pathlib",
+      "src.catalogue.manifest_loader",
+      "typing"
+    ],
+    "src/catalogue/manifest_loader.py": [
+      "enum",
+      "json",
+      "pathlib",
+      "pydantic",
+      "typing"
+    ],
+    "src/catalogue/schema_inspector.py": [
+      "json",
+      "pathlib",
+      "pyarrow.parquet",
+      "typing"
+    ],
+    "src/catalogue/__init__.py": [],
+    "src/engines/benchmark_runner.py": [
+      "json",
+      "pathlib",
+      "src.engines.duckdb_engine",
+      "src.engines.wherobots_engine",
+      "src.ingestion.telemetry",
+      "time",
+      "typing"
+    ],
+    "src/engines/duckdb_engine.py": [
+      "duckdb",
+      "functools",
+      "hashlib",
+      "json",
+      "pandas",
+      "pathlib",
+      "pyarrow",
+      "pyarrow.parquet",
+      "pyproj",
+      "shapely",
+      "shapely.geometry",
+      "shapely.ops",
+      "src.catalogue.dataset_registry",
+      "src.ingestion.gcs_storage",
+      "time",
+      "typing"
+    ],
+    "src/engines/wherobots_engine.py": [
+      "os",
+      "ssl",
+      "time",
+      "typing",
+      "urllib.request",
+      "wherobots.db",
+      "wherobots.db.constants"
+    ],
+    "src/engines/__init__.py": [
+      "src.engines.duckdb_engine",
+      "src.engines.wherobots_engine"
+    ],
+    "src/exports/geojson_export.py": [
+      "geopandas",
+      "json",
+      "pathlib",
+      "shapely.geometry",
+      "src.ingestion.telemetry",
+      "typing"
+    ],
+    "src/exports/geoparquet_export.py": [
+      "geopandas",
+      "pathlib",
+      "src.ingestion.telemetry",
+      "typing"
+    ],
+    "src/exports/map_package_builder.py": [
+      "geopandas",
+      "json",
+      "pathlib",
+      "shapely.geometry",
+      "src.catalogue.dataset_registry",
+      "src.ingestion.telemetry",
+      "typing"
+    ],
+    "src/exports/__init__.py": [],
+    "src/ingestion/gcs_storage.py": [
+      "google.cloud",
+      "json",
+      "os",
+      "pathlib",
+      "src.ingestion.telemetry",
+      "src.validation.publish_gate",
+      "typing"
+    ],
+    "src/ingestion/geoparquet_writer.py": [
+      "geopandas",
+      "pandas",
+      "pathlib",
+      "src.catalogue.manifest_loader",
+      "typing"
+    ],
+    "src/ingestion/live_fetch.py": [
+      "geopandas",
+      "src.catalogue.dataset_registry",
+      "src.catalogue.manifest_loader",
+      "src.ingestion.gcs_storage",
+      "src.ingestion.snapshot_ingest",
+      "typing"
+    ],
+    "src/ingestion/snapshot_ingest.py": [
+      "geopandas",
+      "json",
+      "pathlib",
+      "src.catalogue.dataset_registry",
+      "src.catalogue.manifest_loader",
+      "src.ingestion.gcs_storage",
+      "src.ingestion.geoparquet_writer",
+      "src.ingestion.source_connectors",
+      "src.ingestion.telemetry",
+      "src.validation.geoparquet_validation",
+      "src.validation.reconciliation",
+      "src.validation.source_contracts",
+      "time",
+      "typing"
+    ],
+    "src/ingestion/telemetry.py": [
+      "dataclasses",
+      "datetime",
+      "hashlib",
+      "pathlib",
+      "time",
+      "typing"
+    ],
+    "src/ingestion/__init__.py": [],
+    "src/validation/geometry_validation.py": [
+      "geopandas",
+      "typing"
+    ],
+    "src/validation/geoparquet_validation.py": [
+      "geopandas",
+      "pathlib",
+      "src.catalogue.manifest_loader",
+      "src.catalogue.schema_inspector",
+      "src.ingestion.telemetry",
+      "src.validation.geometry_validation",
+      "typing"
+    ],
+    "src/validation/publish_gate.py": [
+      "os",
+      "pathlib",
+      "re",
+      "typing"
+    ],
+    "src/validation/qa_report.py": [
+      "json",
+      "pathlib",
+      "src.catalogue.dataset_registry",
+      "src.catalogue.manifest_loader",
+      "src.ingestion.gcs_storage",
+      "src.ingestion.telemetry",
+      "typing"
+    ],
+    "src/validation/reconciliation.py": [
+      "src.catalogue.manifest_loader",
+      "typing"
+    ],
+    "src/validation/source_contracts.py": [
+      "json",
+      "src.catalogue.manifest_loader",
+      "ssl",
+      "time",
+      "typing",
+      "urllib.parse",
+      "urllib.request"
+    ],
+    "src/validation/__init__.py": [],
+    "src/ingestion/source_connectors/arcgis_connector.py": [
+      "geopandas",
+      "json",
+      "shapely.geometry",
+      "src.catalogue.manifest_loader",
+      "src.validation.source_contracts",
+      "typing",
+      "urllib.parse"
+    ],
+    "src/ingestion/source_connectors/geojson_connector.py": [
+      "geopandas",
+      "shapely.geometry",
+      "src.catalogue.manifest_loader",
+      "src.validation.source_contracts",
+      "typing"
+    ],
+    "src/ingestion/source_connectors/wfs_connector.py": [
+      "geopandas",
+      "shapely.geometry",
+      "src.catalogue.manifest_loader",
+      "src.validation.source_contracts",
+      "typing",
+      "urllib.parse"
+    ],
+    "src/ingestion/source_connectors/__init__.py": [
+      "src.ingestion.source_connectors.arcgis_connector",
+      "src.ingestion.source_connectors.geojson_connector",
+      "src.ingestion.source_connectors.wfs_connector"
+    ],
+    "tools/build_workbench_and_packs.py": [
+      "geopandas",
+      "json",
+      "pathlib",
+      "src.ai.spatial_agent",
+      "src.analysis.exposure",
+      "src.analysis.infrastructure_dependencies",
+      "src.analysis.isolation",
+      "src.analysis.population_methods",
+      "src.catalogue.dataset_registry",
+      "src.engines.benchmark_runner",
+      "src.engines.duckdb_engine",
+      "src.exports.geojson_export",
+      "src.exports.geoparquet_export",
+      "src.exports.map_package_builder",
+      "src.ingestion.telemetry",
+      "sys"
+    ],
+    "tools/git_sync.py": [
+      "pathlib",
+      "subprocess",
+      "sys",
+      "tools.graphify_analysis"
+    ],
+    "tools/graphify_analysis.py": [
+      "ast",
+      "json",
+      "pathlib",
+      "re",
+      "sys",
+      "typing"
+    ],
+    "tools/ingest_dataset.py": [
+      "argparse",
+      "pathlib",
+      "src.catalogue.dataset_registry",
+      "src.ingestion.gcs_storage",
+      "src.ingestion.snapshot_ingest",
+      "src.validation.qa_report",
+      "sys"
+    ],
+    "tools/publish_to_gcs.py": [
+      "google.auth",
+      "google.auth.transport.requests",
+      "google.cloud",
+      "json",
+      "mimetypes",
+      "os",
+      "pathlib",
+      "src.catalogue.dataset_registry",
+      "src.ingestion.gcs_storage",
+      "src.validation.publish_gate",
+      "src.validation.qa_report",
+      "sys",
+      "time",
+      "typing",
+      "urllib.request"
+    ],
+    "tools/run_qa.py": [
+      "pathlib",
+      "src.catalogue.dataset_registry",
+      "src.ingestion.gcs_storage",
+      "src.validation.qa_report",
+      "sys"
+    ]
+  }
+}

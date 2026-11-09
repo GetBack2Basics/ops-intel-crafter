@@ -1,0 +1,23 @@
+# Virtual environments & caches
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.duckdb_extensions/
+scratch/
+
+# Secrets & credentials (Zero-Secret Policy)
+.env
+.env.*
+!*env.example
+*credentials*.json
+*service-account*.json
+*.pem
+*.key
+
+# Local staging mirror of GCS lake (canonical storage is gs://operational-intelligence-crafter-lake/)
+data/lake/
+docs/qa/data/*.geojson
+docs/data/workbench_bundle.json
+docs/exports/
+docs/map_packages/

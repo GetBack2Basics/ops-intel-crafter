@@ -1,0 +1,29 @@
+# Core Geospatial & Columnar Lakehouse
+duckdb>=1.1.0
+geopandas>=1.0.0
+pyarrow>=16.0.0
+shapely>=2.0.0
+pyproj>=3.6.0
+pyogrio>=0.9.0
+
+# Data Processing & HTTP
+pandas>=2.0.0
+numpy>=1.25.0
+requests>=2.31.0
+httpx>=0.27.0
+python-dotenv>=1.0.0
+jsonschema>=4.20.0
+
+# API & Schemas
+fastapi>=0.110.0
+uvicorn>=0.29.0
+pydantic>=2.6.0
+
+# Cloud & Distributed Spatial Engines
+google-cloud-storage>=2.16.0
+gcsfs>=2024.2.0
+wherobots-python-dbapi>=0.28.0
+
+# Testing & Quality Gates
+pytest>=8.0.0
+
