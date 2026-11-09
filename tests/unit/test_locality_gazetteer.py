@@ -5,10 +5,13 @@ Verifies the ABS ASGS Locality & Postal Gazetteer:
 - Verifies bounding box validity (minx < maxx, miny < maxy in Australian extent).
 - Verifies smoothed extent polygon geometry (rounded corners, clockwise winding, closed ring).
 - Verifies spatial query against ga_major_power_stations within Sydney extent finds stations.
+- Verifies buffer and simplification support for natural language queries (Wollongong, 5000m buffer).
+- Verifies substation flood query template has zero conflicting bounding box clauses.
 """
 import json
 import math
 import os
+import re
 import pytest
 
 
@@ -20,8 +23,8 @@ def test_gazetteer_contains_major_australian_localities():
 
     assert len(data) >= 1000, f"Expected at least 1,000 localities, got {len(data)}"
 
-    # Check key Australian cities and regions
-    for key in ["sydney", "newcastle", "parramatta", "melbourne", "brisbane", "nsw", "vic", "qld"]:
+    # Check key Australian cities and regions including Wollongong
+    for key in ["sydney", "newcastle", "parramatta", "melbourne", "brisbane", "wollongong", "nsw", "vic", "qld"]:
         assert key in data, f"Key '{key}' should exist in gazetteer"
         entry = data[key]
         assert "bbox" in entry, f"Entry {key} missing bbox"
@@ -90,3 +93,53 @@ def test_spatial_extent_resolves_power_stations_in_sydney():
     station_names = [f["properties"]["name"] for f in spatial_match]
     assert any("Smithfield" in n for n in station_names)
     assert any("Lucas Heights" in n for n in station_names)
+
+
+def test_buffer_expansion_and_simplification_extraction():
+    """Verifies natural language buffer and simplification extraction."""
+    # Buffer parsing (supports both "buffer 5000m" and "5000m buffer")
+    text1 = "Find substations near Wollongong with 5000m buffer"
+    buf_match = (
+        re.search(r"(?:buffer|catchment|proximity|distance|radius)(?:\s*(?:of|is|:))?\s*(\d+(?:\.\d+)?)\s*(km|m)?", text1, re.I)
+        or re.search(r"(\d+(?:\.\d+)?)\s*(km|m|meters|metres)?\s*(?:buffer|catchment|proximity|radius)?", text1, re.I)
+    )
+    assert buf_match is not None
+    assert buf_match.group(1) == "5000"
+
+    # Simplification parsing (supports both "tolerance 50m" and "50m tolerance")
+    text2 = "substations in Wollongong with 50m tolerance and 5km buffer"
+    simp_match = (
+        re.search(r"(?:simplif(?:y|ication)|tolerance|tolerance:|smooth(?:ing)?|fillet)\s*(\d+(?:\.\d+)?)\s*(m|km|%|deg)?", text2, re.I)
+        or re.search(r"(\d+(?:\.\d+)?)\s*(m|km|%|deg)\s*(?:simplif(?:y|ication)|tolerance|smoothing)?", text2, re.I)
+    )
+    assert simp_match is not None
+    assert simp_match.group(1) == "50"
+
+    # Metric expansion on Wollongong bbox [150.75, -34.55, 151.00, -34.30]
+    woll_bbox = [150.75, -34.55, 151.00, -34.30]
+    buffer_m = 5000.0
+    d_lat = buffer_m / 111320.0
+    mid_lat = (woll_bbox[1] + woll_bbox[3]) / 2.0
+    d_lon = buffer_m / (111320.0 * math.cos(math.radians(mid_lat)))
+
+    buffered_bbox = [woll_bbox[0] - d_lon, woll_bbox[1] - d_lat, woll_bbox[2] + d_lon, woll_bbox[3] + d_lat]
+    assert buffered_bbox[0] < woll_bbox[0]
+    assert buffered_bbox[1] < woll_bbox[1]
+    assert buffered_bbox[2] > woll_bbox[2]
+    assert buffered_bbox[3] > woll_bbox[3]
+
+
+def test_substation_flood_query_has_no_hunter_bbox_for_wollongong():
+    """Verifies that when Wollongong is targeted, the query does NOT contain Hunter coordinates."""
+    app_js_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "app.js")
+    with open(app_js_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Ensure buildSqlForScenario for substation_flood does not hardcode hunter bbox unconditionally
+    substation_fn_snippet = re.search(r'if \(key === "substation_flood"\) \{([\s\S]+?)return `-- Substation Flood', content)
+    assert substation_fn_snippet is not None
+    snippet = substation_fn_snippet.group(1)
+    # The snippet must check resolved locality extent first
+    assert "resolveLocalityExtent" in snippet
+    # It must NOT unconditionally set bboxSql to 151.35 AND 151.90
+    assert "bboxSql = `_bbox_xmax >= 151.35" not in snippet

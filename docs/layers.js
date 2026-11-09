@@ -340,14 +340,48 @@
     return null;
   }
 
-  // ---------- Smoothed Extent Polygon Generator (Rounded Corners) ----------
-  function createSmoothedExtentPolygon(bbox, numArcPoints = 6) {
+  // ---------- Metric Buffer & Simplification Tolerance Parsers ----------
+  function extractBufferMeters(str) {
+    if (!str || typeof str !== "string") return 0;
+    const m = str.match(/(?:buffer|catchment|proximity|radius|within)(?:\s*(?:of|is|:))?\s*(\d+(?:\.\d+)?)\s*(km|m|meters|metres|kilometres|kilometers)?/i) ||
+              str.match(/(\d+(?:\.\d+)?)\s*(km|m|meters|metres|kilometres|kilometers)\s*(?:buffer|catchment|proximity|radius)?/i);
+    if (!m) return 0;
+    const val = parseFloat(m[1]);
+    const isKm = (m[2] || "").toLowerCase().startsWith("k");
+    return isKm ? val * 1000 : val;
+  }
+
+  function extractSimplificationTolerance(str) {
+    if (!str || typeof str !== "string") return 6;
+    const m = str.match(/(?:simplif(?:y|ication)|tolerance|tolerance:|smooth(?:ing)?|fillet)(?:\s*(?:of|is|:))?\s*(\d+(?:\.\d+)?)\s*(m|km|%|deg)?/i) ||
+              str.match(/(\d+(?:\.\d+)?)\s*(m|km|%|deg)\s*(?:simplif(?:y|ication)|tolerance|smoothing)?/i);
+    if (!m) return 6;
+    const val = parseFloat(m[1]);
+    if (val >= 100 || val >= 0.01 || val >= 20) return 3;
+    if (val <= 10 || val <= 0.001) return 10;
+    return 6;
+  }
+
+  // ---------- Smoothed Extent Polygon Generator (Rounded Corners & Metric Buffering) ----------
+  function createSmoothedExtentPolygon(bbox, numArcPoints = 6, bufferMeters = 0, filletFraction = 0.12) {
     if (!bbox || bbox.length !== 4) return null;
-    const [minX, minY, maxX, maxY] = bbox;
+    let [minX, minY, maxX, maxY] = bbox;
+
+    // Apply metric buffer expansion if specified (111,320m per lat degree)
+    if (bufferMeters > 0) {
+      const dLat = bufferMeters / 111320.0;
+      const midLat = (minY + maxY) / 2.0;
+      const dLon = bufferMeters / (111320.0 * Math.max(0.2, Math.cos(midLat * Math.PI / 180.0)));
+      minX -= dLon;
+      maxX += dLon;
+      minY -= dLat;
+      maxY += dLat;
+    }
+
     const w = maxX - minX;
     const h = maxY - minY;
-    // Fillet radius: 12% of shorter dimension
-    const r = Math.min(w, h) * 0.12;
+    // Fillet radius: fraction of shorter dimension
+    const r = Math.min(w, h) * Math.max(0.01, Math.min(0.35, filletFraction));
     const ring = [];
 
     function addArc(cx, cy, startAng, endAng) {
@@ -440,53 +474,81 @@
     })
     .catch(err => console.warn("locality_gazetteer.json load warning (using embedded core):", err));
 
-  function resolveLocalityExtent(input) {
+  function resolveLocalityExtent(input, opts = {}) {
     if (!input) return null;
+    const bufferMeters = opts.bufferMeters !== undefined ? opts.bufferMeters : extractBufferMeters(typeof input === "string" ? input : "");
+    const numArcPoints = opts.numArcPoints !== undefined ? opts.numArcPoints : extractSimplificationTolerance(typeof input === "string" ? input : "");
+    const filletFraction = opts.filletFraction || 0.12;
+
     if (typeof input === "object" && !Array.isArray(input)) {
       if (input.type === "FeatureCollection" || input.type === "Feature" ||
           input.type === "Polygon" || input.type === "MultiPolygon") {
         const bbox = geomBounds(input.geometry || input);
-        return { polygon: input, bbox };
+        return { polygon: input, bbox, bufferMeters };
       }
       if (input.bbox && Array.isArray(input.bbox) && input.bbox.length === 4) {
-        return { bbox: input.bbox, polygon: createSmoothedExtentPolygon(input.bbox) };
+        return { bbox: input.bbox, polygon: createSmoothedExtentPolygon(input.bbox, numArcPoints, bufferMeters, filletFraction), bufferMeters };
       }
     }
     if (Array.isArray(input) && input.length === 4 && typeof input[0] === "number") {
-      return { bbox: input, polygon: createSmoothedExtentPolygon(input) };
+      return { bbox: input, polygon: createSmoothedExtentPolygon(input, numArcPoints, bufferMeters, filletFraction), bufferMeters };
     }
     if (Array.isArray(input) && input.length === 2 && Array.isArray(input[0])) {
       const bbox = [input[0][0], input[0][1], input[1][0], input[1][1]];
-      return { bbox, polygon: createSmoothedExtentPolygon(bbox) };
+      return { bbox, polygon: createSmoothedExtentPolygon(bbox, numArcPoints, bufferMeters, filletFraction), bufferMeters };
     }
     if (typeof input === "string") {
       const clean = input.trim();
       const upper = clean.toUpperCase();
       if (upper.startsWith("POLYGON") || upper.startsWith("MULTIPOLYGON")) {
         const parsed = parseWktPolygon(clean);
-        if (parsed) return { polygon: parsed, bbox: geomBounds(parsed) };
+        if (parsed) return { polygon: parsed, bbox: geomBounds(parsed), bufferMeters };
       }
       const numMatch = clean.match(/(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)/);
       if (numMatch) {
-        const bbox = [parseFloat(numMatch[1]), parseFloat(numMatch[2]), parseFloat(numMatch[3]), parseFloat(numMatch[4])];
+        let bbox = [parseFloat(numMatch[1]), parseFloat(numMatch[2]), parseFloat(numMatch[3]), parseFloat(numMatch[4])];
         if (bbox.every(n => !isNaN(n))) {
-          return { bbox, polygon: createSmoothedExtentPolygon(bbox) };
+          if (bufferMeters > 0) {
+            const dLat = bufferMeters / 111320.0;
+            const midLat = (bbox[1] + bbox[3]) / 2.0;
+            const dLon = bufferMeters / (111320.0 * Math.max(0.2, Math.cos(midLat * Math.PI / 180.0)));
+            bbox = [bbox[0] - dLon, bbox[1] - dLat, bbox[2] + dLon, bbox[3] + dLat];
+          }
+          return { bbox, polygon: createSmoothedExtentPolygon(bbox, numArcPoints, 0, filletFraction), bufferMeters };
         }
       }
 
-      const lower = clean.toLowerCase();
+      // Strip buffer and simplification phrases from string before matching gazetteer names
+      const cleanName = clean
+        .replace(/(?:with|using|and|\+)?\s*(?:buffer|catchment|proximity|radius|simplif(?:y|ication)|tolerance|tolerance:)\s*(\d+(?:\.\d+)?)\s*(?:km|m|deg|%|meters|metres)?/gi, "")
+        .replace(/\b\d+(?:\.\d+)?\s*(?:km|m|deg|%)\s*(?:buffer|catchment|proximity|radius)?\b/gi, "")
+        .replace(/\b(?:in|across|around|at|for|within)\b/gi, "")
+        .trim();
+      const lower = (cleanName || clean).toLowerCase();
+
+      function buildReturn(entry, bbox) {
+        let finalBbox = bbox.slice();
+        if (bufferMeters > 0) {
+          const dLat = bufferMeters / 111320.0;
+          const midLat = (finalBbox[1] + finalBbox[3]) / 2.0;
+          const dLon = bufferMeters / (111320.0 * Math.max(0.2, Math.cos(midLat * Math.PI / 180.0)));
+          finalBbox = [finalBbox[0] - dLon, finalBbox[1] - dLat, finalBbox[2] + dLon, finalBbox[3] + dLat];
+        }
+        return {
+          name: entry.name || cleanName || clean,
+          state: entry.state,
+          stateCode: entry.stateCode || (entry.state ? entry.state.toUpperCase() : null),
+          isState: !!entry.isState,
+          bbox: finalBbox,
+          center: entry.center,
+          bufferMeters,
+          polygon: createSmoothedExtentPolygon(bbox, numArcPoints, bufferMeters, filletFraction)
+        };
+      }
+
       // 1. Direct gazetteer key match
       if (GAZETTEER[lower]) {
-        const g = GAZETTEER[lower];
-        return {
-          name: g.name || clean,
-          state: g.state,
-          stateCode: g.stateCode || (g.state ? g.state.toUpperCase() : null),
-          isState: !!g.isState,
-          bbox: g.bbox,
-          center: g.center,
-          polygon: createSmoothedExtentPolygon(g.bbox)
-        };
+        return buildReturn(GAZETTEER[lower], GAZETTEER[lower].bbox);
       }
 
       // 2. Substring or multi-token match in gazetteer
@@ -509,26 +571,22 @@
         const minY = Math.min(...matched.map(m => m.bbox[1]));
         const maxX = Math.max(...matched.map(m => m.bbox[2]));
         const maxY = Math.max(...matched.map(m => m.bbox[3]));
-        const bbox = [minX, minY, maxX, maxY];
         const primary = matched[0];
-        return {
+        return buildReturn({
           name: matched.map(m => m.name || m.code).join(", "),
           state: primary.state,
-          stateCode: primary.stateCode || (primary.state ? primary.state.toUpperCase() : null),
+          stateCode: primary.stateCode,
           isState: matched.length === 1 && !!primary.isState,
-          bbox,
-          polygon: createSmoothedExtentPolygon(bbox)
-        };
+          center: primary.center
+        }, [minX, minY, maxX, maxY]);
       }
 
       // Fallbacks
       if (lower.includes("statewide") || lower.includes("nsw")) {
-        const g = GAZETTEER.nsw;
-        return { name: "New South Wales", state: "NSW", stateCode: "NSW", isState: true, bbox: g.bbox, polygon: createSmoothedExtentPolygon(g.bbox) };
+        return buildReturn(GAZETTEER.nsw, GAZETTEER.nsw.bbox);
       }
       if (lower.includes("national") || lower.includes("australia")) {
-        const g = GAZETTEER.australia;
-        return { name: "Australia", isState: false, bbox: g.bbox, polygon: createSmoothedExtentPolygon(g.bbox) };
+        return buildReturn(GAZETTEER.australia, GAZETTEER.australia.bbox);
       }
     }
     return null;
@@ -665,7 +723,7 @@
     }
   }
 
-  function setAoiMask(geomOrInput) {
+  function setAoiMask(geomOrInput, opts = {}) {
     currentAoiGeometry = geomOrInput;
     if (!map || !map.getSource("territory-mask")) return;
     if (!aoiMaskEnabled || !geomOrInput) {
@@ -683,6 +741,18 @@
     if (map.getLayer("aoi-boundary-line")) map.moveLayer("aoi-boundary-line");
     ["oic-hl-fill", "oic-hl-line", "oic-hl-point"].forEach(id => { if (map.getLayer(id)) map.moveLayer(id); });
     updateMaskButtonUi();
+
+    // Auto-fit camera to the active AOI bounds if not explicitly disabled
+    if (opts.fitBounds !== false && map) {
+      const resolved = resolveLocalityExtent(geomOrInput, opts);
+      if (resolved && resolved.bbox) {
+        map.fitBounds([[resolved.bbox[0], resolved.bbox[1]], [resolved.bbox[2], resolved.bbox[3]]], {
+          padding: 50,
+          maxZoom: 12.0,
+          duration: 800
+        });
+      }
+    }
   }
 
   function clearAoiMask() {

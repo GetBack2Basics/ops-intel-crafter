@@ -268,15 +268,32 @@ ORDER BY g.cell_id;`;
 
     if (key === "substation_flood") {
       const catchMeters = parseNumericDistance(distText, 5000);
-      const bboxMatch = areaText.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
-      let bboxSql = "";
-      if (bboxMatch) {
-        const [, minX, minY, maxX, maxY] = bboxMatch;
-        bboxSql = `_bbox_xmax >= ${minX} AND _bbox_xmin <= ${maxX}\n      AND _bbox_ymax >= ${minY} AND _bbox_ymin <= ${maxY}`;
+      const resolved = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(areaText) : null;
+      let whereClause = "";
+      if (resolved && resolved.bbox) {
+        const [minX, minY, maxX, maxY] = resolved.bbox;
+        whereClause = `WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}\n      AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Area scope: ${resolved.name}`;
       } else {
-        bboxSql = `_bbox_xmax >= 151.35 AND _bbox_xmin <= 151.90\n      AND _bbox_ymax >= -33.05 AND _bbox_ymin <= -32.60`;
+        const bboxMatch = areaText.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+        if (bboxMatch) {
+          const [, minX, minY, maxX, maxY] = bboxMatch;
+          whereClause = `WHERE _bbox_maxx >= ${minX} AND _bbox_minx <= ${maxX}\n      AND _bbox_maxy >= ${minY} AND _bbox_miny <= ${maxY}`;
+        } else {
+          const areaFilterSql = parseAreaWhereClause(areaText, "s.locality");
+          if (areaFilterSql.startsWith("AND")) {
+            whereClause = `WHERE 1=1\n      ${areaFilterSql}`;
+          } else {
+            whereClause = `WHERE _bbox_maxx >= 151.35 AND _bbox_minx <= 151.90\n      AND _bbox_maxy >= -33.05 AND _bbox_miny <= -32.60\n      ${areaFilterSql}`;
+          }
+        }
       }
-      const areaFilterSql = bboxMatch ? "" : parseAreaWhereClause(areaText, "s.locality");
+
+      // Check if simplification option specified (e.g. "Simplification tolerance: 50m")
+      const simpMatch = (optText || "").match(/(?:simplif(?:y|ication)|tolerance|tolerance:|smooth)\s*(\d+(?:\.\d+)?)\s*(m|km|deg)?/i);
+      const simpClause = simpMatch
+        ? `ST_Simplify(ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true), ${parseFloat(simpMatch[1]) * (simpMatch[2] === "km" ? 1000 : 1)})`
+        : `ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true)`;
+
       return `-- Substation Flood Proximity & Facility Catchment
 -- User Area: ${areaText || "Lower Hunter"}
 -- User Catchment Distance: ${catchMeters}m (${distText || "5000m"})
@@ -289,11 +306,10 @@ WITH substations AS (
         voltage_kv,
         ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
     FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet') s
-    WHERE ${bboxSql}
-      ${areaFilterSql}
+    ${whereClause}
 ),
 inundation AS (
-    SELECT ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
+    SELECT ${simpClause} AS geom_3112
     FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2024-NSW-DCS/20261108T223144Z/part-00000.parquet')
 ),
 foi AS (
@@ -309,7 +325,7 @@ SELECT
 FROM substations s
 CROSS JOIN inundation i
 GROUP BY s.substation_name, s.locality, s.voltage_kv, s.geom_3112
-ORDER BY distance_to_inundation_m ASC;`;
+ORDER BY distance_to_inundation_m ASC;`;;
     }
 
     if (key === "lga_multi_hazard") {
@@ -763,7 +779,13 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       }
     }
 
-    // 2. Uploaded hazard / AOI data
+    // 2. Authoritative ABS Locality & Postal Gazetteer (3,562 Australian localities)
+    const resGaz = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(raw) : null;
+    if (resGaz && resGaz.bbox) {
+      return { exists: true, locationText: resGaz.name || raw, bbox: resGaz.bbox, state: resGaz.state };
+    }
+
+    // 3. Uploaded hazard / AOI data
     if (uploadedCycloneData || uploadedAoiData) {
       const activeName = (uploadedCycloneData && uploadedCycloneData.metadata && uploadedCycloneData.metadata.cyclone_name) ||
                          (uploadedAoiData && uploadedAoiData.name);
@@ -1292,20 +1314,31 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
 
     const lower = text.toLowerCase();
 
-    // 1. Contextual Distance Extraction
+    // 1. Buffer / Catchment Distance Extraction from natural language
     let extractedDist = "";
-    const distMatch = text.match(/(\d+(?:\.\d+)?)\s*(km|m|meters|metres|kilometres|kilometers)\b/i);
-    if (distMatch) {
-      extractedDist = `${distMatch[1]}${distMatch[2].toLowerCase().startsWith("k") ? "km" : "m"} proximity buffer`;
+    const bufferMatch = text.match(/(?:buffer|catchment|proximity|distance|radius)(?:\s*(?:of|is|:))?\s*(\d+(?:\.\d+)?)\s*(km|m|meters|metres|kilometres|kilometers)?/i) ||
+                        text.match(/(\d+(?:\.\d+)?)\s*(km|m|meters|metres|kilometres|kilometers)\s*(?:buffer|catchment|proximity|radius|facility catchment)?/i);
+    if (bufferMatch) {
+      const num = bufferMatch[1];
+      const unit = (bufferMatch[2] || "m").toLowerCase().startsWith("k") ? "km" : "m";
+      extractedDist = `${num}${unit} (${unit === "km" ? parseFloat(num) * 1000 : num}m metric buffer)`;
     } else if (lower.includes("facility catchment") || lower.includes("catchment")) {
       extractedDist = "5000m facility catchment";
-    } else if (lower.includes("flood zone") || lower.includes("inundation") || lower.includes("inside")) {
+    } else if (lower.includes("flood zone") || lower.includes("inundation") || lower.includes("inside") || lower.includes("direct intersection")) {
       extractedDist = "0m (Direct polygon intersection)";
     } else {
       extractedDist = preset.defaultDistance;
     }
 
-    // 2. Contextual Area Extraction
+    // 2. Simplification / Smoothing Tolerance Extraction from natural language
+    let extractedSimp = "";
+    const simpMatch = text.match(/(?:simplif(?:y|ication)|tolerance|tolerance:|smooth(?:ing)?|fillet)(?:\s*(?:of|is|:))?\s*(\d+(?:\.\d+)?)\s*(m|km|%|deg)?/i) ||
+                      text.match(/(\d+(?:\.\d+)?)\s*(m|km|%|deg)\s*(?:simplif(?:y|ication)|tolerance|smoothing)?/i);
+    if (simpMatch) {
+      extractedSimp = `Simplification: ${simpMatch[1]}${simpMatch[2] || "m"}`;
+    }
+
+    // 3. Contextual Area Extraction
     let extractedArea = "";
     const locDetection = detectLocationStatus(text);
     if (locDetection && locDetection.status === "CLEAR") {
@@ -1314,10 +1347,19 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       const bboxMatch = text.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
       if (bboxMatch) {
         extractedArea = bboxMatch[0];
+      } else {
+        const words = text.split(/[\s,;]+/).filter(w => w.length >= 3 && !/^(find|show|list|query|with|using|across|around|near|within|buffer|simplify|simplification|metric|proximity|catchment|distance)$/i.test(w));
+        for (const w of words) {
+          const res = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(w) : null;
+          if (res && res.bbox) {
+            extractedArea = res.name || w;
+            break;
+          }
+        }
       }
     }
 
-    // 3. Contextual Options Extraction
+    // 4. Contextual Options Extraction
     let extractedOpt = "";
     if (lower.includes("method a")) extractedOpt = "Method A (Centroid ST_Contains)";
     else if (lower.includes("method b")) extractedOpt = "Method B (1 km² Polygon ST_Intersects)";
@@ -1330,6 +1372,9 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
 
     if (!extractedOpt) {
       extractedOpt = preset.defaultOptions;
+    }
+    if (extractedSimp) {
+      extractedOpt = `${extractedOpt} | ${extractedSimp}`;
     }
 
     return {
@@ -1613,6 +1658,14 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       map.fitBounds([[minBx, minBy], [maxBx, maxBy]], { padding: 40, maxZoom: 13, duration: 800 });
       return;
     }
+    // Check if userParams.area resolves via Locality Gazetteer (e.g. Wollongong, Sydney, Melbourne, Brisbane)
+    if (userParams.area) {
+      const res = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(userParams.area) : null;
+      if (res && res.bbox) {
+        map.fitBounds([[res.bbox[0], res.bbox[1]], [res.bbox[2], res.bbox[3]]], { padding: 40, maxZoom: 12.5, duration: 800 });
+        return;
+      }
+    }
     for (const [locName, locCfg] of Object.entries(LOCALITY_COORDS)) {
       if (raw.includes(locName)) {
         if (locCfg.bbox) {
@@ -1818,7 +1871,9 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         .join("");
 
       if (map && mapReady) {
-        showQueryLayers(["hunter_substation_flood_dependency", "ga_electricity_transmission_lines", "nsw_water_inundation_areas"]);
+        const isHunter = !userParams.area || /hunter|maitland|cessnock|newcastle/i.test(userParams.area);
+        const subLayer = isHunter ? "hunter_substation_flood_dependency" : "ga_electricity_substations";
+        showQueryLayers([subLayer, "ga_electricity_transmission_lines", "nsw_water_inundation_areas"]);
         const coords = rows.map(s => {
           try {
             const gj = typeof s.geojson_7844 === "string" ? JSON.parse(s.geojson_7844) : s.geojson_7844;
@@ -1828,7 +1883,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         fitMapToResultsExtent(coords, [151.63, -32.82], 10.3);
       }
       if (window.OICLayers) {
-        window.OICLayers.bindResultsRows(tbody, "hunter_substation_flood_dependency", "feature_name");
+        window.OICLayers.bindResultsRows(tbody, isHunter ? "hunter_substation_flood_dependency" : "ga_electricity_substations", "feature_name");
         const floodAoi = (bundle && bundle.population_study && bundle.population_study.regimes && bundle.population_study.regimes[1].incident_wkt_7844) || null;
         window.OICLayers.setAoiMask(userParams.area || floodAoi);
       }
