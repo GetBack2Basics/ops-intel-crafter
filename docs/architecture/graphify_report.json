@@ -1,5 +1,5 @@
 {
-  "files_scanned": 46,
+  "files_scanned": 47,
   "secret_leaks_detected": 0,
   "mock_violations_detected": 0,
   "secret_hits": [],
@@ -302,6 +302,11 @@
       "src.ingestion.snapshot_ingest",
       "src.validation.qa_report",
       "sys"
+    ],
+    "tools/publish_docs_to_gcs.py": [
+      "google.cloud",
+      "os",
+      "pathlib"
     ],
     "tools/publish_to_gcs.py": [
       "google.auth",

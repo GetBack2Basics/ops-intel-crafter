@@ -555,9 +555,20 @@ def render_qa_html_pages(
             <h3 class="font-headline font-bold text-xl">Source Failed Level 1 Validation — Zero Mock Geometry</h3>
             <p id="mapErrorText" class="font-mono text-xs max-w-xl text-primary-fixed"></p>
           </div>
+          <div class="absolute bottom-3 left-3 bg-primary/85 text-white backdrop-blur-sm px-3 py-1.5 rounded-lg text-[11px] font-mono flex items-center gap-2 z-10 pointer-events-none">
+            <span class="text-secondary-fixed">👆 Click any point, line or polygon for attribute popup</span>
+          </div>
         </div>
 
         <div class="panel-card space-y-4 overflow-y-auto max-h-[540px]">
+          <div id="selectedFeatureBox" class="p-3 rounded-lg bg-primary text-white space-y-2 hidden">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-secondary-fixed">Selected Feature</span>
+              <button id="btnCloseSelectedFeature" class="text-xs text-white hover:text-error">✕</button>
+            </div>
+            <div id="selectedFeatureTitle" class="font-bold text-sm"></div>
+            <div id="selectedFeatureAttrs" class="space-y-1 text-[11px] font-mono max-h-44 overflow-y-auto divide-y divide-primary-container"></div>
+          </div>
           <h2 class="font-headline font-bold text-base text-on-surface">Provenance &amp; Validation Metadata</h2>
           <div id="inspectorMetadataList" class="space-y-2 text-xs"></div>
         </div>
@@ -565,13 +576,16 @@ def render_qa_html_pages(
 
       <!-- Sample Feature Attribute Table -->
       <section class="panel-card space-y-3">
-        <div class="flex items-center justify-between">
-          <h2 class="font-headline font-bold text-base text-on-surface">Stored Feature Attribute Sample (Click Row to Pan/Zoom)</h2>
-          <span id="sampleCountLabel" class="font-mono text-xs text-on-surface-variant"></span>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 class="font-headline font-bold text-base text-on-surface">Stored Feature Attribute Sample (Click Row to Pan/Zoom &amp; Popup)</h2>
+            <span id="sampleCountLabel" class="font-mono text-xs text-on-surface-variant"></span>
+          </div>
+          <input id="sampleFilterInput" type="search" placeholder="🔍 Search preview features..." class="h-8 px-2.5 rounded bg-surface-container-low border border-outline-variant text-xs w-64 focus:outline-none focus:ring-1 focus:ring-secondary"/>
         </div>
         <div class="overflow-x-auto max-h-80">
           <table class="w-full text-left border-collapse text-xs">
-            <thead id="attrTableHead" class="bg-surface-container-low text-on-surface-variant font-mono text-[11px] sticky top-0"></thead>
+            <thead id="attrTableHead" class="bg-surface-container-low text-on-surface-variant font-mono text-[11px] sticky top-0 z-10"></thead>
             <tbody id="attrTableBody" class="divide-y divide-surface-container font-mono text-[11px]"></tbody>
           </table>
         </div>
@@ -583,6 +597,8 @@ def render_qa_html_pages(
     const QA_SUMMARY = {summary_json_inline};
     let map = null;
     let currentBounds = null;
+    let currentGeojson = null;
+    let popup = null;
 
     function initMap() {{
       map = new maplibregl.Map({{
@@ -603,6 +619,115 @@ def render_qa_html_pages(
         zoom: 8
       }});
       map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+      map.on("load", () => {{
+        // Setup highlight layer for inspected feature
+        map.addSource("inspect-hl", {{ type: "geojson", data: {{ type: "FeatureCollection", features: [] }} }});
+        map.addLayer({{
+          id: "inspect-hl-fill",
+          type: "fill",
+          source: "inspect-hl",
+          paint: {{ "fill-color": "#facc15", "fill-opacity": 0.3 }}
+        }});
+        map.addLayer({{
+          id: "inspect-hl-line",
+          type: "line",
+          source: "inspect-hl",
+          paint: {{ "line-color": "#facc15", "line-width": 4 }}
+        }});
+        map.addLayer({{
+          id: "inspect-hl-point",
+          type: "circle",
+          source: "inspect-hl",
+          paint: {{ "circle-radius": 10, "circle-color": "rgba(250,204,21,0.3)", "circle-stroke-color": "#facc15", "circle-stroke-width": 2.5 }}
+        }});
+      }});
+    }}
+
+    function computeGeometryBounds(geom) {{
+      if (!geom) return null;
+      const pts = [];
+      function flatten(coords) {{
+        if (typeof coords[0] === "number") {{ pts.push(coords); return; }}
+        coords.forEach(c => flatten(c));
+      }}
+      if (geom.type === "GeometryCollection") {{
+        (geom.geometries || []).forEach(g => g && g.coordinates && flatten(g.coordinates));
+      }} else if (geom.coordinates) {{
+        flatten(geom.coordinates);
+      }}
+      if (!pts.length) return null;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      pts.forEach(([x, y]) => {{
+        minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+      }});
+      return [[minX, minY], [maxX, maxY]];
+    }}
+
+    function setInspectHighlight(feature) {{
+      const src = map && map.getSource("inspect-hl");
+      if (src) {{
+        src.setData({{ type: "FeatureCollection", features: feature ? [feature] : [] }});
+      }}
+    }}
+
+    function showInspectPopup(feature, lngLat) {{
+      if (!feature || !map) return;
+      const props = feature.properties || {{}};
+      const gtype = (feature.geometry && feature.geometry.type) || "Geometry";
+      const title = props.feature_name || props.title || props.name || props.lga_name_2025 || props.sa2_name_2021 || props.cell_id || `Feature #${{props.__idx ?? 0}}`;
+      
+      const rows = Object.entries(props)
+        .filter(([k]) => k !== "__idx" && !k.startsWith("_oic_"))
+        .map(([k, v]) => `<tr><th class="py-1 pr-2 text-on-surface-variant font-bold uppercase text-[10px] whitespace-nowrap text-left">${{k}}</th><td class="py-1 font-mono text-[11px] text-on-surface break-all">${{v ?? ""}}</td></tr>`)
+        .join("");
+
+      const content = `
+        <div style="font-family:'Plus Jakarta Sans',sans-serif; max-width:320px; max-height:240px; overflow-y:auto; padding:8px;">
+          <div style="font-size:10px; font-weight:700; color:#006973; text-transform:uppercase;">${{gtype}}</div>
+          <div style="font-size:13px; font-weight:700; color:#001026; margin-bottom:6px;">${{title}}</div>
+          <table style="width:100%; border-collapse:collapse;">${{rows}}</table>
+        </div>
+      `;
+
+      if (popup) popup.remove();
+      const pos = lngLat || (feature.geometry.type === "Point" ? feature.geometry.coordinates : null);
+      if (pos) {{
+        popup = new maplibregl.Popup({{ closeButton: true, maxWidth: "340px" }})
+          .setLngLat(pos)
+          .setHTML(content)
+          .addTo(map);
+        popup.on("close", () => setInspectHighlight(null));
+      }}
+
+      setInspectHighlight(feature);
+
+      // Also update selected feature card
+      const box = document.getElementById("selectedFeatureBox");
+      if (box) {{
+        box.classList.remove("hidden");
+        document.getElementById("selectedFeatureTitle").textContent = title;
+        document.getElementById("selectedFeatureAttrs").innerHTML = Object.entries(props)
+          .filter(([k]) => k !== "__idx")
+          .map(([k, v]) => `<div class="py-0.5 flex justify-between gap-2"><span class="text-secondary-fixed">${{k}}:</span><span class="truncate">${{v ?? ""}}</span></div>`)
+          .join("");
+      }}
+    }}
+
+    function zoomToInspectFeature(f) {{
+      if (!f || !f.geometry || !map) return;
+      if (f.geometry.type === "Point") {{
+        map.flyTo({{ center: f.geometry.coordinates, zoom: Math.max(map.getZoom(), 13), duration: 600 }});
+        map.once("moveend", () => showInspectPopup(f, f.geometry.coordinates));
+      }} else {{
+        const b = computeGeometryBounds(f.geometry);
+        if (b) {{
+          map.fitBounds(b, {{ padding: 60, maxZoom: 14, duration: 600 }});
+          const center = [(b[0][0] + b[1][0]) / 2, (b[0][1] + b[1][1]) / 2];
+          map.once("moveend", () => showInspectPopup(f, center));
+        }}
+      }}
     }}
 
     async function loadDatasetOnMap(dsKey) {{
@@ -643,10 +768,16 @@ def render_qa_html_pages(
 
       const resp = await fetch(ds.preview_geojson.preview_geojson_path);
       const geojson = await resp.json();
+      currentGeojson = geojson;
+      (geojson.features || []).forEach((f, i) => {{
+        f.properties = f.properties || {{}};
+        f.properties.__idx = i;
+      }});
 
       if (map.getLayer("inspect-points")) map.removeLayer("inspect-points");
       if (map.getLayer("inspect-lines")) map.removeLayer("inspect-lines");
       if (map.getLayer("inspect-polys")) map.removeLayer("inspect-polys");
+      if (map.getLayer("inspect-polys-outline")) map.removeLayer("inspect-polys-outline");
       if (map.getSource("inspect-src")) map.removeSource("inspect-src");
 
       map.addSource("inspect-src", {{ type: "geojson", data: geojson }});
@@ -655,7 +786,14 @@ def render_qa_html_pages(
         type: "fill",
         source: "inspect-src",
         filter: ["in", ["geometry-type"], ["literal", ["Polygon", "MultiPolygon"]]],
-        paint: {{ "fill-color": "#006973", "fill-opacity": 0.35, "fill-outline-color": "#001026" }}
+        paint: {{ "fill-color": "#006973", "fill-opacity": 0.35 }}
+      }});
+      map.addLayer({{
+        id: "inspect-polys-outline",
+        type: "line",
+        source: "inspect-src",
+        filter: ["in", ["geometry-type"], ["literal", ["Polygon", "MultiPolygon"]]],
+        paint: {{ "line-color": "#001026", "line-width": 1.5 }}
       }});
       map.addLayer({{
         id: "inspect-lines",
@@ -672,32 +810,60 @@ def render_qa_html_pages(
         paint: {{ "circle-radius": 6, "circle-color": "#006973", "circle-stroke-width": 1.5, "circle-stroke-color": "#ffffff" }}
       }});
 
+      // Add click & pointer listeners to map layers
+      const interactiveLayers = ["inspect-polys", "inspect-lines", "inspect-points"];
+      interactiveLayers.forEach(lyrId => {{
+        map.on("click", lyrId, e => {{
+          if (e.features && e.features.length) {{
+            const idx = e.features[0].properties.__idx;
+            const fullFeature = geojson.features[idx] || e.features[0];
+            showInspectPopup(fullFeature, e.lngLat);
+          }}
+        }});
+        map.on("mouseenter", lyrId, () => {{ map.getCanvas().style.cursor = "pointer"; }});
+        map.on("mouseleave", lyrId, () => {{ map.getCanvas().style.cursor = ""; }});
+      }});
+
       if (ds.bbox && ds.bbox.length === 4) {{
         currentBounds = [[ds.bbox[0], ds.bbox[1]], [ds.bbox[2], ds.bbox[3]]];
         map.fitBounds(currentBounds, {{ padding: 40, maxZoom: 13 }});
       }}
 
-      // Populate attribute sample table
-      const feats = (geojson.features || []).slice(0, 50);
-      document.getElementById("sampleCountLabel").textContent = `Showing ${{feats.length}} of ${{geojson.features.length}} preview features`;
+      // Populate attribute sample table with search filtering
+      renderSampleTable(geojson);
+    }}
+
+    function renderSampleTable(geojson) {{
+      const filter = (document.getElementById("sampleFilterInput").value || "").toLowerCase().trim();
+      const allFeats = geojson.features || [];
+      const filtered = filter
+        ? allFeats.filter(f => Object.values(f.properties || {{}}).some(v => String(v).toLowerCase().includes(filter)))
+        : allFeats;
+
+      const feats = filtered.slice(0, 100);
+      document.getElementById("sampleCountLabel").textContent = `Showing ${{feats.length}} of ${{allFeats.length}} preview features${{filter ? ' (filtered)' : ''}}`;
+
       if (feats.length > 0) {{
-        const cols = Object.keys(feats[0].properties || {{}}).filter(c => !c.startsWith("_oic_")).slice(0, 8);
-        document.getElementById("attrTableHead").innerHTML = `<tr>${{cols.map(c => `<th class="py-2 px-3">${{c}}</th>`).join("")}}</tr>`;
+        const cols = Object.keys(allFeats[0].properties || {{}}).filter(c => c !== "__idx" && !c.startsWith("_oic_")).slice(0, 8);
+        document.getElementById("attrTableHead").innerHTML = `<tr><th class="py-2 px-3">Geom</th>${{cols.map(c => `<th class="py-2 px-3">${{c}}</th>`).join("")}}</tr>`;
         const tbody = document.getElementById("attrTableBody");
         tbody.innerHTML = "";
         feats.forEach(f => {{
           const tr = document.createElement("tr");
-          tr.className = "hover:bg-surface-container cursor-pointer";
-          tr.innerHTML = cols.map(c => `<td class="py-1.5 px-3 truncate max-w-[220px]">${{f.properties[c] ?? ""}}</td>`).join("");
+          tr.className = "hover:bg-surface-container cursor-pointer transition-colors";
+          const gtype = (f.geometry && f.geometry.type) ? f.geometry.type.replace("Multi", "M-") : "—";
+          tr.innerHTML = `<td class="py-1.5 px-3 font-mono font-bold text-secondary">${{gtype}}</td>` +
+            cols.map(c => `<td class="py-1.5 px-3 truncate max-w-[200px]">${{f.properties[c] ?? ""}}</td>`).join("");
           tr.addEventListener("click", () => {{
-            if (f.geometry && f.geometry.type === "Point") {{
-              map.flyTo({{ center: f.geometry.coordinates, zoom: 13 }});
-            }} else if (currentBounds) {{
-              map.fitBounds(currentBounds, {{ padding: 40 }});
-            }}
+            tbody.querySelectorAll("tr").forEach(r => r.classList.remove("bg-secondary/15"));
+            tr.classList.add("bg-secondary/15");
+            zoomToInspectFeature(f);
           }});
           tbody.appendChild(tr);
         }});
+      }} else {{
+        document.getElementById("attrTableHead").innerHTML = "";
+        document.getElementById("attrTableBody").innerHTML = `<tr><td class="p-3 text-on-surface-variant">No features match "${{filter}}"</td></tr>`;
       }}
     }}
 
@@ -717,6 +883,16 @@ def render_qa_html_pages(
       document.getElementById("btnZoomExtent").addEventListener("click", () => {{
         if (currentBounds && map) map.fitBounds(currentBounds, {{ padding: 40 }});
       }});
+      document.getElementById("sampleFilterInput").addEventListener("input", () => {{
+        if (currentGeojson) renderSampleTable(currentGeojson);
+      }});
+      const closeBtn = document.getElementById("btnCloseSelectedFeature");
+      if (closeBtn) {{
+        closeBtn.addEventListener("click", () => {{
+          document.getElementById("selectedFeatureBox").classList.add("hidden");
+          setInspectHighlight(null);
+        }});
+      }}
       map.on("load", () => loadDatasetOnMap(initialKey));
     }});
   </script>
