@@ -113,6 +113,8 @@
             class="material-symbols-outlined text-[20px]">travel_explore</span>Source Inspector</a>
         <button type="button" id="navOfflineMapPack" class="nav-link text-left w-full cursor-pointer"><span
             class="material-symbols-outlined text-[20px]">inventory_2</span>Offline Map-in-a-Box</button>
+        <button type="button" id="navGeolibreSpec" class="nav-link text-left w-full cursor-pointer"><span
+            class="material-symbols-outlined text-[20px]">layers</span>Export to GeoLibre</button>
       </nav>
     </div>
     <div class="px-4 flex flex-col gap-3">
@@ -124,6 +126,14 @@
         </div>
         <span class="font-mono text-[10px] text-on-surface-variant truncate"
           title="gs://operational-intelligence-crafter-lake/">gs://operational-intelligence-crafter-lake/</span>
+      </div>
+      <div class="px-1 text-[10.5px] text-on-surface-variant flex flex-col gap-1 leading-snug">
+        <div>&copy;&reg; 2026 <a href="https://github.com/GetBack2Basics" target="_blank" class="text-secondary font-bold hover:underline">GetBack2Basics</a></div>
+        <div class="text-[9.5px]">Based on open-source projects from <a href="https://github.com/GetBack2Basics" target="_blank" class="text-secondary hover:underline">GetBack2Basics</a>.</div>
+        <div class="text-[9.5px] text-error font-medium flex items-center gap-1 mt-0.5">
+          <span class="material-symbols-outlined text-[13px] shrink-0">warning</span>
+          <span>Proof of concept &mdash; not for operational use.</span>
+        </div>
       </div>
     </div>
   </aside>
@@ -146,6 +156,11 @@
             class="h-10 px-4 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-2 transition-colors">
             <span class="material-symbols-outlined text-[18px]">fact_check</span><span>Data QA</span>
           </a>
+          <button id="btnHeaderGeolibre" type="button"
+            class="h-10 px-3.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-2 transition-colors cursor-pointer"
+            title="GeoLibre Open GIS Spec &amp; Desktop GIS Access">
+            <span class="material-symbols-outlined text-[18px]">layers</span><span>GeoLibre JSON</span>
+          </button>
           <button id="btnHeaderRun" type="button"
             class="h-10 px-4 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md flex items-center gap-2 transition-colors">
             <span class="material-symbols-outlined text-[18px]">play_arrow</span><span>Run Query</span>
@@ -649,6 +664,10 @@
                 class="badge badge-accent" style="display: none;">
                 <span class="material-symbols-outlined text-[15px]">download</span>Download GeoJSON
               </a>
+              <button id="btnExportGeolibre" type="button" class="badge badge-accent flex items-center gap-1 cursor-pointer"
+                title="Export to GeoLibre Project Spec &amp; Desktop GIS">
+                <span class="material-symbols-outlined text-[15px]">layers</span>Export to GeoLibre
+              </button>
               <span id="execTimeBadge" class="badge">Not Run</span>
             </div>
           </div>
@@ -805,6 +824,19 @@
           <div id="scenarioCardsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
         </section>
 
+        <!-- Footer / Copyright & Proof of Concept Disclaimer -->
+        <footer class="mt-12 pt-6 pb-10 border-t border-outline-variant flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-on-surface-variant">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-bold text-on-surface">&copy;&reg; 2026 <a href="https://github.com/GetBack2Basics" target="_blank" class="text-secondary hover:underline">GetBack2Basics</a></span>
+            <span>&bull;</span>
+            <span>Based on open-source projects from <a href="https://github.com/GetBack2Basics" target="_blank" class="text-secondary hover:underline">GetBack2Basics</a></span>
+          </div>
+          <div class="flex items-center gap-2 text-[11.5px] text-on-surface-variant text-center md:text-right">
+            <span class="material-symbols-outlined text-[16px] text-error shrink-0">warning</span>
+            <span><strong>Proof of Concept Only:</strong> Analytical demonstration &amp; research prototype. Should not be relied on for operational emergency warning, dispatch, or life-safety decisions.</span>
+          </div>
+        </footer>
+
       </div>
     </main>
   </div>
@@ -884,6 +916,82 @@
       </div>
       <div id="offlinePackModalBody" class="p-5 overflow-y-auto space-y-5 text-xs">
         <!-- Content dynamically injected by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- GeoLibre Project Spec & Desktop GIS Integration Modal -->
+  <div id="geolibreModal" class="oic-modal-backdrop" role="dialog" aria-modal="true">
+    <div class="oic-modal-card max-w-2xl">
+      <div class="px-5 py-3.5 bg-primary text-on-primary flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="material-symbols-outlined text-secondary-fixed text-[22px]">layers</span>
+          <h3 class="font-headline-sm text-base font-bold">GeoLibre Open GIS Project Spec</h3>
+        </div>
+        <button type="button" class="px-2.5 py-1 rounded bg-primary-container hover:bg-error text-white text-xs font-bold transition-colors cursor-pointer"
+          data-close-modal="geolibreModal">✕ Close</button>
+      </div>
+      <div class="p-5 overflow-y-auto space-y-4 text-xs">
+        <div class="geolibre-guide-box">
+          <div class="font-bold text-sm text-[#0284c7] mb-1.5">What is the GeoLibre Project Spec?</div>
+          The <code>aura-siting-crafter.geolibre.json</code> file contains the declarative spatial definition of this national siting model, including all candidate hubs, MCE suitability formulas, thematic vector styling, and direct S3 lakehouse stream configurations.
+        </div>
+
+        <div class="font-bold text-[13px] text-on-surface mb-1">How to Use in Desktop GIS (GeoLibre, QGIS, ArcGIS Pro):</div>
+
+        <div class="geolibre-step">
+          <span class="step-num">1</span>
+          <div>
+            <strong>Download the JSON Project Spec</strong> using the button below.
+          </div>
+        </div>
+
+        <div class="geolibre-step">
+          <span class="step-num">2</span>
+          <div>
+            <strong>Open with GeoLibre App / WebGIS</strong>: Launch the GeoLibre desktop application or open the <a href="https://geolibre.app/demo/" target="_blank" class="text-secondary font-semibold underline">GeoLibre WebGIS (geolibre.app/demo)</a> and choose <em>"Project" → "Open Project..."</em> (or drag &amp; drop) → select <code>aura-siting-crafter.geolibre.json</code>.
+          </div>
+        </div>
+
+        <div class="geolibre-step">
+          <span class="step-num">3</span>
+          <div>
+            <strong>Direct S3 Lakehouse Streaming</strong>: GeoLibre connects directly to the S3 Iceberg/GeoParquet endpoints for live querying and spatial joins without downloading full datasets locally.
+          </div>
+        </div>
+
+        <div class="geolibre-step">
+          <span class="step-num">4</span>
+          <div>
+            <strong>QGIS / Python GIS / DuckDB Access</strong>: Import candidate GeoJSON features directly into QGIS, or read candidate parquet with <code>read_parquet('s3://wherobots-user-storage/aura_siting/candidates/datacenter_candidates_national.parquet')</code> in DuckDB or GeoPandas.
+          </div>
+        </div>
+
+        <div class="pt-2 text-[10.5px] text-on-surface-variant flex items-center justify-between border-t border-outline-variant/60 flex-wrap gap-2">
+          <span>&copy;&reg; 2026 <a href="https://github.com/GetBack2Basics" target="_blank" class="text-secondary hover:underline font-bold">GetBack2Basics</a> &bull; Based on open-source projects from GetBack2Basics</span>
+          <span class="text-error font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">warning</span>Proof of concept &mdash; not for operational use.</span>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-outline-variant flex-wrap">
+          <a href="https://geolibre.app/demo/" target="_blank"
+            class="action-btn action-btn-secondary py-2 px-3 flex items-center gap-1.5 font-bold text-xs">
+            <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+            <span>Open in GeoLibre (geolibre.app/demo)</span>
+          </a>
+          <button type="button" id="btnDownloadAuraGeolibreJson"
+            class="action-btn action-btn-secondary py-2 px-3 flex items-center gap-1.5 font-bold text-xs">
+            <span class="material-symbols-outlined text-[16px]">download</span>
+            <span>Download aura-siting-crafter.geolibre.json</span>
+          </button>
+          <button type="button" id="btnDownloadGeolibreJson"
+            class="action-btn action-btn-primary py-2 px-3 flex items-center gap-1.5 font-bold text-xs">
+            <span class="material-symbols-outlined text-[16px]">download</span>
+            <span>Download operational-intelligence-crafter.geolibre.json</span>
+          </button>
+          <button type="button" class="action-btn py-2 px-3 text-xs" data-close-modal="geolibreModal">
+            Close
+          </button>
+        </div>
       </div>
     </div>
   </div>

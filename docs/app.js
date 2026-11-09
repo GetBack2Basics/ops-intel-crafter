@@ -154,6 +154,8 @@
     map.addControl(new maplibregl.NavigationControl(), "top-right");
     map.on("load", () => {
       mapReady = true;
+      window.map = map;
+      window.mapReady = true;
       // AURA-style layer control, click-to-identify popups, metadata, charts & attribute table (docs/layers.js)
       if (window.OICLayers) window.OICLayers.attach(map);
     });
@@ -431,6 +433,39 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       return "lga_multi_hazard";
     }
     return "pop_comparison";
+  }
+
+  function detectScenarioFromSql(sql) {
+    if (!sql || typeof sql !== "string") return {};
+    const lower = sql.toLowerCase();
+    let scenarioKey = null;
+
+    if (lower.includes("nsw_rfs_major_incidents_live") || lower.includes("rfs") || lower.includes("bushfire")) {
+      scenarioKey = "live_rfs";
+    } else if (lower.includes("ga_major_power_stations") || lower.includes("seismic_hazard_pga") || lower.includes("nsha")) {
+      scenarioKey = "national_power";
+    } else if (lower.includes("next_lga_boundaries_asgs2025") || lower.includes("lga_code_2025") || lower.includes("lga_name_2025")) {
+      scenarioKey = "lga_multi_hazard";
+    } else if (lower.includes("ga_electricity_substations") || lower.includes("distance_to_inundation_m") || lower.includes("substation_flood")) {
+      scenarioKey = "substation_flood";
+    } else if (lower.includes("derived_hunter_1km_population_grid") || lower.includes("in_method_a") || lower.includes("overlap_fraction") || lower.includes("cell_population")) {
+      scenarioKey = "pop_comparison";
+    } else if (lower.includes("cyclone") || lower.includes("typhoon") || lower.includes("wp302026")) {
+      scenarioKey = "cyclone_track_exposure";
+    } else if (lower.includes("uploaded_custom_aoi")) {
+      scenarioKey = "uploaded_aoi_exposure";
+    }
+
+    const areaMatch = sql.match(/--\s*User Area:\s*([^\r\n]+)/i);
+    const distMatch = sql.match(/--\s*User (?:Distance|Catchment Distance|Buffer|Clip):\s*([^\r\n]+)/i);
+    const optMatch = sql.match(/--\s*User Options:\s*([^\r\n]+)/i);
+
+    return {
+      scenarioKey,
+      area: areaMatch ? areaMatch[1].trim() : "",
+      distance: distMatch ? distMatch[1].trim() : "",
+      options: optMatch ? optMatch[1].trim() : ""
+    };
   }
 
   // Disambiguation Knowledge Base: Matches ambiguous administrative and geographic entities
@@ -1117,6 +1152,10 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     document.getElementById("ctxGateVal").textContent = "SQL Generated — Ready to Run";
     document.getElementById("ctxGateSub").textContent = "Review SQL below and click Run Query";
 
+    if (window.OICLayers && userParams.area) {
+      window.OICLayers.setAoiMask(userParams.area);
+    }
+
     document.getElementById("clarificationBox").style.display = "none";
 
     const runBtn = document.getElementById("btnRunQuery");
@@ -1598,6 +1637,19 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       console.error("Workbench bundle could not be loaded.");
       return;
     }
+
+    const currentSql = (document.getElementById("sqlInput")?.value || "").trim();
+    if (currentSql && !currentSql.startsWith("-- Loading")) {
+      const detected = detectScenarioFromSql(currentSql);
+      if (detected.scenarioKey) {
+        activeScenarioKey = detected.scenarioKey;
+        highlightActivePresetChip(activeScenarioKey);
+      }
+      if (detected.area) userParams.area = detected.area;
+      if (detected.options) userParams.options = detected.options;
+      if (detected.distance) userParams.distance = detected.distance;
+    }
+
     if (!activeScenarioKey) {
       analyzeQuery();
       return;
@@ -1606,7 +1658,6 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       openLocationClarificationModal("uncatalogued_reject");
       return;
     }
-    const currentSql = (document.getElementById("sqlInput")?.value || "").trim();
     if (!currentSql || currentSql.startsWith("-- Loading")) {
       generateValidatedQuery(activeScenarioKey, true);
       return;
@@ -1749,7 +1800,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       if (window.OICLayers) {
         window.OICLayers.bindResultsRows(tbody, "hunter_substation_flood_dependency", "feature_name");
         const floodAoi = (bundle && bundle.population_study && bundle.population_study.regimes && bundle.population_study.regimes[1].incident_wkt_7844) || null;
-        if (floodAoi) window.OICLayers.setAoiMask(floodAoi);
+        window.OICLayers.setAoiMask(userParams.area || floodAoi);
       }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#ea580c]"></span><span>GA Power Substation</span></div>
@@ -1813,7 +1864,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       }
       if (window.OICLayers) {
         window.OICLayers.bindResultsRows(tbody, "next_lga_boundaries_asgs2025", "lga_code");
-        window.OICLayers.setAoiMask([151.10, -33.35, 151.95, -32.55]);
+        window.OICLayers.setAoiMask(userParams.area || [151.10, -33.35, 151.95, -32.55]);
       }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3.5 h-1 rounded bg-[#006973]"></span><span>ABS ASGS 2025 LGA Boundary</span></div>
@@ -1864,7 +1915,10 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         const coords = rows.map(inc => [parseFloat(inc.lon), parseFloat(inc.lat)]).filter(pt => !isNaN(pt[0]) && !isNaN(pt[1]));
         fitMapToResultsExtent(coords, [149.5, -32.6], 5.8);
       }
-      if (window.OICLayers) window.OICLayers.bindResultsRows(tbody, "nsw_rfs_major_incidents_live", "title");
+      if (window.OICLayers) {
+        window.OICLayers.bindResultsRows(tbody, "nsw_rfs_major_incidents_live", "title");
+        window.OICLayers.setAoiMask(userParams.area || [141.0, -37.5, 153.6, -28.1]);
+      }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#dc2626]"></span><span>NSW RFS Active Incident</span></div>
       `;
@@ -1919,7 +1973,10 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
           map.fitBounds([[112.9, -43.7], [153.7, -10.0]], { padding: 30, duration: 800 });
         }
       }
-      if (window.OICLayers) window.OICLayers.bindResultsRows(tbody, null, null);
+      if (window.OICLayers) {
+        window.OICLayers.bindResultsRows(tbody, null, null);
+        window.OICLayers.setAoiMask(userParams.area || [112.9, -43.7, 153.7, -10.0]);
+      }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#7c3aed]"></span><span>GA Major Power Station</span></div>
       `;
@@ -2134,6 +2191,12 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#c2410c]"></span><span>GA Power Substations</span></div>
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#16a34a]"></span><span>NSW FOI Health &amp; Emergency Complexes</span></div>
       `;
+    }
+
+    // Safeguard: Ensure territory focus mask is armed/active for the query's target selection area
+    if (window.OICLayers && !window.OICLayers.getCurrentAoiGeometry()) {
+      const fallbackArea = userParams.area || (preset && preset.defaultArea) || "NSW Statewide";
+      window.OICLayers.setAoiMask(fallbackArea);
     }
 
     populateStep5AndStep6();
@@ -4401,6 +4464,82 @@ th { color: var(--muted); font-weight: 600; }
     modal.classList.add("open");
   }
 
+  // --- GeoLibre Open GIS Project Spec Modal & Export ---
+
+  function openGeolibreModal() {
+    const modal = document.getElementById("geolibreModal");
+    if (modal) modal.classList.add("open");
+  }
+
+  function closeGeolibreModal() {
+    const modal = document.getElementById("geolibreModal");
+    if (modal) modal.classList.remove("open");
+  }
+
+  async function downloadGeolibreJson(specType = "operational") {
+    const fileName = specType === "aura"
+      ? "aura-siting-crafter.geolibre.json"
+      : "operational-intelligence-crafter.geolibre.json";
+
+    try {
+      const resp = await fetch(fileName);
+      if (resp.ok) {
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(`Downloaded ${fileName}`, "info");
+        return;
+      }
+    } catch (err) {
+      console.warn("Direct fetch of GeoLibre spec failed, using generated spec:", err);
+    }
+
+    // Dynamic fallback generation matching GeoLibre schema
+    const bbox = getCurrentQueryBbox();
+    const dynamicSpec = {
+      version: "0.2.0",
+      name: specType === "aura" ? "AURA Siting Crafter — National Model" : "Operational Intelligence Crafter — Emergency Spatial Workbench",
+      mapView: {
+        center: [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2],
+        zoom: 9.0,
+        bearing: 0,
+        pitch: 0,
+        bbox: bbox
+      },
+      basemapStyleUrl: "https://tiles.openfreemap.org/styles/liberty",
+      basemapVisible: true,
+      basemapOpacity: 0.75,
+      metadata: {
+        project: "Operational Intelligence Crafter",
+        copyright: "©® 2026 GetBack2Basics. Based on open-source projects from GetBack2Basics.",
+        disclaimer: "Proof of concept only. Should not be relied on for operational work.",
+        lakehouse: "gs://operational-intelligence-crafter-lake",
+        crs: "EPSG:7844 (GDA2020) / EPSG:3112 (Lambert Metric)",
+        zero_mock: true
+      }
+    };
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dynamicSpec, null, 2));
+    const a = document.createElement("a");
+    a.href = dataStr;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast(`Exported ${fileName}`, "info");
+  }
+
+  // Expose on window for direct HTML onclick or console invocation
+  window.openGeolibreModal = openGeolibreModal;
+  window.closeGeolibreModal = closeGeolibreModal;
+  window.downloadGeolibreJson = downloadGeolibreJson;
+
   // =========================================================================
   // END OF OFFLINE MAP-IN-A-BOX SECTION
   // =========================================================================
@@ -4591,6 +4730,35 @@ th { color: var(--muted); font-weight: 600; }
     const btnLaunchBox = document.getElementById("btnLaunchCurrentBox");
     if (btnLaunchBox) {
       btnLaunchBox.addEventListener("click", () => launchCurrentQueryMapInABox());
+    }
+
+    // GeoLibre Open GIS Spec Export Controls
+    const btnExportGeolibre = document.getElementById("btnExportGeolibre");
+    if (btnExportGeolibre) {
+      btnExportGeolibre.addEventListener("click", openGeolibreModal);
+    }
+
+    const btnHeaderGeolibre = document.getElementById("btnHeaderGeolibre");
+    if (btnHeaderGeolibre) {
+      btnHeaderGeolibre.addEventListener("click", openGeolibreModal);
+    }
+
+    const navGeolibreSpec = document.getElementById("navGeolibreSpec");
+    if (navGeolibreSpec) {
+      navGeolibreSpec.addEventListener("click", e => {
+        e.preventDefault();
+        openGeolibreModal();
+      });
+    }
+
+    const btnDownloadGeolibre = document.getElementById("btnDownloadGeolibreJson");
+    if (btnDownloadGeolibre) {
+      btnDownloadGeolibre.addEventListener("click", () => downloadGeolibreJson("operational"));
+    }
+
+    const btnDownloadAuraGeolibre = document.getElementById("btnDownloadAuraGeolibreJson");
+    if (btnDownloadAuraGeolibre) {
+      btnDownloadAuraGeolibre.addEventListener("click", () => downloadGeolibreJson("aura"));
     }
 
     // Initial render of saved browser profile map packs

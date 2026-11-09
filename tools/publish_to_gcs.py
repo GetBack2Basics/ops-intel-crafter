@@ -249,7 +249,15 @@ def upload_and_sync_all() -> Dict[str, Any]:
         blob.upload_from_filename(str(item), content_type=_guess_content_type(item))
         print(f"  [UPLOAD] gs://{BUCKET_NAME}/{object_key} ({item.stat().st_size:,} B)")
 
-    for root_doc in ("index.html", "style.css", "app.js", "layers.js", "data/workbench_bundle.json"):
+    for root_doc in (
+        "index.html",
+        "style.css",
+        "app.js",
+        "layers.js",
+        "data/workbench_bundle.json",
+        "operational-intelligence-crafter.geolibre.json",
+        "aura-siting-crafter.geolibre.json",
+    ):
         doc_path = PROJECT_ROOT / "docs" / root_doc
         if doc_path.exists():
             assert_safe_object_name(root_doc)
@@ -276,6 +284,7 @@ def upload_and_sync_all() -> Dict[str, Any]:
         f"https://storage.googleapis.com/{BUCKET_NAME}/exports/hunter_population_grid_comparison/result.geojson",
         f"https://storage.googleapis.com/{BUCKET_NAME}/qa/data/qa_summary.json",
         f"https://storage.googleapis.com/{BUCKET_NAME}/manifests/dataset_manifest.json",
+        f"https://storage.googleapis.com/{BUCKET_NAME}/operational-intelligence-crafter.geolibre.json",
     ]
     verified = []
     for u in test_urls:

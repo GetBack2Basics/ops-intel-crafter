@@ -340,6 +340,111 @@
     return null;
   }
 
+  const KNOWN_LOCALITY_BBOXES = {
+    nsw: [141.0, -37.5, 153.6, -28.1],
+    "new south wales": [141.0, -37.5, 153.6, -28.1],
+    hunter: [151.45, -32.95, 151.82, -32.68],
+    "lower hunter": [151.45, -32.95, 151.82, -32.68],
+    maitland: [151.45, -32.82, 151.66, -32.65],
+    newcastle: [151.66, -33.02, 151.85, -32.84],
+    cessnock: [151.15, -33.05, 151.50, -32.70],
+    "port stephens": [151.68, -32.85, 152.22, -32.60],
+    "lake macquarie": [151.38, -33.20, 151.75, -32.92],
+    "central coast": [151.10, -33.60, 151.60, -33.10],
+    campbelltown: [150.70, -34.20, 150.95, -33.95],
+    tablelands: [144.35, -18.25, 145.85, -16.85],
+    cyclone: [136.0, -43.0, 158.0, -24.0],
+    qld: [137.9, -29.2, 153.6, -9.1],
+    queensland: [137.9, -29.2, 153.6, -9.1],
+    vic: [140.9, -39.2, 149.9, -33.9],
+    victoria: [140.9, -39.2, 149.9, -33.9],
+    wa: [112.9, -35.2, 129.0, -13.7],
+    "western australia": [112.9, -35.2, 129.0, -13.7],
+    sa: [129.0, -38.1, 141.0, -25.9],
+    "south australia": [129.0, -38.1, 141.0, -25.9],
+    tas: [143.8, -43.7, 148.5, -39.5],
+    tasmania: [143.8, -43.7, 148.5, -39.5],
+    nt: [129.0, -26.0, 138.0, -10.8],
+    "northern territory": [129.0, -26.0, 138.0, -10.8],
+    act: [148.7, -35.9, 149.4, -35.1],
+    australia: [112.9, -43.7, 153.7, -10.0],
+    national: [112.9, -43.7, 153.7, -10.0]
+  };
+
+  function normalizeGeometryInput(input) {
+    if (!input) return null;
+
+    // GeoJSON objects
+    if (typeof input === "object" && !Array.isArray(input)) {
+      if (input.type === "FeatureCollection" || input.type === "Feature" ||
+          input.type === "Polygon" || input.type === "MultiPolygon") {
+        return input;
+      }
+      if (input.geometry) return normalizeGeometryInput(input.geometry);
+      if (input.bbox && Array.isArray(input.bbox) && input.bbox.length === 4) {
+        return input.bbox;
+      }
+    }
+
+    // [[x0, y0], [x1, y1]] format (MapLibre LngLatBounds)
+    if (Array.isArray(input) && input.length === 2 && Array.isArray(input[0]) && Array.isArray(input[1])) {
+      return [input[0][0], input[0][1], input[1][0], input[1][1]];
+    }
+
+    // [minX, minY, maxX, maxY]
+    if (Array.isArray(input) && input.length === 4 && typeof input[0] === "number") {
+      return input;
+    }
+
+    // Strings (WKT, coordinate tuples, or locality names)
+    if (typeof input === "string") {
+      const clean = input.trim();
+      const upper = clean.toUpperCase();
+      if (upper.startsWith("POLYGON") || upper.startsWith("MULTIPOLYGON")) {
+        const parsed = parseWktPolygon(clean);
+        if (parsed) return parsed;
+      }
+
+      // Check if string contains 4 bounding box numbers (minX, minY, maxX, maxY)
+      const numMatch = clean.match(/(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)/);
+      if (numMatch) {
+        const minX = parseFloat(numMatch[1]);
+        const minY = parseFloat(numMatch[2]);
+        const maxX = parseFloat(numMatch[3]);
+        const maxY = parseFloat(numMatch[4]);
+        if (!isNaN(minX) && !isNaN(minY) && !isNaN(maxX) && !isNaN(maxY)) {
+          return [minX, minY, maxX, maxY];
+        }
+      }
+
+      // Check against known localities (support unioning multiple matches e.g. "Newcastle, Maitland, Cessnock")
+      const lower = clean.toLowerCase();
+      let matchedBboxes = [];
+      for (const [key, bbox] of Object.entries(KNOWN_LOCALITY_BBOXES)) {
+        const re = new RegExp(`\\b${key}\\b`, "i");
+        if (re.test(lower) || lower.includes(key)) {
+          matchedBboxes.push(bbox);
+        }
+      }
+      if (matchedBboxes.length > 0) {
+        const minX = Math.min(...matchedBboxes.map(b => b[0]));
+        const minY = Math.min(...matchedBboxes.map(b => b[1]));
+        const maxX = Math.max(...matchedBboxes.map(b => b[2]));
+        const maxY = Math.max(...matchedBboxes.map(b => b[3]));
+        return [minX, minY, maxX, maxY];
+      }
+
+      if (lower.includes("statewide")) {
+        return KNOWN_LOCALITY_BBOXES.nsw;
+      }
+      if (lower.includes("national")) {
+        return KNOWN_LOCALITY_BBOXES.australia;
+      }
+    }
+
+    return null;
+  }
+
   function createInvertedMaskGeoJSON(geomOrInput) {
     const worldRing = ensureRingWinding([
       [-180, -85],
@@ -351,13 +456,7 @@
 
     if (!geomOrInput) return { type: "FeatureCollection", features: [] };
 
-    let geom = geomOrInput;
-    if (typeof geom === "string") {
-      const clean = geom.trim().toUpperCase();
-      if (clean.startsWith("POLYGON") || clean.startsWith("MULTIPOLYGON")) {
-        geom = parseWktPolygon(geom);
-      }
-    }
+    const geom = normalizeGeometryInput(geomOrInput);
     if (!geom) return { type: "FeatureCollection", features: [] };
 
     const holes = [];
@@ -402,13 +501,7 @@
 
   function extractBoundaryGeoJSON(geomOrInput) {
     if (!geomOrInput) return { type: "FeatureCollection", features: [] };
-    let geom = geomOrInput;
-    if (typeof geom === "string") {
-      const clean = geom.trim().toUpperCase();
-      if (clean.startsWith("POLYGON") || clean.startsWith("MULTIPOLYGON")) {
-        geom = parseWktPolygon(geom);
-      }
-    }
+    const geom = normalizeGeometryInput(geomOrInput);
     if (!geom) return { type: "FeatureCollection", features: [] };
     if (geom.type === "FeatureCollection") return geom;
     if (geom.type === "Feature") return { type: "FeatureCollection", features: [geom] };
@@ -1223,6 +1316,7 @@
     catalog: CATALOG,
     byKey: BY_KEY,
     loadData,
+    getMap: () => map,
     getLayerData: key => (state[key] ? state[key].data : null),
     getState: key => state[key],
     getActiveKeys: () => order.filter(k => state[k] && state[k].visible)
