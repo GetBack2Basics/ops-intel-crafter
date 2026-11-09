@@ -13,14 +13,18 @@
 
   // ---------- Catalogue registry (real GeoJSON previews / derived exports) ----------
   const CATALOG = [
-    { key: "derived_hunter_1km_population_grid", title: "1 km² Population Grid (Methods A/B/C)", kind: "fill", color: "#006973",
+    {
+      key: "derived_hunter_1km_population_grid", title: "1 km² Population Grid (Methods A/B/C)", kind: "fill", color: "#006973",
       path: "exports/hunter_population_grid_comparison/result.geojson", theme: "Population (Derived)", scale: "local",
       derivedFrom: ["next_sa2_boundaries_asgs2021", "nsw_foi_building_complexes", "nsw_water_inundation_areas"],
       paint: { "fill-color": ["match", ["get", "cell_classification"], "FULLY_CONTAINED", "#006973", "BOUNDARY_CENTROID_IN", "#0284c7", "BOUNDARY_CENTROID_OUT", "#d47300", "#64748b"] },
-      legendClasses: [["#006973", "Fully contained (A & B)"], ["#0284c7", "Straddling — centroid in"], ["#d47300", "Straddling — missed by A"]] },
-    { key: "hunter_substation_flood_dependency", title: "Substation Flood Dependency (Derived)", kind: "circle", color: "#ea580c",
+      legendClasses: [["#006973", "Fully contained (A & B)"], ["#0284c7", "Straddling — centroid in"], ["#d47300", "Straddling — missed by A"]]
+    },
+    {
+      key: "hunter_substation_flood_dependency", title: "Substation Flood Dependency (Derived)", kind: "circle", color: "#ea580c",
       path: "exports/hunter_substation_flood_dependency/result.geojson", theme: "Infrastructure (Derived)", scale: "local",
-      derivedFrom: ["ga_electricity_substations", "nsw_water_inundation_areas", "nsw_foi_building_complexes"] },
+      derivedFrom: ["ga_electricity_substations", "nsw_water_inundation_areas", "nsw_foi_building_complexes"]
+    },
     { key: "nsw_water_inundation_areas", title: "NSW Water Inundation Areas", kind: "fill", color: "#38bdf8", path: "qa/data/nsw_water_inundation_areas.geojson", theme: "Flood & Hydrography", scale: "state" },
     { key: "ga_electricity_transmission_lines", title: "GA Transmission Lines", kind: "line", color: "#eab308", path: "qa/data/ga_electricity_transmission_lines.geojson", theme: "Critical Infrastructure", scale: "national" },
     { key: "ga_electricity_substations", title: "GA Power Substations", kind: "circle", color: "#c2410c", path: "qa/data/ga_electricity_substations.geojson", theme: "Critical Infrastructure", scale: "national" },
@@ -169,8 +173,10 @@
     const st = state[key];
     map.addSource(`S-${key}`, { type: "geojson", data: st.data });
     if (c.kind === "fill") {
-      map.addLayer({ id: `L-${key}-fill`, type: "fill", source: `S-${key}`,
-        paint: Object.assign({ "fill-color": c.color, "fill-opacity": st.opacity }, c.paint || {}) });
+      map.addLayer({
+        id: `L-${key}-fill`, type: "fill", source: `S-${key}`,
+        paint: Object.assign({ "fill-color": c.color, "fill-opacity": st.opacity }, c.paint || {})
+      });
       const outline = { "line-color": c.paint ? "#001026" : c.color, "line-width": c.hollow ? 2 : 1, "line-opacity": 1 };
       if (c.dash) outline["line-dasharray"] = [3, 2];
       map.addLayer({ id: `L-${key}-outline`, type: "line", source: `S-${key}`, paint: outline });
@@ -179,9 +185,13 @@
       if (c.dash) p["line-dasharray"] = [3, 2];
       map.addLayer({ id: `L-${key}-line`, type: "line", source: `S-${key}`, paint: p });
     } else {
-      map.addLayer({ id: `L-${key}-circle`, type: "circle", source: `S-${key}`,
-        paint: { "circle-radius": c.radius || 6, "circle-color": c.color, "circle-opacity": st.opacity,
-          "circle-stroke-width": 1.5, "circle-stroke-color": "#ffffff", "circle-stroke-opacity": st.opacity } });
+      map.addLayer({
+        id: `L-${key}-circle`, type: "circle", source: `S-${key}`,
+        paint: {
+          "circle-radius": c.radius || 6, "circle-color": c.color, "circle-opacity": st.opacity,
+          "circle-stroke-width": 1.5, "circle-stroke-color": "#ffffff", "circle-stroke-opacity": st.opacity
+        }
+      });
     }
   }
 
@@ -530,12 +540,18 @@
   // ---------- Highlight & Identify ----------
   function installHighlight() {
     map.addSource("oic-hl", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-    map.addLayer({ id: "oic-hl-fill", type: "fill", source: "oic-hl", filter: ["in", ["geometry-type"], ["literal", ["Polygon", "MultiPolygon"]]],
-      paint: { "fill-color": "#facc15", "fill-opacity": 0.25 } });
-    map.addLayer({ id: "oic-hl-line", type: "line", source: "oic-hl", filter: ["!", ["in", ["geometry-type"], ["literal", ["Point", "MultiPoint"]]]],
-      paint: { "line-color": "#facc15", "line-width": 4 } });
-    map.addLayer({ id: "oic-hl-point", type: "circle", source: "oic-hl", filter: ["in", ["geometry-type"], ["literal", ["Point", "MultiPoint"]]],
-      paint: { "circle-radius": 11, "circle-color": "rgba(250,204,21,0.25)", "circle-stroke-color": "#facc15", "circle-stroke-width": 3 } });
+    map.addLayer({
+      id: "oic-hl-fill", type: "fill", source: "oic-hl", filter: ["in", ["geometry-type"], ["literal", ["Polygon", "MultiPolygon"]]],
+      paint: { "fill-color": "#facc15", "fill-opacity": 0.25 }
+    });
+    map.addLayer({
+      id: "oic-hl-line", type: "line", source: "oic-hl", filter: ["!", ["in", ["geometry-type"], ["literal", ["Point", "MultiPoint"]]]],
+      paint: { "line-color": "#facc15", "line-width": 4 }
+    });
+    map.addLayer({
+      id: "oic-hl-point", type: "circle", source: "oic-hl", filter: ["in", ["geometry-type"], ["literal", ["Point", "MultiPoint"]]],
+      paint: { "circle-radius": 11, "circle-color": "rgba(250,204,21,0.25)", "circle-stroke-color": "#facc15", "circle-stroke-width": 3 }
+    });
   }
   function setHighlight(feature) {
     const src = map && map.getSource("oic-hl");
@@ -923,13 +939,13 @@
     const rowH = 24, labelW = 230, barW = 440, h = bars.length * rowH + 10;
     const svg = `<svg viewBox="0 0 ${labelW + barW + 60} ${h}" width="100%" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;">
       ${bars.map(([lbl, cnt], i) => {
-        const y = i * rowH + 4, bw = Math.max(2, (cnt / maxC) * barW);
-        const short = lbl.length > 36 ? lbl.slice(0, 35) + "…" : lbl;
-        return `<g><title>${esc(lbl)}: ${cnt}</title>
+      const y = i * rowH + 4, bw = Math.max(2, (cnt / maxC) * barW);
+      const short = lbl.length > 36 ? lbl.slice(0, 35) + "…" : lbl;
+      return `<g><title>${esc(lbl)}: ${cnt}</title>
           <text x="${labelW - 6}" y="${y + 15}" text-anchor="end" fill="#44474e">${esc(short)}</text>
           <rect x="${labelW}" y="${y + 3}" width="${bw}" height="${rowH - 8}" rx="3" fill="${color}" opacity="0.85"></rect>
           <text x="${labelW + bw + 5}" y="${y + 15}" fill="#131b2e" font-weight="700">${cnt.toLocaleString()}</text></g>`;
-      }).join("")}
+    }).join("")}
     </svg>`;
     $("chartModalBody").innerHTML = `<div class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant mb-2">${isNumeric ? "Histogram (10 equal-width bins)" : "Category frequency"} — ${esc(field)}</div>${svg}`;
   }
