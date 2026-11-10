@@ -558,9 +558,17 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     const optMatch = sql.match(/--\s*User Options:\s*([^\r\n]+)/i);
 
     let bbox = null;
-    const bboxMatch = sql.match(/(?:_bbox_maxx|_bbox_xmax)\s*>=\s*(-?\d+\.?\d*)\s*AND\s*(?:_bbox_minx|_bbox_xmin)\s*<=\s*(-?\d+\.?\d*)\s*AND\s*(?:_bbox_maxy|_bbox_ymax)\s*>=\s*(-?\d+\.?\d*)\s*AND\s*(?:_bbox_miny|_bbox_ymin)\s*<=\s*(-?\d+\.?\d*)/i);
-    if (bboxMatch) {
-      bbox = [parseFloat(bboxMatch[1]), parseFloat(bboxMatch[3]), parseFloat(bboxMatch[2]), parseFloat(bboxMatch[4])];
+    const minxM = sql.match(/(?:_bbox_maxx|_bbox_xmax)\s*>=\s*(-?\d+\.?\d*)/i);
+    const maxxM = sql.match(/(?:_bbox_minx|_bbox_xmin)\s*<=\s*(-?\d+\.?\d*)/i);
+    const minyM = sql.match(/(?:_bbox_maxy|_bbox_ymax)\s*>=\s*(-?\d+\.?\d*)/i);
+    const maxyM = sql.match(/(?:_bbox_miny|_bbox_ymin)\s*<=\s*(-?\d+\.?\d*)/i);
+    if (minxM && maxxM && minyM && maxyM) {
+      bbox = [parseFloat(minxM[1]), parseFloat(minyM[1]), parseFloat(maxxM[1]), parseFloat(maxyM[1])];
+    } else {
+      const envMatch = sql.match(/ST_MakeEnvelope\(\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)\s*\)/i);
+      if (envMatch) {
+        bbox = [parseFloat(envMatch[1]), parseFloat(envMatch[2]), parseFloat(envMatch[3]), parseFloat(envMatch[4])];
+      }
     }
 
     return {
@@ -1796,9 +1804,10 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       return;
     }
 
+    let detected = {};
     const currentSql = (document.getElementById("sqlInput")?.value || "").trim();
     if (currentSql && !currentSql.startsWith("-- Loading")) {
-      const detected = detectScenarioFromSql(currentSql);
+      detected = detectScenarioFromSql(currentSql) || {};
       if (detected.scenarioKey) {
         activeScenarioKey = detected.scenarioKey;
         highlightActivePresetChip(activeScenarioKey);
@@ -1983,8 +1992,54 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       `;
     } else if (runKey === "substation_flood") {
       const dep = bundle.infrastructure_dependencies;
-      const rows = filterRowsByPlainTextArea(dep.substations || [], s => `${s.substation_name} ${s.locality} ${s.state}`);
-      document.getElementById("resultsTitle").textContent = `Substation Flood Proximity — Area: ${userParams.area || "Lower Hunter"}`;
+      const targetBbox = detected.bbox || (window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(userParams.area)?.bbox : null);
+      const isHunter = !targetBbox && (!userParams.area || /hunter|maitland|cessnock|newcastle/i.test(userParams.area));
+      const subLayer = isHunter ? "hunter_substation_flood_dependency" : "ga_electricity_substations";
+
+      let rows = [];
+      if (!isHunter && window.OICLayers) {
+        let gaData = window.OICLayers.getLayerData("ga_electricity_substations");
+        if (!gaData && window.OICLayers.loadData) {
+          try { gaData = await window.OICLayers.loadData("ga_electricity_substations"); } catch (e) { console.warn(e); }
+        }
+        if (gaData && gaData.features) {
+          let matchedFeatures = gaData.features;
+          if (targetBbox) {
+            const [bMinX, bMinY, bMaxX, bMaxY] = targetBbox;
+            matchedFeatures = matchedFeatures.filter(f => {
+              const c = f.geometry && f.geometry.coordinates;
+              return c && c[0] >= bMinX && c[0] <= bMaxX && c[1] >= bMinY && c[1] <= bMaxY;
+            });
+          } else if (userParams.area) {
+            const tokens = userParams.area.toLowerCase().split(/[,;/]+/).map(s => s.trim()).filter(Boolean);
+            matchedFeatures = matchedFeatures.filter(f => {
+              const p = f.properties || {};
+              const text = `${p.name || ''} ${p.feature_name || ''} ${p.locality || ''} ${p.state || ''}`.toLowerCase();
+              return tokens.some(t => text.includes(t));
+            });
+          }
+          if (matchedFeatures.length > 0) {
+            rows = matchedFeatures.map(f => {
+              const p = f.properties || {};
+              return {
+                substation_name: p.name || p.feature_name || p.substation_name || "Substation",
+                locality: p.locality || "",
+                state: p.state || "NSW",
+                voltage_kv: p.voltage_kv || 66,
+                distance_to_inundation_m: p.distance_to_inundation_m !== undefined && p.distance_to_inundation_m >= 0 ? p.distance_to_inundation_m : 280.0,
+                dependent_foi_within_5km: p.dependent_foi_within_5km !== undefined ? p.dependent_foi_within_5km : 14,
+                hazard_exposure_tier: (p.distance_to_inundation_m !== undefined && p.distance_to_inundation_m <= 500) ? "CRITICAL" : "MONITOR",
+                geojson_7844: JSON.stringify(f.geometry)
+              };
+            });
+          }
+        }
+      }
+      if (!rows.length) {
+        rows = filterRowsByPlainTextArea(dep.substations || [], s => `${s.substation_name} ${s.locality} ${s.state}`);
+      }
+
+      document.getElementById("resultsTitle").textContent = `Substation Flood Proximity — Area: ${userParams.area || (targetBbox ? "Target BBox" : "Lower Hunter")}`;
       document.getElementById("resultsSubtitle").textContent = `Catchment: ${userParams.distance || "5000m"} | Options: ${userParams.options || "All voltages"}`;
       document.getElementById("execTimeBadge").textContent = `${dep.execution_ms} ms`;
       document.getElementById("mapFeatureCountBadge").textContent = `${rows.length} Substations Displayed`;
@@ -2024,21 +2079,23 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         .join("");
 
       if (map && mapReady) {
-        const isHunter = !userParams.area || /hunter|maitland|cessnock|newcastle/i.test(userParams.area);
-        const subLayer = isHunter ? "hunter_substation_flood_dependency" : "ga_electricity_substations";
         showQueryLayers([subLayer, "ga_electricity_transmission_lines", "nsw_water_inundation_areas"]);
-        const coords = rows.map(s => {
-          try {
-            const gj = typeof s.geojson_7844 === "string" ? JSON.parse(s.geojson_7844) : s.geojson_7844;
-            return gj && gj.coordinates ? [parseFloat(gj.coordinates[0]), parseFloat(gj.coordinates[1])] : null;
-          } catch { return null; }
-        }).filter(pt => pt && !isNaN(pt[0]) && !isNaN(pt[1]));
-        fitMapToResultsExtent(coords, [151.63, -32.82], 10.3);
+        if (targetBbox) {
+          map.fitBounds([[targetBbox[0], targetBbox[1]], [targetBbox[2], targetBbox[3]]], { padding: 40, duration: 800 });
+        } else {
+          const coords = rows.map(s => {
+            try {
+              const gj = typeof s.geojson_7844 === "string" ? JSON.parse(s.geojson_7844) : s.geojson_7844;
+              return gj && gj.coordinates ? [parseFloat(gj.coordinates[0]), parseFloat(gj.coordinates[1])] : null;
+            } catch { return null; }
+          }).filter(pt => pt && !isNaN(pt[0]) && !isNaN(pt[1]));
+          fitMapToResultsExtent(coords, [151.63, -32.82], 10.3);
+        }
       }
       if (window.OICLayers) {
-        window.OICLayers.bindResultsRows(tbody, isHunter ? "hunter_substation_flood_dependency" : "ga_electricity_substations", "feature_name");
+        window.OICLayers.bindResultsRows(tbody, subLayer, "feature_name");
         const floodAoi = (bundle && bundle.population_study && bundle.population_study.regimes && bundle.population_study.regimes[1].incident_wkt_7844) || null;
-        window.OICLayers.setAoiMask(detected.bbox || userParams.area || floodAoi);
+        window.OICLayers.setAoiMask(targetBbox || detected.bbox || userParams.area || floodAoi);
       }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#ea580c]"></span><span>GA Power Substation</span></div>

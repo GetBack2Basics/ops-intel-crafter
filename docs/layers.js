@@ -1022,11 +1022,27 @@
     if (!BY_KEY[key]) return false;
     if (!state[key].visible) await setVisible(key, true);
     const d = state[key].data;
-    if (!d) return false;
+    if (!d || !d.features) return false;
     const want = String(value).trim().toLowerCase();
-    const f = d.features.find(ft => ft.properties && String(ft.properties[prop] ?? "").trim().toLowerCase() === want);
+    const f = d.features.find(ft => {
+      if (!ft || !ft.properties) return false;
+      const candidates = [
+        ft.properties[prop],
+        ft.properties.feature_name,
+        ft.properties.name,
+        ft.properties.substation_name,
+        ft.properties.title,
+        ft.properties.incident_title,
+        ft.properties.lga_name,
+        ft.properties.lga_code,
+        ft.properties.cell_id
+      ].filter(v => v !== undefined && v !== null).map(v => String(v).trim().toLowerCase());
+
+      return candidates.some(c => c === want || c.includes(want) || want.includes(c));
+    });
     if (!f) return false;
     zoomToFeature(f);
+    showFeature(key, f, featureAnchor(f), 0);
     map.once("moveend", () => showFeature(key, f, featureAnchor(f), 0));
     return true;
   }

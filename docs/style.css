@@ -4,23 +4,23 @@
 */
 
 :root {
-  --primary: #001026;
-  --primary-container: #0b2545;
-  --secondary: #006973;
-  --secondary-container: #81f0ff;
-  --surface: #faf8ff;
-  --surface-container-low: #f2f3ff;
-  --surface-container: #eaedff;
-  --surface-container-high: #e2e7ff;
+  --primary: #0a1120;
+  --primary-container: #0f172a;
+  --secondary: #0284c7;
+  --secondary-container: #0284c7;
+  --surface: #f8fafc;
+  --surface-container-low: #f1f5f9;
+  --surface-container: #e2e8f0;
+  --surface-container-high: #cbd5e1;
   --surface-container-lowest: #ffffff;
-  --on-surface: #131b2e;
-  --on-surface-variant: #44474e;
-  --on-tertiary-container: #d47300;
-  --text-dim: #74777f;
+  --on-surface: #0f172a;
+  --on-surface-variant: #64748b;
+  --on-tertiary-container: #0369a1;
+  --text-dim: #94a3b8;
 
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Space Grotesk', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Geist', sans-serif;
+  --font-mono: 'JetBrains Mono', Consolas, monospace;
 }
 
 html { scroll-behavior: smooth; }
