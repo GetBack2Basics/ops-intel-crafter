@@ -225,6 +225,15 @@
       .map(s => s.trim())
       .filter(s => s && !/lower hunter|statewide|national|australia|all|floodplain/i.test(s));
     if (!tokens.length) return `-- Area scope: ${raw.replace(/'/g, "")}`;
+    const isStateCol = /state/i.test(columnExpr);
+    if (isStateCol) {
+      // Only filter by state column if token matches an actual Australian state or territory
+      const validStateTokens = tokens.filter(t => /^(nsw|vic|qld|wa|sa|tas|nt|act|new south wales|victoria|queensland|western australia|south australia|tasmania|northern territory|australian capital territory)$/i.test(t));
+      if (!validStateTokens.length) {
+        return `-- Area scope: ${raw.replace(/'/g, "")} (Locality outside state filter)`;
+      }
+      return `AND (${validStateTokens.map(t => `${columnExpr} ILIKE '%${t.replace(/'/g, "")}%'`).join(" OR ")})`;
+    }
     const ilikes = tokens.map(t => `${columnExpr} ILIKE '%${t.replace(/'/g, "")}%'`).join(" OR ");
     return `AND (${ilikes})`;
   }

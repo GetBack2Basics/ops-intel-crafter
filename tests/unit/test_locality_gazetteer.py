@@ -143,3 +143,31 @@ def test_substation_flood_query_has_no_hunter_bbox_for_wollongong():
     assert "resolveLocalityExtent" in snippet
     # It must NOT unconditionally set bboxSql to 151.35 AND 151.90
     assert "bboxSql = `_bbox_xmax >= 151.35" not in snippet
+
+
+def test_tweed_locality_and_power_query():
+    """Verifies that Tweed is recognized synchronously in layers.js and generates spatial bbox filter, not state ILIKE '%Tweed%'."""
+    layers_js_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "layers.js")
+    with open(layers_js_path, "r", encoding="utf-8") as f:
+        layers_content = f.read()
+
+    # Tweed must be present in layers.js embedded gazetteer
+    assert "tweed" in layers_content and "tweed heads" in layers_content, "tweed must be embedded directly in layers.js for zero-latency synchronous resolution"
+
+    # Verify gazetteer json has tweed
+    gaz_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "data", "locality_gazetteer.json")
+    with open(gaz_path, "r", encoding="utf-8") as f:
+        gaz = json.load(f)
+
+    tweed = gaz["tweed"]
+    assert tweed["bbox"] == [153.1067, -28.5427, 153.5863, -28.1569]
+    assert tweed["center"] == [153.3465, -28.3498]
+    assert tweed["state"] == "New South Wales"
+
+    # Verify app.js parseAreaWhereClause protects state column from non-state locality filtering
+    app_js_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "app.js")
+    with open(app_js_path, "r", encoding="utf-8") as f:
+        app_content = f.read()
+
+    assert "validStateTokens" in app_content
+

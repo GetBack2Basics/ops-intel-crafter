@@ -255,6 +255,11 @@ def upload_and_sync_all() -> Dict[str, Any]:
         "app.js",
         "layers.js",
         "data/workbench_bundle.json",
+        "data/locality_gazetteer.json",
+        "data/lga_gazetteer_compact.json",
+        "data/WP302026_CYCLONE_ZONES.geojson",
+        "data/WP302026_TRACK_latest.geojson",
+        "data/WP302026_TRACK_latest.kmz",
         "operational-intelligence-crafter.geolibre.json",
         "aura-siting-crafter.geolibre.json",
     ):
@@ -285,6 +290,7 @@ def upload_and_sync_all() -> Dict[str, Any]:
         f"https://storage.googleapis.com/{BUCKET_NAME}/qa/data/qa_summary.json",
         f"https://storage.googleapis.com/{BUCKET_NAME}/manifests/dataset_manifest.json",
         f"https://storage.googleapis.com/{BUCKET_NAME}/operational-intelligence-crafter.geolibre.json",
+        f"https://storage.googleapis.com/{BUCKET_NAME}/data/locality_gazetteer.json",
     ]
     verified = []
     for u in test_urls:
