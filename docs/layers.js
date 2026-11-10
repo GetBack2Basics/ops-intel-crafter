@@ -830,7 +830,6 @@
       }
     }
   }
-  }
 
   function clearAoiMask() {
     currentAoiGeometry = null;

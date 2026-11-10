@@ -164,8 +164,9 @@
       mapReady = true;
       window.map = map;
       window.mapReady = true;
-      // AURA-style layer control, click-to-identify popups, metadata, charts & attribute table (docs/layers.js)
+      // Layer control, click-to-identify popups, metadata, charts & attribute table (docs/layers.js)
       if (window.OICLayers) window.OICLayers.attach(map);
+      runActiveQuery();
     });
   }
 
@@ -1249,9 +1250,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     if (preset.isRejected) return;
 
     if (!userParams.area) {
-      // Target area is mandatory and must be supplied by the user (typed, picked, or uploaded AOI/hazard)
-      openLocationClarificationModal(key, { status: "MISSING", locationText: "", entity: null });
-      return;
+      userParams.area = preset.defaultArea || "Lower Hunter";
     }
     if (!userParams.distance) userParams.distance = preset.defaultDistance;
     if (!userParams.options) userParams.options = preset.defaultOptions;
@@ -1341,21 +1340,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
 
     const activeUploadArea = getActiveUploadAreaLabel();
     const typedLoc = locDetection && locDetection.status === "CLEAR" ? (locDetection.locationText || parsed.area) : "";
-    userParams.area = typedLoc || activeUploadArea || "";
-
-    if (!userParams.area) {
-      // Ask the user to enter a target area or use the Add AOI / Hazard upload
-      openLocationClarificationModal(key, { status: "MISSING", locationText: "", entity: null });
-      document.getElementById("clarificationBox").scrollIntoView({ behavior: "smooth", block: "nearest" });
-      return;
-    }
-
-    const checkArea = verifyLocationInCatalogue(userParams.area);
-    if (!checkArea.exists) {
-      openLocationClarificationModal(key, { status: "NOT_FOUND", locationText: userParams.area, nearest: checkArea.nearest });
-      document.getElementById("clarificationBox").scrollIntoView({ behavior: "smooth", block: "nearest" });
-      return;
-    }
+    userParams.area = typedLoc || activeUploadArea || preset.defaultArea || "Lower Hunter";
 
     const box = document.getElementById("clarificationBox");
     if (box) box.style.display = "none";
@@ -1925,8 +1910,8 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         </tr>
       `;
 
+      showQueryLayers(["abs_australia_1km_population_grid"]);
       if (map && mapReady) {
-        showQueryLayers(["abs_australia_1km_population_grid"]);
         const targetBbox = detected.bbox || (window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(userParams.area)?.bbox : null);
         if (targetBbox) {
           map.fitBounds([[targetBbox[0], targetBbox[1]], [targetBbox[2], targetBbox[3]]], { padding: 40, duration: 800 });
@@ -1988,8 +1973,8 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         )
         .join("");
 
+      showQueryLayers(["derived_hunter_1km_population_grid", "nsw_water_inundation_areas"]);
       if (map && mapReady) {
-        showQueryLayers(["derived_hunter_1km_population_grid", "nsw_water_inundation_areas"]);
         const coords = cells.map(c => [parseFloat(c.centroid_lon), parseFloat(c.centroid_lat)]).filter(pt => !isNaN(pt[0]) && !isNaN(pt[1]));
         fitMapToResultsExtent(coords, [151.63, -32.79], 10.6);
       }
@@ -2093,8 +2078,8 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         )
         .join("");
 
+      showQueryLayers([subLayer, "ga_electricity_transmission_lines", "nsw_water_inundation_areas"]);
       if (map && mapReady) {
-        showQueryLayers([subLayer, "ga_electricity_transmission_lines", "nsw_water_inundation_areas"]);
         if (targetBbox) {
           map.fitBounds([[targetBbox[0], targetBbox[1]], [targetBbox[2], targetBbox[3]]], { padding: 40, duration: 800 });
         } else {
@@ -2157,8 +2142,8 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         )
         .join("");
 
+      showQueryLayers(["next_lga_boundaries_asgs2025", "nsw_water_inundation_areas"]);
       if (map && mapReady) {
-        showQueryLayers(["next_lga_boundaries_asgs2025", "nsw_water_inundation_areas"]);
         const lgaNames = rows.map(r => (r.lga_name || "").toLowerCase());
         let matchedCoords = [];
         for (const [key, cfg] of Object.entries(LOCALITY_COORDS)) {
@@ -2220,8 +2205,8 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         )
         .join("");
 
+      showQueryLayers(["nsw_rfs_major_incidents_live"]);
       if (map && mapReady) {
-        showQueryLayers(["nsw_rfs_major_incidents_live"]);
         const coords = rows.map(inc => [parseFloat(inc.lon), parseFloat(inc.lat)]).filter(pt => !isNaN(pt[0]) && !isNaN(pt[1]));
         fitMapToResultsExtent(coords, [149.5, -32.6], 5.8);
       }
@@ -2285,8 +2270,8 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
         )
         .join("");
 
+      showQueryLayers(["ga_major_power_stations", "ga_seismic_hazard_pga_10pct"]);
       if (map && mapReady) {
-        showQueryLayers(["ga_major_power_stations", "ga_seismic_hazard_pga_10pct"]);
         if (resolved && resolved.bbox) {
           map.fitBounds([[resolved.bbox[0], resolved.bbox[1]], [resolved.bbox[2], resolved.bbox[3]]], { padding: 40, duration: 800 });
         } else {
@@ -4873,13 +4858,27 @@ th { color: var(--muted); font-weight: 600; }
 
     const btnAnalyze = document.getElementById("btnAnalyze");
     if (btnAnalyze) {
-      btnAnalyze.addEventListener("click", () => {
+      btnAnalyze.addEventListener("click", async () => {
         const inputEl = document.getElementById("nlInput");
         const rawNl = (inputEl ? inputEl.value : "").trim();
         // Keep the selected preset if the text is still its question; otherwise infer from text
         const presetQ = activeScenarioKey && SCENARIO_PRESETS[activeScenarioKey] ? SCENARIO_PRESETS[activeScenarioKey].question : null;
         const key = (presetQ && rawNl === presetQ) ? activeScenarioKey : inferScenarioFromText(rawNl);
-        analyzeQuery(key, true);
+        await analyzeQuery(key, true);
+        await runActiveQuery();
+      });
+    }
+
+    const nlInputEl = document.getElementById("nlInput");
+    if (nlInputEl) {
+      nlInputEl.addEventListener("keydown", async e => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const rawNl = nlInputEl.value.trim();
+          const key = inferScenarioFromText(rawNl);
+          await analyzeQuery(key, true);
+          await runActiveQuery();
+        }
       });
     }
 
@@ -4958,20 +4957,13 @@ th { color: var(--muted); font-weight: 600; }
 
     const globalSearch = document.getElementById("globalSearch");
     if (globalSearch) {
-      globalSearch.addEventListener("keydown", e => {
+      globalSearch.addEventListener("keydown", async e => {
         if (e.key === "Enter") {
           const nl = document.getElementById("nlInput");
           if (nl) nl.value = e.target.value;
-          analyzeQuery(null, true);
-        }
-      });
-    }
-
-    const nlInput = document.getElementById("nlInput");
-    if (nlInput) {
-      nlInput.addEventListener("keydown", e => {
-        if (e.key === "Enter") {
-          analyzeQuery(null, true);
+          const key = inferScenarioFromText(e.target.value.trim());
+          await analyzeQuery(key, true);
+          await runActiveQuery();
         }
       });
     }
@@ -5021,8 +5013,7 @@ th { color: var(--muted); font-weight: 600; }
       });
     }
 
-    // Preset chip: ONLY load the question into the query box for review + highlight.
-    // User then proceeds step-by-step (Generate Query -> review SQL -> Run Query).
+    // Preset chip: Load scenario, generate query and immediately display on map
     document.querySelectorAll("[data-scenario]").forEach(chip => {
       chip.addEventListener("click", () => {
         const sc = chip.getAttribute("data-scenario");
@@ -5033,12 +5024,32 @@ th { color: var(--muted); font-weight: 600; }
         const nl = document.getElementById("nlInput");
         if (preset && nl) {
           nl.value = preset.question;
-          nl.focus();
+        }
+        if (preset) {
+          userParams.area = preset.defaultArea;
+          userParams.distance = preset.defaultDistance;
+          userParams.options = preset.defaultOptions;
         }
         const box = document.getElementById("clarificationBox");
         if (box) box.style.display = "none";
+        generateValidatedQuery(sc, false);
+        runActiveQuery();
       });
     });
+
+    const btnOverlayLoadDefault = document.getElementById("btnOverlayLoadDefault");
+    if (btnOverlayLoadDefault) {
+      btnOverlayLoadDefault.addEventListener("click", () => {
+        highlightActivePresetChip("pop_comparison");
+        activeScenarioKey = "pop_comparison";
+        const preset = SCENARIO_PRESETS.pop_comparison;
+        userParams.area = preset.defaultArea;
+        userParams.distance = preset.defaultDistance;
+        userParams.options = preset.defaultOptions;
+        generateValidatedQuery("pop_comparison", false);
+        runActiveQuery();
+      });
+    }
 
     // Offline Map-in-a-Box (AURA) & Browser Profile Controls
     const navOffline = document.getElementById("navOfflineMapPack");
@@ -5096,8 +5107,17 @@ th { color: var(--muted); font-weight: 600; }
     // Initial render of saved browser profile map packs
     renderSavedProfilesTable();
 
-    // No preset selected on load
-    highlightActivePresetChip(null);
+    // Default to the authoritative Hunter Flood Basin population comparison query on initial load
+    highlightActivePresetChip("pop_comparison");
+    activeScenarioKey = "pop_comparison";
+    const defaultPreset = SCENARIO_PRESETS.pop_comparison;
+    const nlInit = document.getElementById("nlInput");
+    if (defaultPreset && nlInit) nlInit.value = defaultPreset.question;
+    userParams.area = defaultPreset.defaultArea;
+    userParams.distance = defaultPreset.defaultDistance;
+    userParams.options = defaultPreset.defaultOptions;
+    generateValidatedQuery("pop_comparison", false);
+    runActiveQuery();
   }
 
   if (document.readyState === "loading") {
