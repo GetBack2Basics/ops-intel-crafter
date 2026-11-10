@@ -40,7 +40,8 @@
     { key: "national_schools_acara_v2", title: "AURA: National Schools (ACARA)", kind: "circle", color: "#2563eb", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3", theme: "AURA: Sensitive Receptors", scale: "national", radius: 4 },
     { key: "qld_transmission_grid_v2", title: "AURA: QLD Transmission Grid", kind: "line", color: "#f59e0b", endpoint: "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2", theme: "AURA: Transmission Grid", scale: "state" },
     { key: "national_cyclone_hazard_tcha_v2", title: "AURA: Tropical Cyclone Hazard (TCHA)", kind: "line", color: "#06b6d4", endpoint: "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/15", theme: "AURA: Cyclone Hazard", scale: "national", dash: true },
-    { key: "nsw_coastal_inundation_hazard_v2", title: "AURA: NSW Coastal Inundation & Surge", kind: "fill", color: "#0284c7", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7", theme: "AURA: Coastal Hazard", scale: "state", opacity: 0.45 }
+    { key: "nsw_coastal_inundation_hazard_v2", title: "AURA: NSW Coastal Inundation & Surge", kind: "fill", color: "#0284c7", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7", theme: "AURA: Coastal Hazard", scale: "state", opacity: 0.45 },
+    { key: "aoi_focus_mask", title: "Selection Focus Mask (Tuffs AOI)", kind: "fill", color: "#030712", theme: "AOI & Focus Mask", scale: "local", opacity: 0.80, isSystemLayer: true, paint: { "fill-color": "#030712", "fill-opacity": 0.80 } }
   ];
   const BY_KEY = Object.fromEntries(CATALOG.map(c => [c.key, c]));
   const TITLE_FIELDS = ["feature_name", "title", "incident_title", "LGA_NAME_2025", "lga_name", "lganame", "sa2_name_2021", "hydroname", "cell_id", "contour_id", "generalname", "name"];
@@ -71,7 +72,16 @@
   const state = {}; // key -> { data, loading, visible, opacity, inList }
   let order = [];   // top-first list of keys in the layer control
 
-  CATALOG.forEach(c => { state[c.key] = { data: null, loading: null, visible: false, opacity: c.hollow ? 0.08 : (c.kind === "fill" ? 0.42 : 1), inList: false }; });
+  CATALOG.forEach(c => {
+    state[c.key] = {
+      data: null,
+      loading: null,
+      visible: c.key === "aoi_focus_mask" ? true : false,
+      opacity: c.key === "aoi_focus_mask" ? 0.80 : (c.hollow ? 0.08 : (c.kind === "fill" ? 0.42 : 1)),
+      inList: c.key === "aoi_focus_mask" ? true : false
+    };
+  });
+  if (!order.includes("aoi_focus_mask")) order.unshift("aoi_focus_mask");
 
   fetch("qa/data/qa_summary.json")
     .then(r => r.json())
@@ -81,12 +91,14 @@
   const $ = id => document.getElementById(id);
   const esc = v => String(v === null || v === undefined ? "" : v).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
   const mapIds = key => {
+    if (key === "aoi_focus_mask") return ["territory-mask-fill", "aoi-boundary-line"];
     const c = BY_KEY[key];
     if (c.kind === "fill") return [`L-${key}-fill`, `L-${key}-outline`];
     if (c.kind === "line") return [`L-${key}-line`];
     return [`L-${key}-circle`];
   };
   const hitIds = key => {
+    if (key === "aoi_focus_mask") return [];
     const c = BY_KEY[key];
     if (c.kind === "fill") return c.hollow ? [`L-${key}-fill`, `L-${key}-outline`] : [`L-${key}-fill`];
     return mapIds(key);
@@ -97,6 +109,11 @@
     const st = state[key];
     if (st.data) return Promise.resolve(st.data);
     if (st.loading) return st.loading;
+    if (key === "aoi_focus_mask") {
+      const d = createInvertedMaskGeoJSON(currentAoiGeometry || DEFAULT_HUNTER_AOI_WKT);
+      st.data = d;
+      return Promise.resolve(d);
+    }
     const c = BY_KEY[key];
     const fetchUrl = c.path ? c.path : (c.endpoint.replace(/\/+$/, '') + '/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=2000');
     st.loading = fetch(fetchUrl)
@@ -146,6 +163,11 @@
     return [[x0, y0], [x1, y1]];
   }
   function layerBounds(key) {
+    if (key === "aoi_focus_mask") {
+      const res = resolveLocalityExtent(currentAoiGeometry);
+      if (res && res.bbox) return [[res.bbox[0], res.bbox[1]], [res.bbox[2], res.bbox[3]]];
+      return [[151.45, -32.95], [151.82, -32.68]];
+    }
     const d = state[key].data;
     if (!d) return null;
     let b = null;
@@ -168,6 +190,10 @@
 
   // ---------- Map layer management ----------
   function ensureMapLayers(key) {
+    if (key === "aoi_focus_mask") {
+      installAoiMask();
+      return;
+    }
     if (!map || map.getSource(`S-${key}`)) return;
     const c = BY_KEY[key];
     const st = state[key];
@@ -197,6 +223,14 @@
 
   function applyVisibility(key) {
     if (!map) return;
+    if (key === "aoi_focus_mask") {
+      aoiMaskEnabled = !!state[key].visible;
+      const vis = state[key].visible ? "visible" : "none";
+      if (map.getLayer("territory-mask-fill")) map.setLayoutProperty("territory-mask-fill", "visibility", vis);
+      if (map.getLayer("aoi-boundary-line")) map.setLayoutProperty("aoi-boundary-line", "visibility", vis);
+      updateMaskButtonUi();
+      return;
+    }
     mapIds(key).forEach(id => { if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", state[key].visible ? "visible" : "none"); });
   }
 
@@ -204,6 +238,11 @@
     if (!map) return;
     const c = BY_KEY[key];
     const o = state[key].opacity;
+    if (key === "aoi_focus_mask") {
+      if (map.getLayer("territory-mask-fill")) map.setPaintProperty("territory-mask-fill", "fill-opacity", o);
+      updateMaskButtonUi();
+      return;
+    }
     if (c.kind === "fill") {
       if (map.getLayer(`L-${key}-fill`)) map.setPaintProperty(`L-${key}-fill`, "fill-opacity", o);
       if (map.getLayer(`L-${key}-outline`)) map.setPaintProperty(`L-${key}-outline`, "line-opacity", c.hollow ? Math.max(0.15, Math.min(1, o * 8)) : Math.max(0.15, Math.min(1, o * 2)));
@@ -746,6 +785,15 @@
     if (map.getLayer("territory-mask-fill")) map.moveLayer("territory-mask-fill");
     if (map.getLayer("aoi-boundary-line")) map.moveLayer("aoi-boundary-line");
     ["oic-hl-fill", "oic-hl-line", "oic-hl-point"].forEach(id => { if (map.getLayer(id)) map.moveLayer(id); });
+    if (state["aoi_focus_mask"]) {
+      state["aoi_focus_mask"].visible = aoiMaskEnabled;
+      state["aoi_focus_mask"].inList = true;
+      state["aoi_focus_mask"].data = maskData;
+      if (!order.includes("aoi_focus_mask")) {
+        order.unshift("aoi_focus_mask");
+      }
+      renderLayerControl();
+    }
     updateMaskButtonUi();
 
     // Auto-fit camera to the active AOI bounds if not explicitly disabled
@@ -769,37 +817,58 @@
     if (map && map.getSource("aoi-boundary")) {
       map.getSource("aoi-boundary").setData({ type: "FeatureCollection", features: [] });
     }
+    if (state["aoi_focus_mask"]) {
+      state["aoi_focus_mask"].data = null;
+      renderLayerControl();
+    }
     updateMaskButtonUi();
   }
 
   function toggleAoiMask() {
     aoiMaskEnabled = !aoiMaskEnabled;
+    if (state["aoi_focus_mask"]) {
+      state["aoi_focus_mask"].visible = aoiMaskEnabled;
+    }
     if (aoiMaskEnabled) {
       setAoiMask(currentAoiGeometry || DEFAULT_HUNTER_AOI_WKT);
-    } else if (map && map.getSource("territory-mask")) {
-      map.getSource("territory-mask").setData({ type: "FeatureCollection", features: [] });
-      if (map.getSource("aoi-boundary")) map.getSource("aoi-boundary").setData({ type: "FeatureCollection", features: [] });
+    } else {
+      if (map && map.getSource("territory-mask")) {
+        map.getSource("territory-mask").setData({ type: "FeatureCollection", features: [] });
+      }
+      if (map && map.getSource("aoi-boundary")) {
+        map.getSource("aoi-boundary").setData({ type: "FeatureCollection", features: [] });
+      }
     }
     updateMaskButtonUi();
+    renderLayerControl();
   }
 
   function updateMaskButtonUi() {
     const btn = $("btnToggleAoiMask");
     const status = $("aoiMaskStatus");
-    if (!btn || !status) return;
-    const hasAoi = !!currentAoiGeometry;
-    if (aoiMaskEnabled && hasAoi) {
-      status.textContent = "On (80%)";
-      btn.classList.add("active");
-      btn.style.borderColor = "#54e1f0";
-    } else if (aoiMaskEnabled && !hasAoi) {
-      status.textContent = "Armed";
-      btn.classList.remove("active");
-      btn.style.borderColor = "";
-    } else {
-      status.textContent = "Off";
-      btn.classList.remove("active");
-      btn.style.borderColor = "";
+    const pct = Math.round((state["aoi_focus_mask"] ? state["aoi_focus_mask"].opacity : 0.80) * 100);
+    if (btn && status) {
+      const hasAoi = !!currentAoiGeometry;
+      if (aoiMaskEnabled && hasAoi) {
+        status.textContent = `On (${pct}%)`;
+        btn.classList.add("active");
+        btn.style.borderColor = "#54e1f0";
+      } else if (aoiMaskEnabled && !hasAoi) {
+        status.textContent = "Armed";
+        btn.classList.remove("active");
+        btn.style.borderColor = "";
+      } else {
+        status.textContent = "Off";
+        btn.classList.remove("active");
+        btn.style.borderColor = "";
+      }
+    }
+    const hudBtn = $("btnToggleMask");
+    if (hudBtn) {
+      hudBtn.textContent = aoiMaskEnabled ? `🎭 Focus Mask: ${pct}%` : `🎭 Focus Mask: Off`;
+      hudBtn.classList.toggle("active", aoiMaskEnabled);
+      hudBtn.style.borderColor = aoiMaskEnabled ? "#54e1f0" : "";
+      hudBtn.style.opacity = aoiMaskEnabled ? "1.0" : "0.6";
     }
   }
 
@@ -958,11 +1027,13 @@
 
   // ---------- Layer Control & Legend ----------
   function swatch(c) {
+    if (c.key === "aoi_focus_mask") return `<span class="geom-swatch-poly" style="color:#54e1f0;background:#030712cc;border:1.5px solid #54e1f0;"></span>`;
     if (c.kind === "circle") return `<span class="geom-swatch-point" style="background:${c.color}"></span>`;
     if (c.kind === "line") return `<span class="geom-swatch-line" style="background:${c.dash ? `repeating-linear-gradient(90deg, ${c.color} 0 4px, transparent 4px 7px)` : c.color}"></span>`;
     return `<span class="geom-swatch-poly" style="color:${c.color};background:${c.hollow ? "transparent" : c.color + "66"};${c.dash ? "border-style:dashed;" : ""}"></span>`;
   }
   function qaBadge(key) {
+    if (key === "aoi_focus_mask") return `<span class="badge-tag optimal" style="font-size:9.5px;padding:0 5px;">ACTIVE</span>`;
     const qa = qaIndex[key];
     const s = qa ? qa.overall_qa_status : (BY_KEY[key].derivedFrom ? "DERIVED" : "N/A");
     const cls = s === "PASS" ? "optimal" : (s === "WARNING" || s === "DERIVED" ? "tight" : "long");
@@ -988,6 +1059,7 @@
       const c = BY_KEY[k];
       const st = state[k];
       const count = st.data ? st.data.features.length : (qaIndex[k] && qaIndex[k].preview_geojson ? qaIndex[k].preview_geojson.preview_feature_count : null);
+      const featText = k === "aoi_focus_mask" ? (currentAoiGeometry ? ((resolveLocalityExtent(currentAoiGeometry) || {}).name || "Active AOI") : "Default AOI") : (count !== null ? Number(count).toLocaleString() + " feat" : "—");
       const idx = order.indexOf(k);
       return `<div class="layer-card ${dockKey === k ? "active-layer" : ""}" data-layer="${k}">
         <div class="flex items-center gap-2">
@@ -996,7 +1068,7 @@
           <div class="min-w-0 flex-1">
             <div class="text-[12px] font-bold text-on-surface truncate" title="${esc(c.title)}">${esc(c.title)}</div>
             <div class="flex items-center gap-1.5 text-[10px] text-on-surface-variant">
-              <span class="font-mono">${count !== null ? Number(count).toLocaleString() + " feat" : "—"}</span>
+              <span class="font-mono">${esc(featText)}</span>
               <span>•</span><span class="truncate">${esc(c.theme)}</span>${qaBadge(k)}
               ${st.loading && !st.data ? '<span class="text-secondary font-bold">loading…</span>' : ""}
             </div>
@@ -1005,9 +1077,13 @@
         <div class="flex items-center gap-1 mt-1.5 flex-wrap">
           <button type="button" class="layer-icon-btn" data-act="opacity" title="Opacity">🎚️</button>
           <button type="button" class="layer-icon-btn" data-act="zoom" title="Zoom to layer extent">🎯</button>
+          ${!c.isSystemLayer ? `
           <button type="button" class="layer-icon-btn" data-act="meta" title="Metadata &amp; 3-Level QA lineage">ℹ️</button>
           <button type="button" class="layer-icon-btn" data-act="chart" title="Attribute distribution charts">📊</button>
           <button type="button" class="layer-icon-btn ${dockKey === k ? "active" : ""}" data-act="table" title="Open in Attribute Table View">⊞</button>
+          ` : `
+          <button type="button" class="layer-icon-btn" data-act="meta" title="Focus Mask Details">ℹ️</button>
+          `}
           ${idx >= 0 ? `<span class="flex-1"></span>
           <button type="button" class="layer-icon-btn" data-act="up" title="Move up" ${idx === 0 ? "disabled style=\"opacity:.35\"" : ""}>▲</button>
           <button type="button" class="layer-icon-btn" data-act="down" title="Move down" ${idx === order.length - 1 ? "disabled style=\"opacity:.35\"" : ""}>▼</button>
@@ -1031,7 +1107,13 @@
     if (act === "toggle") return setVisible(key, actEl.checked, { zoom: actEl.checked && !state[key].data });
     if (act === "opacity") { card.querySelector(".opacity-drawer").classList.toggle("hidden"); return; }
     if (act === "zoom") { if (!state[key].visible) await setVisible(key, true); return zoomToLayer(key); }
-    if (act === "meta") return openMeta(key);
+    if (act === "meta") {
+      if (key === "aoi_focus_mask") {
+        alert("Selection Focus Mask (Tuffs AOI)\n\nInverted world ring polygon (#030712 @ 80% default opacity) highlighting the active spatial query extent, locality or incident bounding box.\n\nUse the checkbox to toggle visibility, or open the opacity drawer (🎚️) to adjust focus density from 0% to 100%.");
+        return;
+      }
+      return openMeta(key);
+    }
     if (act === "chart") return openChart(key);
     if (act === "table") return openTable(key);
     if (act === "remove") return removeFromList(key);

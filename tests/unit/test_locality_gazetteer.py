@@ -228,3 +228,22 @@ def test_sql_bbox_extraction_and_extent_resolution():
     assert scope_match.group(1).strip() == "Lake Munmorah - Mannering Park"
 
 
+def test_aoi_mask_layer_registration_in_layers_js():
+    """Verifies that the AOI focus mask is registered as a first-class layer in layers.js CATALOG and layer control."""
+    layers_js_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "layers.js")
+    with open(layers_js_path, "r", encoding="utf-8") as f:
+        layers_content = f.read()
+
+    # 1. CATALOG entry
+    assert 'key: "aoi_focus_mask"' in layers_content
+    assert 'Selection Focus Mask' in layers_content
+
+    # 2. Layer ID mapping to MapLibre fill and outline layers
+    assert 'if (key === "aoi_focus_mask") return ["territory-mask-fill", "aoi-boundary-line"];' in layers_content
+
+    # 3. Opacity and visibility handlers for the mask layer
+    assert 'if (key === "aoi_focus_mask")' in layers_content
+    assert 'map.setPaintProperty("territory-mask-fill", "fill-opacity", o);' in layers_content
+
+
+
