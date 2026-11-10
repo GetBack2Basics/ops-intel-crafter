@@ -18,6 +18,7 @@ def upload_web_assets():
         ("app.js", "application/javascript; charset=utf-8"),
         ("duckdb_wasm.js", "application/javascript; charset=utf-8"),
         ("layers.js", "application/javascript; charset=utf-8"),
+        ("geolibre_catalog_engine.js", "application/javascript; charset=utf-8"),
         ("index.html", "text/html; charset=utf-8"),
         ("style.css", "text/css; charset=utf-8"),
         ("data/WP302026_TRACK_latest.kmz", "application/vnd.google-earth.kmz"),
@@ -54,6 +55,8 @@ def upload_web_assets():
                 ct = "text/html; charset=utf-8" if p.suffix == ".html" else "application/json" if p.suffix == ".json" else "text/css" if p.suffix == ".css" else "application/javascript" if p.suffix == ".js" else "text/plain"
                 files_to_upload.append((rel, ct))
 
+    FORCE_UPLOAD = {"app.js", "duckdb_wasm.js", "layers.js", "geolibre_catalog_engine.js", "index.html", "style.css"}
+
     for rel_path, content_type in files_to_upload:
         file_path = DOCS_DIR / rel_path
         if not file_path.exists():
@@ -61,6 +64,15 @@ def upload_web_assets():
             continue
         
         blob = bucket.blob(rel_path)
+        if rel_path not in FORCE_UPLOAD:
+            try:
+                blob.reload()
+                if blob.size == file_path.stat().st_size:
+                    # Unchanged, skip upload
+                    continue
+            except Exception:
+                pass
+
         # Prevent aggressive CDN caching so changes are immediately visible
         blob.cache_control = "no-cache, max-age=0"
         blob.upload_from_filename(str(file_path), content_type=content_type)

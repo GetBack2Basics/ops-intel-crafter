@@ -198,7 +198,36 @@
     const t0 = performance.now();
 
     try {
-      const table = await conn.query(executableSql);
+      let table;
+      try {
+        table = await conn.query(executableSql);
+      } catch (queryErr) {
+        // If a catalog error occurs for a known table, attempt on-demand view creation and retry
+        const missingTableMatch = (queryErr.message || "").match(/Table with name (\w+) does not exist/i);
+        if (missingTableMatch) {
+          const missingName = missingTableMatch[1];
+          const tblEntry = REGISTERED_TABLES.find(t => t.name === missingName);
+          if (tblEntry && duckdbModule) {
+            console.log(`[DuckDB-WASM] Creating missing view on-demand for ${missingName}...`);
+            const fileUrl = new URL(tblEntry.url, window.location.href).href;
+            try {
+              await db.registerFileURL(tblEntry.file, fileUrl, duckdbModule.DuckDBDataProtocol.HTTP, false);
+            } catch (regErr) {
+              console.warn(`[DuckDB-WASM] registerFileURL error for ${missingName}:`, regErr);
+            }
+            if (tblEntry.type === "parquet") {
+              await conn.query(`CREATE OR REPLACE VIEW ${missingName} AS SELECT * FROM read_parquet('${tblEntry.file}');`);
+            } else {
+              await conn.query(`CREATE OR REPLACE VIEW ${missingName} AS SELECT * FROM read_json_auto('${tblEntry.file}');`);
+            }
+            table = await conn.query(executableSql);
+          } else {
+            throw queryErr;
+          }
+        } else {
+          throw queryErr;
+        }
+      }
       const elapsedMs = (performance.now() - t0).toFixed(1);
       updateEngineStatus("ready", `DuckDB-WASM (v1.28.0) Ready • ${elapsedMs} ms`);
 

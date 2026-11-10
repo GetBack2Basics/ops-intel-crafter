@@ -278,6 +278,12 @@
     const distText = (userParams.distance || "").trim();
     const optText = (userParams.options || "").trim();
 
+    // Check if GeoLibre Catalog Engine can compile this scenario
+    if (window.GeoLibreCatalogEngine && window.GeoLibreCatalogEngine.CATALOGUE_BY_SCENARIO[key]) {
+      const loc = window.GeoLibreCatalogEngine.resolveLocality(areaText);
+      return window.GeoLibreCatalogEngine.CATALOGUE_BY_SCENARIO[key].sqlBuilder(areaText, loc);
+    }
+
     if (key === "national_pop_grid") {
       let whereClause = "";
       const resolved = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(areaText) : null;
@@ -483,6 +489,9 @@ LIMIT 100;`;
     if (key === "uncatalogued_reject") {
       const qInput = document.getElementById("nlInput");
       const qText = (qInput ? qInput.value : "").trim() || "Requested data";
+      if (window.GeoLibreCatalogEngine && typeof window.GeoLibreCatalogEngine.buildUncataloguedRejectSql === "function") {
+        return window.GeoLibreCatalogEngine.buildUncataloguedRejectSql(qText);
+      }
       return `-- UNCATALOGUED ENTITY / DATASET NOT IN SPATIAL LAKEHOUSE
 -- User Query: "${qText.replace(/"/g, "'")}"
 -- Status: NOT_IN_CATALOGUE (Zero-Mock Invariant Enforced)
@@ -535,8 +544,21 @@ LIMIT 50;`;
   }
 
   function inferScenarioFromText(text, currentKey) {
-    const q = (text || "").toLowerCase().trim();
-    if (!q) return currentKey || "national_pop_grid";
+    const raw = (text || "").trim();
+    if (!raw) return currentKey || "national_pop_grid";
+
+    // 0. Use GeoLibre Catalogue Discovery Engine if loaded
+    if (window.GeoLibreCatalogEngine && typeof window.GeoLibreCatalogEngine.findDataset === "function") {
+      const match = window.GeoLibreCatalogEngine.findDataset(raw, userParams.area);
+      if (match.status === "REJECTED_UNCATALOGUED" || match.status === "DATASET_NOT_FOUND") {
+        return "uncatalogued_reject";
+      }
+      if (match.status === "MATCHED" && match.scenarioKey) {
+        return match.scenarioKey;
+      }
+    }
+
+    const q = raw.toLowerCase();
 
     // 1. Explicit uncatalogued / restricted sources
     if (q.includes("scada") || q.includes("icu") || q.includes("restricted") || q.includes("token") || q.includes("hospital icu") ||
@@ -1467,17 +1489,42 @@ LIMIT 50;`;
     }
     const inputEl = document.getElementById("nlInput");
     const rawNl = (inputEl ? inputEl.value : "").trim();
-    const key = scenarioKeyOverride || inferScenarioFromText(rawNl, activeScenarioKey);
+    const aoiInputEl = document.getElementById("aoiInput");
+    const aoiVal = (aoiInputEl ? aoiInputEl.value : "").trim();
+
+    let key = scenarioKeyOverride;
+    let match = null;
+
+    if (!key && window.GeoLibreCatalogEngine && typeof window.GeoLibreCatalogEngine.findDataset === "function") {
+      match = window.GeoLibreCatalogEngine.findDataset(rawNl, aoiVal || userParams.area);
+      if (match.status === "REJECTED_UNCATALOGUED" || match.status === "DATASET_NOT_FOUND") {
+        key = "uncatalogued_reject";
+      } else if (match.status === "MATCHED") {
+        key = match.scenarioKey;
+        if (match.locality) {
+          userParams.area = match.locality.name;
+          if (aoiInputEl) aoiInputEl.value = match.locality.name;
+          setTargetArea(match.locality.name, false);
+        }
+      }
+    }
+
+    if (!key) {
+      key = inferScenarioFromText(rawNl, activeScenarioKey);
+    }
     activeScenarioKey = key;
     highlightActivePresetChip(key);
     const preset = SCENARIO_PRESETS[key] || SCENARIO_PRESETS.pop_comparison;
 
-    if (preset.isRejected) {
-      setSqlCode(buildSqlForScenario("uncatalogued_reject"));
+    if (preset.isRejected || key === "uncatalogued_reject") {
+      const rejectSql = (window.GeoLibreCatalogEngine && match)
+        ? window.GeoLibreCatalogEngine.compileSql(match, aoiVal || userParams.area)
+        : buildSqlForScenario("uncatalogued_reject");
+      setSqlCode(rejectSql);
       const targetUriEl = document.getElementById("sqlTargetUri");
       if (targetUriEl) targetUriEl.textContent = "BLOCKED — Source Not in Catalogue";
       const ctxScaleVal = document.getElementById("ctxScaleVal");
-      if (ctxScaleVal) ctxScaleVal.textContent = userParams.area || "—";
+      if (ctxScaleVal) ctxScaleVal.textContent = userParams.area || aoiVal || "—";
       const ctxScaleSub = document.getElementById("ctxScaleSub");
       if (ctxScaleSub) ctxScaleSub.textContent = "Requested Entity Not In Catalogue";
       const ctxMethodVal = document.getElementById("ctxMethodVal");
@@ -5280,10 +5327,7 @@ th { color: var(--muted); font-weight: 600; }
     const btnAnalyze = document.getElementById("btnAnalyze");
     if (btnAnalyze) {
       btnAnalyze.addEventListener("click", async () => {
-        const inputEl = document.getElementById("nlInput");
-        const rawNl = (inputEl ? inputEl.value : "").trim();
-        const key = inferScenarioFromText(rawNl, activeScenarioKey);
-        await analyzeQuery(key, false);
+        await analyzeQuery(null, false);
         scrollToStep("panel-sql");
       });
     }
@@ -5293,9 +5337,7 @@ th { color: var(--muted); font-weight: 600; }
       nlInputEl.addEventListener("keydown", async e => {
         if (e.key === "Enter") {
           e.preventDefault();
-          const rawNl = nlInputEl.value.trim();
-          const key = inferScenarioFromText(rawNl, activeScenarioKey);
-          await analyzeQuery(key, false);
+          await analyzeQuery(null, false);
           scrollToStep("panel-sql");
         }
       });
@@ -5321,12 +5363,17 @@ th { color: var(--muted); font-weight: 600; }
 
     const btnGenerateSql = document.getElementById("btnGenerateSql");
     if (btnGenerateSql) {
-      btnGenerateSql.addEventListener("click", () => {
-        if (activeScenarioKey) {
+      btnGenerateSql.addEventListener("click", async () => {
+        const inputEl = document.getElementById("nlInput");
+        const rawNl = (inputEl ? inputEl.value : "").trim();
+        if (rawNl) {
+          await analyzeQuery(null, false);
+        } else if (activeScenarioKey) {
           generateValidatedQuery(activeScenarioKey, true);
         } else {
-          analyzeQuery(null, true);
+          await analyzeQuery(null, false);
         }
+        scrollToStep("panel-sql");
       });
     }
 
