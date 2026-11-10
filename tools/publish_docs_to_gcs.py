@@ -26,6 +26,14 @@ def upload_web_assets():
         ("data/workbench_bundle.json", "application/json; charset=utf-8"),
     ]
 
+    # Also include qa/data parquet and geojson assets
+    qa_data_dir = DOCS_DIR / "qa" / "data"
+    if qa_data_dir.exists():
+        for p in sorted(qa_data_dir.glob("*.parquet")):
+            if p.is_file():
+                rel = p.relative_to(DOCS_DIR).as_posix()
+                files_to_upload.append((rel, "application/octet-stream"))
+
     # Also include map_packages
     map_packages_dir = DOCS_DIR / "map_packages"
     if map_packages_dir.exists():

@@ -30,63 +30,63 @@
     },
     {
       name: "ga_electricity_substations",
-      file: "ga_electricity_substations.geojson",
-      url: "qa/data/ga_electricity_substations.geojson",
-      type: "json"
+      file: "ga_electricity_substations.parquet",
+      url: "qa/data/ga_electricity_substations.parquet",
+      type: "parquet"
     },
     {
       name: "ga_electricity_transmission_lines",
-      file: "ga_electricity_transmission_lines.geojson",
-      url: "qa/data/ga_electricity_transmission_lines.geojson",
-      type: "json"
+      file: "ga_electricity_transmission_lines.parquet",
+      url: "qa/data/ga_electricity_transmission_lines.parquet",
+      type: "parquet"
     },
     {
       name: "nsw_water_inundation_areas",
-      file: "nsw_water_inundation_areas.geojson",
-      url: "qa/data/nsw_water_inundation_areas.geojson",
-      type: "json"
+      file: "nsw_water_inundation_areas.parquet",
+      url: "qa/data/nsw_water_inundation_areas.parquet",
+      type: "parquet"
     },
     {
       name: "nsw_foi_building_complexes",
-      file: "nsw_foi_building_complexes.geojson",
-      url: "qa/data/nsw_foi_building_complexes.geojson",
-      type: "json"
+      file: "nsw_foi_building_complexes.parquet",
+      url: "qa/data/nsw_foi_building_complexes.parquet",
+      type: "parquet"
     },
     {
       name: "next_lga_boundaries_asgs2025",
-      file: "next_lga_boundaries_asgs2025.geojson",
-      url: "qa/data/next_lga_boundaries_asgs2025.geojson",
-      type: "json"
+      file: "next_lga_boundaries_asgs2025.parquet",
+      url: "qa/data/next_lga_boundaries_asgs2025.parquet",
+      type: "parquet"
     },
     {
       name: "next_sa2_boundaries_asgs2021",
-      file: "next_sa2_boundaries_asgs2021.geojson",
-      url: "qa/data/next_sa2_boundaries_asgs2021.geojson",
-      type: "json"
+      file: "next_sa2_boundaries_asgs2021.parquet",
+      url: "qa/data/next_sa2_boundaries_asgs2021.parquet",
+      type: "parquet"
     },
     {
       name: "nsw_lga_boundaries",
-      file: "nsw_lga_boundaries.geojson",
-      url: "qa/data/nsw_lga_boundaries.geojson",
-      type: "json"
+      file: "nsw_lga_boundaries.parquet",
+      url: "qa/data/nsw_lga_boundaries.parquet",
+      type: "parquet"
     },
     {
       name: "nsw_rfs_major_incidents_live",
-      file: "nsw_rfs_major_incidents_live.geojson",
-      url: "qa/data/nsw_rfs_major_incidents_live.geojson",
-      type: "json"
+      file: "nsw_rfs_major_incidents_live.parquet",
+      url: "qa/data/nsw_rfs_major_incidents_live.parquet",
+      type: "parquet"
     },
     {
       name: "ga_major_power_stations",
-      file: "ga_major_power_stations.geojson",
-      url: "qa/data/ga_major_power_stations.geojson",
-      type: "json"
+      file: "ga_major_power_stations.parquet",
+      url: "qa/data/ga_major_power_stations.parquet",
+      type: "parquet"
     },
     {
       name: "ga_seismic_hazard_pga_10pct",
-      file: "ga_seismic_hazard_pga_10pct.geojson",
-      url: "qa/data/ga_seismic_hazard_pga_10pct.geojson",
-      type: "json"
+      file: "ga_seismic_hazard_pga_10pct.parquet",
+      url: "qa/data/ga_seismic_hazard_pga_10pct.parquet",
+      type: "parquet"
     }
   ];
 
