@@ -267,7 +267,7 @@
           <div
             class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-medium border border-slate-200 flex items-center gap-1.5">
             <span class="text-slate-400">Lake Engine:</span>
-            <strong class="font-bold font-mono text-slate-800">DuckDB Spatial</strong>
+            <span id="duckdbStatusBadge" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-amber-100 text-amber-800 border border-amber-300">DuckDB-WASM Initializing...</span>
           </div>
         </div>
       </section>
@@ -487,8 +487,7 @@
                   gs://operational-intelligence-crafter-lake/geoparquet/ (awaiting query)
                 </span>
               </div>
-              <span class="text-sky-400 font-sans text-[10px] uppercase font-bold tracking-wider">DuckDB Spatial
-                v0.10</span>
+              <span id="sqlEngineBadge" class="text-sky-400 font-sans text-[10px] uppercase font-bold tracking-wider">DuckDB-WASM Live Engine</span>
             </div>
             <textarea id="sqlInput"
               class="sql-editor w-full min-h-[300px] p-4 bg-transparent text-slate-200 font-mono text-xs leading-relaxed outline-none resize-y border-none"
@@ -1220,8 +1219,9 @@
   <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 
   <!-- Application scripts -->
-  <script src="layers.js?v=20261110T1430"></script>
-  <script src="app.js?v=20261110T1430"></script>
+  <script src="duckdb_wasm.js?v=20261110T1900"></script>
+  <script src="layers.js?v=20261110T1900"></script>
+  <script src="app.js?v=20261110T1900"></script>
 
   <!-- Initialize Lucide Icons -->
   <script data-purpose="icon-initialization">

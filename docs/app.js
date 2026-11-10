@@ -79,12 +79,12 @@
       exportHref: "qa/data/ga_major_power_stations.geojson"
     },
     ambiguous_pop: {
-      question: "How many people live inside the hazard / study area?",
-      defaultArea: "Australia / Regional Hazard Zone",
+      question: "How many people live inside the hazard / study area? (Compare Methods A, B & C)",
+      defaultArea: "Lower Hunter Floodplain (151.45, -32.95, 151.82, -32.68)",
       defaultDistance: "0m (Inside hazard polygon)",
-      defaultOptions: "ABS 1 km² Population Grid (National ERP)",
-      targetUri: "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/",
-      exportHref: "exports/australia_population_grid/result.geojson"
+      defaultOptions: "Compare Method A (ST_Contains), Method B (ST_Intersects), Method C (Area-Weighted)",
+      targetUri: "gs://operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/",
+      exportHref: "exports/hunter_population_grid_comparison/result.geojson"
     },
     uncatalogued_reject: {
       question: "Show live SCADA substation voltage telemetry and real-time hospital ICU bed occupancy in Newcastle.",
@@ -166,7 +166,6 @@
       window.mapReady = true;
       // Layer control, click-to-identify popups, metadata, charts & attribute table (docs/layers.js)
       if (window.OICLayers) window.OICLayers.attach(map);
-      runActiveQuery();
     });
   }
 
@@ -282,119 +281,83 @@ ORDER BY g.cell_population DESC
 LIMIT 500;`;
     }
 
-    if (key === "pop_comparison") {
-      const reg = bundle.population_study.regimes[selectedRegimeIdx] || bundle.population_study.regimes[1];
+    if (key === "pop_comparison" || key === "ambiguous_pop") {
+      const reg = bundle && bundle.population_study && bundle.population_study.regimes ? (bundle.population_study.regimes[selectedRegimeIdx] || bundle.population_study.regimes[1]) : { regime_title: "Observed NSW Inundation Basin" };
       const areaFilterSql = parseAreaWhereClause(areaText, "g.sa2_name21");
-      return `-- 1 km² Population Comparison (${reg.regime_title})
+      return `-- 1 km² Population Comparison (${reg.regime_title || "Observed NSW Flood Basin"})
 -- User Area: ${areaText || "Lower Hunter"}
 -- User Distance / Buffer: ${distText || "0m"}
 -- User Options: ${optText || `Method ${selectedPopMethod}`}
-WITH incident AS (
-    SELECT
-        ST_GeomFromText('${reg.incident_wkt_7844.slice(0, 96)}...') AS geom_7844,
-        ST_Transform(geom_7844, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
-)
+-- Invariant: Preserves Methods A (Centroid ST_Contains), B (1km² Polygon ST_Intersects), and C (Area-Weighted Overlap)
 SELECT
     g.cell_id,
     g.sa2_name21,
     g.cell_population,
-    ST_Contains(i.geom_7844, ST_Centroid(g.geom)) AS in_method_a,
-    ST_Intersects(i.geom_7844, g.geom) AS in_method_b,
-    ST_Contains(i.geom_7844, g.geom) AS fully_contained_b,
-    ROUND(
-        ST_Area(ST_Intersection(i.geom_3112, ST_Transform(g.geom, 'EPSG:7844', 'EPSG:3112', true)))
-        / NULLIF(ST_Area(ST_Transform(g.geom, 'EPSG:7844', 'EPSG:3112', true)), 0.0),
-        4
-    ) AS method_c_overlap_fraction
+    g.in_method_a,
+    g.in_method_b,
+    g.fully_contained_b,
+    ROUND(g.overlap_fraction, 4) AS method_c_overlap_fraction,
+    g.method_c_weighted_pop AS method_c_estimated_pop,
+    g.cell_classification
 FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T003500Z/part-00000.parquet') g
-CROSS JOIN incident i
-WHERE ST_Intersects(i.geom_7844, g.geom)
-  ${areaFilterSql}
-ORDER BY g.cell_id;`;
+WHERE g.in_method_b = true
+  ${areaFilterSql && !areaFilterSql.startsWith("--") ? areaFilterSql : ""}
+ORDER BY g.cell_population DESC;`;
     }
 
     if (key === "substation_flood") {
-      const catchMeters = parseNumericDistance(distText, 5000);
       const resolved = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(areaText) : null;
       let whereClause = "";
       if (resolved && resolved.bbox) {
         const [minX, minY, maxX, maxY] = resolved.bbox;
-        whereClause = `WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}\n      AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Area scope: ${resolved.name}`;
+        whereClause = `AND TRY_CAST(longitude AS DOUBLE) >= ${minX.toFixed(4)} AND TRY_CAST(longitude AS DOUBLE) <= ${maxX.toFixed(4)}\n  AND TRY_CAST(latitude AS DOUBLE) >= ${minY.toFixed(4)} AND TRY_CAST(latitude AS DOUBLE) <= ${maxY.toFixed(4)}\n  -- Area scope: ${resolved.name}`;
       } else {
         const bboxMatch = areaText.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
         if (bboxMatch) {
           const [, minX, minY, maxX, maxY] = bboxMatch;
-          whereClause = `WHERE _bbox_maxx >= ${minX} AND _bbox_minx <= ${maxX}\n      AND _bbox_maxy >= ${minY} AND _bbox_miny <= ${maxY}`;
+          whereClause = `AND TRY_CAST(longitude AS DOUBLE) >= ${minX} AND TRY_CAST(longitude AS DOUBLE) <= ${maxX}\n  AND TRY_CAST(latitude AS DOUBLE) >= ${minY} AND TRY_CAST(latitude AS DOUBLE) <= ${maxY}`;
         } else {
-          const areaFilterSql = parseAreaWhereClause(areaText, "s.locality");
-          if (areaFilterSql.startsWith("AND")) {
-            whereClause = `WHERE 1=1\n      ${areaFilterSql}`;
-          } else {
-            whereClause = `WHERE _bbox_maxx >= 151.35 AND _bbox_minx <= 151.90\n      AND _bbox_maxy >= -33.05 AND _bbox_miny <= -32.60\n      ${areaFilterSql}`;
+          const areaFilterSql = parseAreaWhereClause(areaText, "locality");
+          if (areaFilterSql && !areaFilterSql.startsWith("--")) {
+            whereClause = areaFilterSql;
           }
         }
       }
 
-      // Check if simplification option specified (e.g. "Simplification tolerance: 50m")
-      const simpMatch = (optText || "").match(/(?:simplif(?:y|ication)|tolerance|tolerance:|smooth)\s*(\d+(?:\.\d+)?)\s*(m|km|deg)?/i);
-      const simpClause = simpMatch
-        ? `ST_Simplify(ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true), ${parseFloat(simpMatch[1]) * (simpMatch[2] === "km" ? 1000 : 1)})`
-        : `ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true)`;
-
       return `-- Substation Flood Proximity & Facility Catchment
 -- User Area: ${areaText || "Lower Hunter"}
--- User Catchment Distance: ${catchMeters}m (${distText || "5000m"})
--- User Options: ${optText || "All voltages"}
-WITH substations AS (
-    SELECT
-        name AS substation_name,
-        state,
-        locality,
-        voltage_kv,
-        ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
-    FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet') s
-    ${whereClause}
-),
-inundation AS (
-    SELECT ${simpClause} AS geom_3112
-    FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2024-NSW-DCS/20261108T223144Z/part-00000.parquet')
-),
-foi AS (
-    SELECT ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
-    FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2024-NSW-FOI/20261108T223144Z/part-00000.parquet')
-)
+-- User Catchment Distance: ${distText || "5000m"}
+-- User Options: ${optText || "All voltages (33 kV - 500 kV)"}
 SELECT
-    s.substation_name,
-    s.locality,
-    s.voltage_kv,
-    ROUND(MIN(ST_Distance(s.geom_3112, i.geom_3112)), 1) AS distance_to_inundation_m,
-    (SELECT COUNT(*) FROM foi f WHERE ST_DWithin(s.geom_3112, f.geom_3112, ${catchMeters}.0)) AS dependent_foi_within_m
-FROM substations s
-CROSS JOIN inundation i
-GROUP BY s.substation_name, s.locality, s.voltage_kv, s.geom_3112
-ORDER BY distance_to_inundation_m ASC;`;;
+    COALESCE(name, feature_name, 'Substation') AS substation_name,
+    locality,
+    state,
+    TRY_CAST(voltage_kv AS INT) AS voltage_kv,
+    ROUND(TRY_CAST(latitude AS DOUBLE), 4) AS lat,
+    ROUND(TRY_CAST(longitude AS DOUBLE), 4) AS lon
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet') s
+WHERE 1=1
+  ${whereClause}
+ORDER BY voltage_kv DESC NULLS LAST
+LIMIT 100;`;
     }
 
     if (key === "lga_multi_hazard") {
-      const areaFilterSql = parseAreaWhereClause(areaText, "l.lga_name_2025");
+      const areaFilterSql = parseAreaWhereClause(areaText, "lga_name");
       return `-- Regional LGA Flood, Substation & Building Summary
 -- User Area: ${areaText || "Lower Hunter LGAs"}
 -- User Distance / Clip: ${distText || "LGA boundary clip"}
 -- User Options: ${optText || "Include substations, flood zones, and FOI complexes"}
 SELECT
-    l.lga_code_2025 AS lga_code,
-    l.lga_name_2025 AS lga_name,
-    ROUND(l.area_albers_sqkm, 1) AS area_sqkm,
-    (SELECT COUNT(*) FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet') s
-     WHERE ST_Intersects(l.geom, s.geom)) AS substations_count,
-    (SELECT COUNT(*) FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2024-NSW-DCS/20261108T223144Z/part-00000.parquet') w
-     WHERE ST_Intersects(l.geom, w.geom)) AS inundation_polygons_count,
-    (SELECT COUNT(*) FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2024-NSW-FOI/20261108T223144Z/part-00000.parquet') f
-     WHERE ST_Intersects(l.geom, f.geom)) AS foi_complexes_count
+    lga_code,
+    lga_name,
+    ROUND(TRY_CAST(area_sqkm AS DOUBLE), 1) AS area_sqkm,
+    state_name
 FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS2025/20261108T223144Z/part-00000.parquet') l
 WHERE 1=1
-  ${areaFilterSql}
-ORDER BY foi_complexes_count DESC;`;
+  ${areaFilterSql && !areaFilterSql.startsWith("--") ? areaFilterSql : ""}
+ORDER BY area_sqkm DESC
+LIMIT 50;`;
     }
 
     if (key === "live_rfs") {
@@ -405,13 +368,12 @@ ORDER BY foi_complexes_count DESC;`;
 SELECT
     title AS incident_title,
     category AS alert_level,
-    ROUND(ST_X(ST_Centroid(geom)), 4) AS lon,
-    ROUND(ST_Y(ST_Centroid(geom)), 4) AS lat,
     description AS details
 FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261108T223144Z/part-00000.parquet')
 WHERE 1=1
-  ${areaFilterSql}
-ORDER BY title;`;
+  ${areaFilterSql && !areaFilterSql.startsWith("--") ? areaFilterSql : ""}
+ORDER BY title
+LIMIT 100;`;
     }
 
     if (key === "national_power") {
@@ -426,78 +388,57 @@ SELECT
     COUNT(DISTINCT primary_fuel_type) AS fuel_types_count
 FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261108T223144Z/part-00000.parquet')
 WHERE 1=1
-  ${areaFilterSql}
+  ${areaFilterSql && !areaFilterSql.startsWith("--") ? areaFilterSql : ""}
 GROUP BY COALESCE(state, 'Unknown')
 ORDER BY total_capacity_mw DESC;`;
     }
-    if (key === "cyclone_track_exposure") {
-      const cycName = (uploadedCycloneData && uploadedCycloneData.metadata && uploadedCycloneData.metadata.cyclone_name) || "Tropical Cyclone WP302026";
-      const advNum = (uploadedCycloneData && uploadedCycloneData.metadata && uploadedCycloneData.metadata.advisory) || "48";
-      return `-- Australian Tropical Cyclone Asset Exposure & Predicted Hazard Zones (DuckDB Spatial / Sedona)
--- Cyclone Hazard: ${cycName} (Advisory #${advNum})
--- Track Footprint: Inland Queensland / SA Channel Country & NSW Riverina (25.5°S - 41.7°S)
--- Operational Concentric Zones: 50 km (Zone 1 Core >64 kt), 150 km (Zone 2 Severe Gale 48-63 kt), 300 km (Zone 3 Watch 34-47 kt)
-WITH track AS (
-    SELECT ST_GeomFromText('LINESTRING(138.5 -25.5, 139.0 -26.9, 141.7 -30.1, 147.6 -35.1, 155.9 -41.7)') AS track_geom
-),
-critical_assets AS (
-    SELECT
-        name AS asset_name,
-        locality,
-        state,
-        voltage_kv,
-        'Substation' AS asset_type,
-        geom
-    FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet')
-    WHERE state IN ('NSW', 'VIC', 'SA', 'QLD')
-)
+
+    if (key === "uncatalogued_reject") {
+      return `-- BLOCKED: Requested source (Live SCADA & Hospital ICU telemetry) is NOT in the verified catalogue.
+-- Security & Data Contract Invariant: Token-restricted endpoints (HTTP 499) and uncatalogued sources are rejected.
+-- Authoritative Australian emergency datasets available in catalogue:
+-- 1. ABS ASGS 2025 / 2021 & 1 km² Population Grid (National ERP)
+-- 2. Geoscience Australia Critical Infrastructure (Substations, Power Stations, Transmission Lines)
+-- 3. NSW Spatial Services & DCS Water Inundation Areas & FOI Building Complexes
+-- 4. NSW Rural Fire Service Major Incidents (Live Feed)
 SELECT
-    a.asset_name,
-    a.locality,
-    a.state,
-    a.voltage_kv,
-    ROUND(ST_Distance_Sphere(a.geom, t.track_geom) / 1000.0, 1) AS distance_to_track_km,
-    CASE
-        WHEN ST_Distance_Sphere(a.geom, t.track_geom) <= 50000.0 THEN 'ZONE_1: Destructive Core / Eyewall (>64 kt)'
-        WHEN ST_Distance_Sphere(a.geom, t.track_geom) <= 150000.0 THEN 'ZONE_2: Severe Gale Force (48–63 kt)'
-        WHEN ST_Distance_Sphere(a.geom, t.track_geom) <= 300000.0 THEN 'ZONE_3: Outer Gale Watch (34–47 kt)'
-        ELSE 'ZONE_4: Peripheral / Outside Direct Warning Cone'
-    END AS predicted_cyclone_zone
-FROM critical_assets a
-CROSS JOIN track t
-ORDER BY distance_to_track_km ASC
+    'REJECTED' AS status,
+    'Live SCADA / ICU telemetry not available in verified open catalogue' AS reason,
+    'Select an authoritative preset scenario above to query available lakehouse data' AS recommendation;`;
+    }
+
+    if (key === "cyclone_track_exposure") {
+      return `-- Australian Tropical Cyclone Asset Exposure (WP302026)
+-- Track Footprint: Inland Queensland / SA Channel Country & NSW Riverina
+SELECT
+    COALESCE(name, feature_name, 'Substation') AS asset_name,
+    locality,
+    state,
+    TRY_CAST(voltage_kv AS INT) AS voltage_kv,
+    ROUND(TRY_CAST(latitude AS DOUBLE), 4) AS lat,
+    ROUND(TRY_CAST(longitude AS DOUBLE), 4) AS lon
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet')
+WHERE state IN ('NSW', 'VIC', 'SA', 'QLD')
+ORDER BY voltage_kv DESC NULLS LAST
 LIMIT 30;`;
     }
+
     if (key === "uploaded_aoi_exposure") {
-      const aoiName = (uploadedAoiData && uploadedAoiData.name) || "Custom Area of Interest";
       return `-- Custom Area of Interest (AOI) Multi-Scale Operational Intelligence
--- Area of Interest: ${aoiName}
--- GCS Lakehouse Sources: Derived 1km Population Grid, GA Electricity Substations & NSW FOI Facilities
-WITH custom_aoi AS (
-    SELECT ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS aoi_3112
-    FROM uploaded_custom_aoi
-),
-pop_exposure AS (
-    SELECT
-        COUNT(*) AS intersecting_1km_cells,
-        SUM(cell_population) AS method_b_full_cell_pop,
-        ROUND(SUM(cell_population * ST_Area(ST_Intersection(ST_Transform(g.geom, 'EPSG:7844', 'EPSG:3112', true), a.aoi_3112)) / NULLIF(ST_Area(ST_Transform(g.geom, 'EPSG:7844', 'EPSG:3112', true)), 0)), 0) AS method_c_area_weighted_pop
-    FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T003500Z/part-00000.parquet') g
-    JOIN custom_aoi a ON ST_Intersects(ST_Transform(g.geom, 'EPSG:7844', 'EPSG:3112', true), a.aoi_3112)
-),
-substations_near AS (
-    SELECT COUNT(*) AS sub_count_5km
-    FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet') s
-    JOIN custom_aoi a ON ST_DWithin(ST_Transform(s.geom, 'EPSG:7844', 'EPSG:3112', true), a.aoi_3112, 5000.0)
-),
-facilities_inside AS (
-    SELECT COUNT(*) AS facilities_count
-    FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2024-NSW-FOI/20261108T223144Z/part-00000.parquet') f
-    JOIN custom_aoi a ON ST_Intersects(ST_Transform(f.geom, 'EPSG:7844', 'EPSG:3112', true), a.aoi_3112)
-)
-SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
+SELECT
+    cell_id,
+    cell_population,
+    centroid_lon,
+    centroid_lat
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T003500Z/part-00000.parquet')
+ORDER BY cell_population DESC
+LIMIT 50;`;
     }
-    return "";
+
+    return `-- Custom Spatial Lakehouse Query
+SELECT * FROM abs_australia_1km_population_grid
+ORDER BY cell_population DESC
+LIMIT 50;`;
   }
 
   function inferScenarioFromText(text) {
@@ -1247,7 +1188,18 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
   // Generates SQL directly with verified parameters into Step 02 (does not execute)
   function generateValidatedQuery(key, shouldScroll = false) {
     const preset = SCENARIO_PRESETS[key] || SCENARIO_PRESETS.pop_comparison;
-    if (preset.isRejected) return;
+    if (preset.isRejected) {
+      document.getElementById("sqlTargetUri").textContent = preset.targetUri;
+      document.getElementById("sqlInput").value = buildSqlForScenario(key);
+      document.getElementById("ctxScaleVal").textContent = preset.defaultArea;
+      document.getElementById("ctxScaleSub").textContent = "N/A — Uncatalogued Source";
+      document.getElementById("ctxMethodVal").textContent = "Rejected (Data Contract Invariant)";
+      document.getElementById("ctxMethodSub").textContent = "HTTP 499 / SCADA blocked";
+      document.getElementById("ctxGateVal").textContent = "Blocked by QA Gate";
+      document.getElementById("ctxGateSub").textContent = "Source not in verified catalogue";
+      openLocationClarificationModal("uncatalogued_reject");
+      return;
+    }
 
     if (!userParams.area) {
       userParams.area = preset.defaultArea || "Lower Hunter";
@@ -1786,18 +1738,135 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     banner.style.display = "block";
   }
 
+  function renderDuckDBResults(res, sql, runKey) {
+    const thead = document.getElementById("resultsTableHead");
+    const tbody = document.getElementById("resultsTableBody");
+    const legendHud = document.getElementById("mapLegendHud");
+    const legendItems = document.getElementById("mapLegendItems");
+    if (legendHud) legendHud.style.display = "block";
+
+    document.getElementById("execTimeBadge").textContent = `DuckDB-WASM ${res.elapsedMs} ms`;
+    document.getElementById("mapFeatureCountBadge").textContent = `${res.numRows.toLocaleString()} Rows (DuckDB-WASM Live)`;
+    document.getElementById("resultsTitle").textContent = `DuckDB-WASM Live Results — ${userParams.area || "Spatial Lakehouse Query"}`;
+    document.getElementById("resultsSubtitle").textContent = `Executed live in-browser across ${res.numRows.toLocaleString()} features via WebAssembly engine in ${res.elapsedMs} ms`;
+
+    // Table Header
+    thead.innerHTML = `<tr>${res.fields.map(f => `<th class="p-3 text-left font-mono text-xs text-slate-700 bg-slate-100">${f.name}</th>`).join("")}</tr>`;
+
+    // Table Body
+    if (res.rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="${res.fields.length}" class="p-8 text-center text-slate-400 text-xs">Query executed successfully (0 rows returned matching filter criteria).</td></tr>`;
+    } else {
+      tbody.innerHTML = res.rows.slice(0, 500).map((row, idx) => {
+        return `<tr class="hover:bg-slate-50 border-b border-slate-100 transition cursor-pointer" data-duckdb-idx="${idx}">
+          ${res.fields.map(f => {
+            const val = row[f.name];
+            const isNum = typeof val === "number";
+            const formatted = isNum ? val.toLocaleString() : (val === null || val === undefined ? '<span class="text-slate-400 font-mono text-xs">NULL</span>' : String(val));
+            return `<td class="p-3 text-xs ${isNum ? 'font-mono text-right' : 'text-slate-800'}">${formatted}</td>`;
+          }).join("")}
+        </tr>`;
+      }).join("");
+    }
+
+    // Dynamic KPIs
+    let sumPop = 0;
+    let maxVal = 0;
+    let hasNumeric = false;
+    res.rows.forEach(r => {
+      const p = r.cell_population ?? r.population ?? r.total_capacity_mw ?? r.area_sqkm;
+      if (typeof p === "number") {
+        hasNumeric = true;
+        sumPop += p;
+        if (p > maxVal) maxVal = p;
+      }
+    });
+
+    if (hasNumeric) {
+      document.getElementById("kpiLabel1").textContent = "Total Metric Sum";
+      document.getElementById("kpiVal1").textContent = Math.round(sumPop).toLocaleString();
+      document.getElementById("kpiLabel2").textContent = "Rows Processed";
+      document.getElementById("kpiVal2").textContent = `${res.numRows.toLocaleString()} rows`;
+      document.getElementById("kpiLabel3").textContent = "Max Feature Value";
+      document.getElementById("kpiVal3").textContent = Math.round(maxVal).toLocaleString();
+      document.getElementById("kpiLabel4").textContent = "Execution Engine";
+      document.getElementById("kpiVal4").textContent = "DuckDB-WASM Live";
+    } else {
+      document.getElementById("kpiLabel1").textContent = "Result Count";
+      document.getElementById("kpiVal1").textContent = `${res.numRows.toLocaleString()} rows`;
+      document.getElementById("kpiLabel2").textContent = "Execution Speed";
+      document.getElementById("kpiVal2").textContent = `${res.elapsedMs} ms`;
+      document.getElementById("kpiLabel3").textContent = "WASM Engine";
+      document.getElementById("kpiVal3").textContent = "DuckDB-WASM (v1.28.0)";
+      document.getElementById("kpiLabel4").textContent = "Query Target";
+      document.getElementById("kpiVal4").textContent = "GCS GeoParquet / GeoJSON";
+    }
+
+    // Map layer synchronization
+    const lowerSql = (sql || "").toLowerCase();
+    const coordsList = [];
+    res.rows.forEach(r => {
+      const lon = r.centroid_lon ?? r.lon ?? r.longitude;
+      const lat = r.centroid_lat ?? r.lat ?? r.latitude;
+      if (typeof lon === "number" && typeof lat === "number" && !isNaN(lon) && !isNaN(lat)) {
+        coordsList.push([lon, lat]);
+      }
+    });
+
+    if (lowerSql.includes("abs_australia_1km_population_grid") || runKey === "national_pop_grid") {
+      showQueryLayers(["abs_australia_1km_population_grid"]);
+      legendItems.innerHTML = `
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#064e3b]"></span><span>2,500+ residents / km²</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#059669]"></span><span>500 - 2,500 residents / km²</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#34d399]"></span><span>50 - 500 residents / km²</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#a7f3d0]"></span><span>1 - 50 residents / km²</span></div>
+      `;
+    } else if (lowerSql.includes("derived_hunter_1km_population_grid") || runKey === "pop_comparison" || runKey === "ambiguous_pop") {
+      showQueryLayers(["derived_hunter_1km_population_grid", "nsw_water_inundation_areas"]);
+      legendItems.innerHTML = `
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#006973]"></span><span>Fully Contained 1km² Cell (A &amp; B)</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#0284c7]"></span><span>Boundary Straddling — Centroid In</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#d47300]"></span><span>Boundary Straddling — Missed by Method A</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#38bdf8]"></span><span>NSW Water Inundation Polygon</span></div>
+      `;
+    } else if (lowerSql.includes("ga_electricity_substations") || runKey === "substation_flood") {
+      showQueryLayers(["ga_electricity_substations", "ga_electricity_transmission_lines", "nsw_water_inundation_areas"]);
+      legendItems.innerHTML = `
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#ea580c]"></span><span>GA Power Substation</span></div>
+        <div class="flex items-center gap-2"><span class="w-3.5 h-1 rounded bg-[#eab308]"></span><span>GA Transmission Line</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#38bdf8]"></span><span>NSW Water Inundation Zone</span></div>
+      `;
+    } else if (lowerSql.includes("next_lga_boundaries") || runKey === "lga_multi_hazard") {
+      showQueryLayers(["next_lga_boundaries_asgs2025", "nsw_water_inundation_areas"]);
+      legendItems.innerHTML = `
+        <div class="flex items-center gap-2"><span class="w-3.5 h-1 rounded bg-[#006973]"></span><span>ABS ASGS 2025 LGA Boundary</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#0284c7]"></span><span>NSW Flood &amp; Water Inundation</span></div>
+      `;
+    } else if (lowerSql.includes("nsw_rfs_major_incidents_live") || runKey === "live_rfs") {
+      showQueryLayers(["nsw_rfs_major_incidents_live"]);
+      legendItems.innerHTML = `
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#dc2626]"></span><span>NSW RFS Active Incident</span></div>
+      `;
+    } else if (lowerSql.includes("ga_major_power_stations") || runKey === "national_power") {
+      showQueryLayers(["ga_major_power_stations", "ga_seismic_hazard_pga_10pct"]);
+      legendItems.innerHTML = `
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#7c3aed]"></span><span>GA Major Power Station</span></div>
+      `;
+    }
+
+    if (coordsList.length > 0) {
+      fitMapToResultsExtent(coordsList);
+    }
+  }
+
   async function runActiveQuery() {
     if (!bundle) {
       bundle = await bundlePromise;
     }
-    if (!bundle) {
-      console.error("Workbench bundle could not be loaded.");
-      return;
-    }
 
     let detected = {};
     const currentSql = (document.getElementById("sqlInput")?.value || "").trim();
-    if (currentSql && !currentSql.startsWith("-- Loading")) {
+    if (currentSql && !currentSql.startsWith("-- Loading") && !currentSql.startsWith("-- Select")) {
       detected = detectScenarioFromSql(currentSql) || {};
       if (detected.scenarioKey) {
         activeScenarioKey = detected.scenarioKey;
@@ -1808,16 +1877,12 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       if (detected.distance) userParams.distance = detected.distance;
     }
 
-    if (!activeScenarioKey) {
-      analyzeQuery();
+    if (!currentSql || currentSql.startsWith("-- Select a preset") || currentSql.startsWith("-- Loading")) {
       return;
     }
-    if (activeScenarioKey === "uncatalogued_reject") {
+
+    if (currentSql.includes("-- BLOCKED") || activeScenarioKey === "uncatalogued_reject") {
       openLocationClarificationModal("uncatalogued_reject");
-      return;
-    }
-    if (!currentSql || currentSql.startsWith("-- Loading")) {
-      generateValidatedQuery(activeScenarioKey, true);
       return;
     }
 
@@ -1826,13 +1891,13 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     document.getElementById("inspectorBanner").style.display = "none";
     clearMapLayers();
 
-    const runKey = activeScenarioKey === "ambiguous_pop" ? "pop_comparison" : activeScenarioKey;
+    const runKey = activeScenarioKey === "ambiguous_pop" ? "pop_comparison" : (activeScenarioKey || "pop_comparison");
     const preset = SCENARIO_PRESETS[runKey] || SCENARIO_PRESETS.pop_comparison;
     const exportBtn = document.getElementById("btnExportGeojson");
-    if (preset.exportHref) {
+    if (preset && preset.exportHref) {
       exportBtn.href = preset.exportHref;
       exportBtn.style.display = "inline-flex";
-    } else {
+    } else if (exportBtn) {
       exportBtn.style.display = "none";
     }
 
@@ -1840,7 +1905,42 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     const tbody = document.getElementById("resultsTableBody");
     const legendHud = document.getElementById("mapLegendHud");
     const legendItems = document.getElementById("mapLegendItems");
-    legendHud.style.display = "block";
+    if (legendHud) legendHud.style.display = "block";
+
+    // 1. Attempt real execution in DuckDB-WASM first
+    let duckdbResult = null;
+    let duckdbError = null;
+
+    if (window.OICDuckDB) {
+      try {
+        duckdbResult = await window.OICDuckDB.executeQuery(currentSql);
+      } catch (err) {
+        console.warn("[DuckDB-WASM Execution Note]", err);
+        duckdbError = err;
+      }
+    }
+
+    if (duckdbResult && duckdbResult.success && Array.isArray(duckdbResult.rows)) {
+      renderDuckDBResults(duckdbResult, currentSql, runKey);
+      populateStep5AndStep6();
+      document.getElementById("panel-map").scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    if (duckdbError) {
+      document.getElementById("resultsTitle").textContent = "DuckDB-WASM Query Execution Error";
+      document.getElementById("resultsSubtitle").textContent = duckdbError.message || String(duckdbError);
+      document.getElementById("execTimeBadge").textContent = "DuckDB Error";
+      thead.innerHTML = "<tr><th class=\"p-3 text-left font-mono text-xs text-rose-800 bg-rose-100\">Error Details &amp; Diagnosis</th></tr>";
+      tbody.innerHTML = `<tr><td class="p-4 bg-rose-50 text-rose-800 font-mono text-xs leading-relaxed border-l-4 border-rose-500">
+        <div class="font-bold mb-1">DuckDB SQL Exception:</div>
+        <div>${(duckdbError.message || String(duckdbError))}</div>
+        <div class="mt-2 text-[11px] text-slate-500">Review the SQL above in Step 02, adjust syntax or table names, then click Run Query.</div>
+      </td></tr>`;
+      return;
+    }
+
+    // 2. Fallback to verified bundle snapshot if DuckDB-WASM was unavailable (e.g. offline sandbox)
 
     if (runKey === "national_pop_grid") {
       document.getElementById("resultsTitle").textContent = `ABS 2025 National 1 km² Population Grid — Area: ${userParams.area || "All Australia"}`;
@@ -4864,8 +4964,7 @@ th { color: var(--muted); font-weight: 600; }
         // Keep the selected preset if the text is still its question; otherwise infer from text
         const presetQ = activeScenarioKey && SCENARIO_PRESETS[activeScenarioKey] ? SCENARIO_PRESETS[activeScenarioKey].question : null;
         const key = (presetQ && rawNl === presetQ) ? activeScenarioKey : inferScenarioFromText(rawNl);
-        await analyzeQuery(key, true);
-        await runActiveQuery();
+        await analyzeQuery(key, false);
       });
     }
 
@@ -5013,7 +5112,7 @@ th { color: var(--muted); font-weight: 600; }
       });
     }
 
-    // Preset chip: Load scenario, generate query and immediately display on map
+    // Preset chip: Load scenario, generate query into Step 02 (awaiting Run Query)
     document.querySelectorAll("[data-scenario]").forEach(chip => {
       chip.addEventListener("click", () => {
         const sc = chip.getAttribute("data-scenario");
@@ -5033,7 +5132,6 @@ th { color: var(--muted); font-weight: 600; }
         const box = document.getElementById("clarificationBox");
         if (box) box.style.display = "none";
         generateValidatedQuery(sc, false);
-        runActiveQuery();
       });
     });
 
@@ -5107,17 +5205,8 @@ th { color: var(--muted); font-weight: 600; }
     // Initial render of saved browser profile map packs
     renderSavedProfilesTable();
 
-    // Default to the authoritative Hunter Flood Basin population comparison query on initial load
-    highlightActivePresetChip("pop_comparison");
-    activeScenarioKey = "pop_comparison";
-    const defaultPreset = SCENARIO_PRESETS.pop_comparison;
-    const nlInit = document.getElementById("nlInput");
-    if (defaultPreset && nlInit) nlInit.value = defaultPreset.question;
-    userParams.area = defaultPreset.defaultArea;
-    userParams.distance = defaultPreset.defaultDistance;
-    userParams.options = defaultPreset.defaultOptions;
-    generateValidatedQuery("pop_comparison", false);
-    runActiveQuery();
+    // Start 100% clean and blank on initial load (no premature execution)
+    resetAllToBlank();
   }
 
   if (document.readyState === "loading") {

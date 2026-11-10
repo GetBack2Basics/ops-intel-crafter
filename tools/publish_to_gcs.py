@@ -253,6 +253,7 @@ def upload_and_sync_all() -> Dict[str, Any]:
         "index.html",
         "style.css",
         "app.js",
+        "duckdb_wasm.js",
         "layers.js",
         "data/workbench_bundle.json",
         "data/locality_gazetteer.json",

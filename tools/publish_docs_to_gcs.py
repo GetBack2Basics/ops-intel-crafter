@@ -16,6 +16,7 @@ def upload_web_assets():
 
     files_to_upload = [
         ("app.js", "application/javascript; charset=utf-8"),
+        ("duckdb_wasm.js", "application/javascript; charset=utf-8"),
         ("layers.js", "application/javascript; charset=utf-8"),
         ("index.html", "text/html; charset=utf-8"),
         ("style.css", "text/css; charset=utf-8"),
