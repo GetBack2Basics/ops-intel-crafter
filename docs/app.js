@@ -54,6 +54,14 @@
       targetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/",
       exportHref: "exports/hunter_substation_flood_dependency/result.geojson"
     },
+    water_inundation: {
+      question: "Locate water inundation areas, floodplains, and wetland extents within target AOI",
+      defaultArea: "Lower Hunter Floodplain",
+      defaultDistance: "0m (Direct polygon intersection)",
+      defaultOptions: "NSW Spatial Services Water Inundation",
+      targetUri: "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/",
+      exportHref: "qa/data/nsw_water_inundation_areas.geojson"
+    },
     lga_multi_hazard: {
       question: "Summarize LGAs by flood inundation polygons, substations, and building complexes",
       defaultArea: "Newcastle, Maitland, Cessnock, Port Stephens, Lake Macquarie",
@@ -356,6 +364,7 @@ ORDER BY g.cell_population DESC;`;
       }
 
       return `-- Substation Flood Proximity & Facility Catchment
+-- Spatial Filter: within generated AOI region (${(resolved && resolved.name) || areaText || "Lower Hunter"})
 -- User Area: ${areaText || "Lower Hunter"}
 -- User Catchment Distance: ${distText || "5000m"}
 -- User Options: ${optText || "All voltages (33 kV - 500 kV)"}
@@ -370,6 +379,29 @@ FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_elec
 WHERE 1=1
   ${whereClause}
 ORDER BY voltage_kv DESC NULLS LAST
+LIMIT 100;`;
+    }
+
+    if (key === "water_inundation") {
+      const loc = (window.GeoLibreCatalogEngine && window.GeoLibreCatalogEngine.getActiveAoiRegion)
+        ? window.GeoLibreCatalogEngine.getActiveAoiRegion(areaText)
+        : (window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(areaText) : null) || { name: "Lower Hunter Basin", bbox: [151.40, -32.95, 151.85, -32.65] };
+      const [minX, minY, maxX, maxY] = loc.bbox;
+      const areaLabel = loc.name || areaText || "Lower Hunter Basin";
+      return `-- NSW Water Inundation & Flood Extent Footprints
+-- Spatial Filter: within generated AOI region (${areaLabel})
+-- Extent: [${minX.toFixed(4)}, ${minY.toFixed(4)}, ${maxX.toFixed(4)}, ${maxY.toFixed(4)}] (EPSG:7844 / GDA2020)
+SELECT
+    COALESCE(hydroname, waterbody_name, 'Inundation Area') AS waterbody_name,
+    classsubtype AS subtype,
+    ROUND(TRY_CAST(Shape__Area AS DOUBLE), 2) AS area_sqm,
+    ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
+    ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-Q1/20261108T223144Z/part-00000.parquet')
+WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}
+  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}
+  -- Within generated AOI region
+ORDER BY Shape__Area DESC NULLS LAST
 LIMIT 100;`;
     }
 

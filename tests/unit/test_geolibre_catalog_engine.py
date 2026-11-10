@@ -74,3 +74,30 @@ def test_app_js_wires_geolibre_catalog_engine() -> None:
     btn_gen_block = content[content.find('const btnGenerateSql = document.getElementById("btnGenerateSql");'):]
     assert "await analyzeQuery(null, false);" in btn_gen_block[:500]
 
+
+def test_spatial_filter_within_generated_aoi_region() -> None:
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    engine_path = os.path.join(repo_root, "docs", "geolibre_catalog_engine.js")
+
+    with open(engine_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # 1. getActiveAoiRegion must be implemented and exposed
+    assert "function getActiveAoiRegion(" in content
+    assert "getActiveAoiRegion," in content
+
+    # 2. nsw_water_inundation_areas must filter within the generated AOI region
+    water_block = content[content.find('id: "nsw_water_inundation_areas"'):]
+    water_sql = water_block[:water_block.find("},\n    {")]
+    assert "within generated AOI region" in water_sql
+    assert "_bbox_maxx >=" in water_sql
+    assert "_bbox_minx <=" in water_sql
+    assert "_bbox_maxy >=" in water_sql
+    assert "_bbox_miny <=" in water_sql
+
+    # 3. substation_flood must not be clobbered by other datasets
+    assert 'id: "ga_electricity_substations",\n      scenarioKey: "substation_flood"' in content
+    assert 'scenarioKey: "transmission_lines"' in content
+    assert 'scenarioKey: "water_inundation"' in content
+
+

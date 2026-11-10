@@ -104,13 +104,10 @@
       targetColumns: ["facility_name", "facility_type", "facility_subtype", "classsubtype", "generalname", "latitude", "longitude"],
       defaultSort: "facility_type, facility_name",
       sqlBuilder: function (areaText, localityInfo, matchedConcept) {
-        let whereClause = "";
-        let areaLabel = areaText || "Taree, NSW";
-        if (localityInfo && localityInfo.bbox) {
-          const [minX, minY, maxX, maxY] = localityInfo.bbox;
-          whereClause = `AND _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}\n  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Area scope: ${localityInfo.name}`;
-          areaLabel = localityInfo.name;
-        }
+        const loc = getActiveAoiRegion(areaText, localityInfo);
+        const [minX, minY, maxX, maxY] = loc.bbox;
+        const areaLabel = loc.name;
+        const whereClause = `AND _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}\n  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Spatial Filter: within generated AOI region (${loc.name})`;
 
         // Determine specific facility category filter from matched concept or query
         const concept = (matchedConcept || "").toLowerCase();
@@ -148,7 +145,7 @@
         }
 
         return `-- Authoritative NSW Features of Interest (${categoryTitle})
--- User Area: ${areaLabel}
+-- Spatial Filter: within generated AOI region (${areaLabel})
 -- Source: NSW Spatial Services (DCS) Features of Interest
 SELECT
     COALESCE(facility_name, generalname, 'Facility') AS facility_name,
@@ -188,17 +185,14 @@ LIMIT 100;`;
       targetColumns: ["name", "feature_name", "locality", "state", "voltage_kv", "latitude", "longitude"],
       defaultSort: "voltage_kv DESC NULLS LAST",
       sqlBuilder: function (areaText, localityInfo) {
-        let whereClause = "";
-        let areaLabel = areaText || "Lower Hunter (Maitland / Cessnock / Newcastle)";
-        if (localityInfo && localityInfo.bbox) {
-          const [minX, minY, maxX, maxY] = localityInfo.bbox;
-          whereClause = `AND _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}\n  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Area scope: ${localityInfo.name}`;
-          areaLabel = localityInfo.name;
-        }
+        const loc = getActiveAoiRegion(areaText, localityInfo);
+        const [minX, minY, maxX, maxY] = loc.bbox;
+        const areaLabel = loc.name;
 
         return `-- Substation Proximity & Catchment Exposure Query
 -- Evaluates electricity substations within spatial proximity of water inundation extents
--- User Area: ${areaLabel}
+-- Spatial Filter: within generated AOI region (${areaLabel})
+-- Extent: [${minX.toFixed(4)}, ${minY.toFixed(4)}, ${maxX.toFixed(4)}, ${maxY.toFixed(4)}] (EPSG:7844 / GDA2020)
 SELECT
     COALESCE(name, feature_name, 'Substation') AS substation_name,
     locality,
@@ -207,8 +201,9 @@ SELECT
     ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')
-WHERE 1=1
-  ${whereClause}
+WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}
+  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}
+  -- Within generated AOI region
 ORDER BY voltage_kv DESC NULLS LAST
 LIMIT 100;`;
       }
@@ -231,12 +226,32 @@ LIMIT 100;`;
       targetColumns: ["name", "generationmw", "primaryfueltype", "state", "operationalstatus", "latitude", "longitude"],
       defaultSort: "generationmw DESC NULLS LAST",
       sqlBuilder: function (areaText, localityInfo) {
-        let areaFilterSql = "";
-        if (localityInfo && localityInfo.state && localityInfo.state !== "ALL") {
-          areaFilterSql = `WHERE state = '${localityInfo.state}'`;
+        const loc = getActiveAoiRegion(areaText, localityInfo);
+        const areaLabel = loc ? loc.name : (areaText || "Australia National");
+        if (loc && loc.bbox && loc.state !== "ALL" && !loc.name.toLowerCase().includes("national")) {
+          const [minX, minY, maxX, maxY] = loc.bbox;
+          return `-- Major Power Stations & Generation Capacity (GA NEI)
+-- Spatial Filter: within generated AOI region (${loc.name})
+-- Extent: [${minX.toFixed(4)}, ${minY.toFixed(4)}, ${maxX.toFixed(4)}, ${maxY.toFixed(4)}] (EPSG:7844 / GDA2020)
+SELECT
+    COALESCE(name, 'Power Station') AS station_name,
+    locality,
+    state,
+    primaryfueltype AS fuel_type,
+    ROUND(TRY_CAST(generationmw AS DOUBLE), 1) AS capacity_mw,
+    operationalstatus AS status,
+    ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
+    ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
+FROM read_parquet('${this.parquetUri}')
+WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}
+  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}
+  -- Within generated AOI region
+ORDER BY capacity_mw DESC NULLS LAST
+LIMIT 100;`;
         }
+        let areaFilterSql = (loc && loc.state && loc.state !== "ALL") ? `WHERE state = '${loc.state}'` : "";
         return `-- National Major Power Stations & Generation Capacity (GA NEI)
--- Scope: ${areaText || "Continental Australia Rollup"}
+-- Scope: ${areaLabel}
 SELECT
     COALESCE(state, 'Unknown') AS state,
     COUNT(*) AS total_power_stations,
@@ -251,7 +266,7 @@ ORDER BY total_capacity_mw DESC;`;
     },
     {
       id: "ga_electricity_transmission_lines",
-      scenarioKey: "substation_flood",
+      scenarioKey: "transmission_lines",
       title: "Geoscience Australia — High-Voltage Transmission Lines",
       theme: "Critical Infrastructure",
       provider: "Geoscience Australia",
@@ -265,13 +280,24 @@ ORDER BY total_capacity_mw DESC;`;
       ],
       targetColumns: ["name", "feature_name", "voltage_kv", "state"],
       defaultSort: "voltage_kv DESC",
-      sqlBuilder: function (areaText) {
+      sqlBuilder: function (areaText, localityInfo) {
+        const loc = getActiveAoiRegion(areaText, localityInfo);
+        const [minX, minY, maxX, maxY] = loc.bbox;
+        const areaLabel = loc.name;
         return `-- High-Voltage Transmission Grid Lines (>=66kV)
+-- Spatial Filter: within generated AOI region (${areaLabel})
+-- Extent: [${minX.toFixed(4)}, ${minY.toFixed(4)}, ${maxX.toFixed(4)}, ${maxY.toFixed(4)}] (EPSG:7844 / GDA2020)
 SELECT
     COALESCE(name, feature_name, 'Transmission Line') AS line_name,
     state,
-    TRY_CAST(voltage_kv AS INT) AS voltage_kv
+    TRY_CAST(voltage_kv AS INT) AS voltage_kv,
+    ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
+    ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')
+WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}
+  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}
+  -- Within generated AOI region
+ORDER BY voltage_kv DESC NULLS LAST
 LIMIT 100;`;
       }
     },
@@ -292,8 +318,18 @@ LIMIT 100;`;
       ],
       targetColumns: ["title", "category", "status", "agency", "council_area", "latitude", "longitude"],
       defaultSort: "title",
-      sqlBuilder: function (areaText) {
+      sqlBuilder: function (areaText, localityInfo) {
+        const loc = getActiveAoiRegion(areaText, localityInfo);
+        const areaLabel = loc ? loc.name : (areaText || "NSW Statewide");
+        let whereClause = "";
+        if (loc && loc.bbox && loc.state !== "ALL" && !loc.name.toLowerCase().includes("statewide")) {
+          const [minX, minY, maxX, maxY] = loc.bbox;
+          whereClause = `WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}
+  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}
+  -- Within generated AOI region`;
+        }
         return `-- NSW RFS Active Bushfire & Emergency Incidents (Live Feed)
+-- Spatial Filter: within generated AOI region (${areaLabel})
 SELECT
     title AS incident_title,
     category AS alert_level,
@@ -303,6 +339,7 @@ SELECT
     ROUND(TRY_CAST(latitude AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(longitude AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')
+${whereClause}
 ORDER BY
     CASE category
         WHEN 'Emergency Warning' THEN 1
@@ -316,7 +353,7 @@ LIMIT 50;`;
     },
     {
       id: "nsw_water_inundation_areas",
-      scenarioKey: "substation_flood",
+      scenarioKey: "water_inundation",
       title: "NSW Spatial Services — Water Inundation & Flood Extent Areas",
       theme: "Flood & Hydrography",
       provider: "NSW Spatial Services (DCS)",
@@ -326,22 +363,34 @@ LIMIT 50;`;
       viewName: "nsw_water_inundation_areas",
       keywords: [
         "flood", "floods", "water inundation", "inundation", "flood extent", "flood basin",
-        "flood plain", "wetland", "submerged", "inundated area"
+        "flood plain", "wetland", "submerged", "inundated area", "water extent"
       ],
       targetColumns: ["hydroname", "waterbody_name", "classsubtype"],
       defaultSort: "hydroname",
-      sqlBuilder: function () {
+      sqlBuilder: function (areaText, localityInfo) {
+        const loc = getActiveAoiRegion(areaText, localityInfo);
+        const [minX, minY, maxX, maxY] = loc.bbox;
+        const areaLabel = loc.name;
         return `-- NSW Water Inundation & Flood Extent Footprints
+-- Spatial Filter: within generated AOI region (${areaLabel})
+-- Extent: [${minX.toFixed(4)}, ${minY.toFixed(4)}, ${maxX.toFixed(4)}, ${maxY.toFixed(4)}] (EPSG:7844 / GDA2020)
 SELECT
     COALESCE(hydroname, waterbody_name, 'Inundation Area') AS waterbody_name,
-    classsubtype AS subtype
+    classsubtype AS subtype,
+    ROUND(TRY_CAST(Shape__Area AS DOUBLE), 2) AS area_sqm,
+    ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
+    ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')
-LIMIT 50;`;
+WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}
+  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}
+  -- Within generated AOI region
+ORDER BY Shape__Area DESC NULLS LAST
+LIMIT 100;`;
       }
     },
     {
       id: "ga_seismic_hazard_pga_10pct",
-      scenarioKey: "national_power",
+      scenarioKey: "seismic_hazard",
       title: "National Seismic Hazard Assessment 2018 — PGA Contours (10% in 50 Years)",
       theme: "Hazards",
       provider: "Geoscience Australia",
@@ -355,12 +404,25 @@ LIMIT 50;`;
       ],
       targetColumns: ["pga_value", "contour_id"],
       defaultSort: "pga_value DESC",
-      sqlBuilder: function () {
+      sqlBuilder: function (areaText, localityInfo) {
+        const loc = getActiveAoiRegion(areaText, localityInfo);
+        const areaLabel = loc ? loc.name : (areaText || "National / Regional");
+        let whereClause = "";
+        if (loc && loc.bbox && loc.state !== "ALL" && !loc.name.toLowerCase().includes("national")) {
+          const [minX, minY, maxX, maxY] = loc.bbox;
+          whereClause = `WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}
+  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}
+  -- Within generated AOI region`;
+        }
         return `-- National Seismic Hazard Assessment 2018 — Ground Motion PGA Contours
+-- Spatial Filter: within generated AOI region (${areaLabel})
 SELECT
     contour_id,
-    pga_value
+    pga_value,
+    ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
+    ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')
+${whereClause}
 ORDER BY pga_value DESC
 LIMIT 50;`;
       }
@@ -383,16 +445,18 @@ LIMIT 50;`;
       targetColumns: ["cell_id", "cell_population", "centroid_lon", "centroid_lat", "easting_m", "northing_m"],
       defaultSort: "cell_population DESC",
       sqlBuilder: function (areaText, localityInfo) {
+        const loc = getActiveAoiRegion(areaText, localityInfo);
+        const areaLabel = loc ? loc.name : (areaText || "Australia (National)");
         let whereClause = "";
-        let areaLabel = areaText || "All Australia (Continental)";
-        if (localityInfo && localityInfo.bbox) {
-          const [minX, minY, maxX, maxY] = localityInfo.bbox;
-          whereClause = `WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}\n  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Area scope: ${localityInfo.name}`;
-          areaLabel = localityInfo.name;
+        if (loc && loc.bbox && loc.state !== "ALL" && !loc.name.toLowerCase().includes("national")) {
+          const [minX, minY, maxX, maxY] = loc.bbox;
+          whereClause = `WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}
+  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}
+  -- Spatial Filter: within generated AOI region (${loc.name})`;
         }
 
         return `-- ABS 2025 National 1 km² Population Grid (Australia)
--- User Area: ${areaLabel}
+-- Spatial Filter: within generated AOI region (${areaLabel})
 -- Resolution: 1 km² Nested Grid (EPSG:7844 / GDA2020)
 -- Total Continental Features: 286,827 cells (~27.61M pop)
 SELECT
@@ -425,8 +489,16 @@ LIMIT 500;`;
       ],
       targetColumns: ["cell_id", "cell_population", "in_method_a", "in_method_b", "overlap_fraction"],
       defaultSort: "cell_population DESC",
-      sqlBuilder: function (areaText) {
+      sqlBuilder: function (areaText, localityInfo) {
+        const loc = getActiveAoiRegion(areaText, localityInfo);
+        const areaLabel = loc ? loc.name : (areaText || "Lower Hunter");
+        let whereClause = "WHERE g.in_method_b = true";
+        if (loc && loc.bbox && loc.state !== "ALL" && !loc.name.toLowerCase().includes("national")) {
+          const [minX, minY, maxX, maxY] = loc.bbox;
+          whereClause += `\n  AND g._bbox_maxx >= ${minX.toFixed(4)} AND g._bbox_minx <= ${maxX.toFixed(4)}\n  AND g._bbox_maxy >= ${minY.toFixed(4)} AND g._bbox_miny <= ${maxY.toFixed(4)}\n  -- Spatial Filter: within generated AOI region (${loc.name})`;
+        }
         return `-- Population Methodology Comparison (Methods A, B & C)
+-- Spatial Filter: within generated AOI region (${areaLabel})
 -- Invariant: Must evaluate all three methods on identical hazard footprints
 -- Method A: 1 km² Centroid ST_Contains baseline
 -- Method B: 1 km² Cell Polygon ST_Intersects (with boundary-straddling breakdown)
@@ -437,7 +509,8 @@ SELECT
     SUM(CASE WHEN in_method_b THEN cell_population ELSE 0 END) AS pop_method_b,
     ROUND(SUM(cell_population * COALESCE(overlap_fraction, 1.0)), 1) AS pop_method_c_proportional,
     COUNT(CASE WHEN in_method_b AND NOT in_method_a THEN 1 END) AS straddling_cells_missed_by_a
-FROM read_parquet('${this.parquetUri}');`;
+FROM read_parquet('${this.parquetUri}') g
+${whereClause};`;
       }
     },
     {
@@ -456,17 +529,29 @@ FROM read_parquet('${this.parquetUri}');`;
       ],
       targetColumns: ["lga_code_2025", "lga_name_2025", "state_name_2021", "area_sqkm"],
       defaultSort: "lga_name_2025",
-      sqlBuilder: function (areaText) {
-        return `-- Local Government Area (LGA) Multi-Hazard Operational Summary
+      sqlBuilder: function (areaText, localityInfo) {
+        const loc = getActiveAoiRegion(areaText, localityInfo);
+        const areaLabel = loc ? loc.name : (areaText || "NSW LGAs");
+        let whereClause = "";
+        if (loc && loc.bbox && loc.state !== "ALL" && !loc.name.toLowerCase().includes("national")) {
+          const [minX, minY, maxX, maxY] = loc.bbox;
+          whereClause = `WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}\n  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Spatial Filter: within generated AOI region (${loc.name})`;
+        } else if (loc && loc.state && loc.state === "NSW") {
+          whereClause = `WHERE state_name_2021 = 'New South Wales'`;
+        }
+        return `-- Local Government Area (LGA) Boundaries (ASGS 2025)
+-- Spatial Filter: within generated AOI region (${areaLabel})
 SELECT
     lga_code_2025 AS lga_code,
     lga_name_2025 AS lga_name,
     state_name_2021 AS state,
-    ROUND(TRY_CAST(area_sqkm AS DOUBLE), 1) AS area_sqkm
+    ROUND(TRY_CAST(area_sqkm AS DOUBLE), 1) AS area_sqkm,
+    ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
+    ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')
-WHERE state_name_2021 = 'New South Wales'
+${whereClause}
 ORDER BY lga_name_2025
-LIMIT 40;`;
+LIMIT 50;`;
       }
     },
     {
@@ -485,8 +570,16 @@ LIMIT 40;`;
       ],
       targetColumns: ["name", "locality", "state", "voltage_kv", "latitude", "longitude"],
       defaultSort: "voltage_kv DESC NULLS LAST",
-      sqlBuilder: function () {
+      sqlBuilder: function (areaText, localityInfo) {
+        const loc = getActiveAoiRegion(areaText, localityInfo);
+        const areaLabel = loc ? loc.name : (areaText || "Eastern Australia & NSW Riverina");
+        let whereClause = "WHERE state IN ('NSW', 'VIC', 'SA', 'QLD')";
+        if (loc && loc.bbox && loc.state !== "ALL" && !loc.name.toLowerCase().includes("national") && !loc.name.toLowerCase().includes("eastern australia")) {
+          const [minX, minY, maxX, maxY] = loc.bbox;
+          whereClause += `\n  AND _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}\n  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Spatial Filter: within generated AOI region (${loc.name})`;
+        }
         return `-- Australian Tropical Cyclone Asset Exposure (WP302026)
+-- Spatial Filter: within generated AOI region (${areaLabel})
 -- Track Footprint: Inland Queensland / SA Channel Country & NSW Riverina
 SELECT
     COALESCE(name, feature_name, 'Substation') AS asset_name,
@@ -496,7 +589,7 @@ SELECT
     ROUND(TRY_CAST(latitude AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(longitude AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')
-WHERE state IN ('NSW', 'VIC', 'SA', 'QLD')
+${whereClause}
 ORDER BY voltage_kv DESC NULLS LAST
 LIMIT 30;`;
       }
@@ -511,17 +604,53 @@ LIMIT 30;`;
    * Resolves locality text into canonical name and bounding box.
    */
   function resolveLocality(rawText) {
-    if (!rawText || typeof rawText !== "string") return null;
+    if (!rawText) return null;
+    if (typeof rawText === "object") {
+      if (rawText.bbox && Array.isArray(rawText.bbox) && rawText.bbox.length === 4) {
+        return {
+          key: "custom_aoi",
+          name: rawText.name || `Active AOI [${rawText.bbox.map(n => typeof n === "number" ? n.toFixed(3) : n).join(", ")}]`,
+          bbox: rawText.bbox,
+          state: rawText.state || "NSW"
+        };
+      }
+      if (typeof window !== "undefined" && window.OICLayers && typeof window.OICLayers.resolveLocalityExtent === "function") {
+        const ext = window.OICLayers.resolveLocalityExtent(rawText);
+        if (ext && ext.bbox) {
+          return {
+            key: "custom_aoi",
+            name: ext.name || "Active AOI Geometry",
+            bbox: ext.bbox,
+            state: "NSW"
+          };
+        }
+      }
+      return null;
+    }
+    if (typeof rawText !== "string") return null;
     const lower = rawText.toLowerCase().trim();
 
-    // Check exact or substring in gazetteer
+    // 1. Check window.OICLayers.resolveLocalityExtent first (it has 6,000+ gazetteer entries)
+    if (typeof window !== "undefined" && window.OICLayers && typeof window.OICLayers.resolveLocalityExtent === "function") {
+      const ext = window.OICLayers.resolveLocalityExtent(rawText);
+      if (ext && ext.bbox) {
+        return {
+          key: (ext.name || lower).toLowerCase(),
+          name: ext.name || rawText,
+          bbox: ext.bbox,
+          state: ext.state || "NSW"
+        };
+      }
+    }
+
+    // 2. Check exact or substring in LOCALITIES
     for (const [key, info] of Object.entries(LOCALITIES)) {
       if (lower === key || lower.includes(key)) {
         return { key, ...info };
       }
     }
 
-    // Check coordinates pattern: minX, minY, maxX, maxY
+    // 3. Check coordinates pattern: minX, minY, maxX, maxY
     const bboxMatch = lower.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
     if (bboxMatch) {
       let minX = parseFloat(bboxMatch[1]);
@@ -539,6 +668,46 @@ LIMIT 30;`;
     }
 
     return null;
+  }
+
+  /**
+   * Resolves the active generated AOI region from locality info, user input, or layers.
+   */
+  function getActiveAoiRegion(areaText, localityInfo) {
+    if (localityInfo && localityInfo.bbox && Array.isArray(localityInfo.bbox) && localityInfo.bbox.length === 4) {
+      return localityInfo;
+    }
+    if (areaText) {
+      const res = resolveLocality(areaText);
+      if (res && res.bbox) return res;
+    }
+    if (typeof document !== "undefined") {
+      const aoiEl = document.getElementById("aoiInput");
+      const aoiVal = aoiEl ? aoiEl.value.trim() : "";
+      if (aoiVal) {
+        const res = resolveLocality(aoiVal);
+        if (res && res.bbox) return res;
+      }
+    }
+    if (typeof window !== "undefined" && window.OICLayers && typeof window.OICLayers.getCurrentAoiGeometry === "function") {
+      const cur = window.OICLayers.getCurrentAoiGeometry();
+      if (cur) {
+        const res = resolveLocality(cur);
+        if (res && res.bbox) return res;
+      }
+    }
+    if (typeof window !== "undefined" && window.OICApp && typeof window.OICApp.getUserParams === "function") {
+      const p = window.OICApp.getUserParams();
+      if (p && p.area) {
+        const res = resolveLocality(p.area);
+        if (res && res.bbox) return res;
+      }
+    }
+    return LOCALITIES["lower hunter"] || {
+      name: "Lower Hunter AOI",
+      bbox: [151.4000, -32.9500, 151.8500, -32.6500],
+      state: "NSW"
+    };
   }
 
   /**
@@ -715,6 +884,7 @@ SELECT
     CATALOGUE_BY_SCENARIO,
     LOCALITIES,
     resolveLocality,
+    getActiveAoiRegion,
     findDataset,
     compileSql,
     buildUncataloguedRejectSql

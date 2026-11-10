@@ -650,16 +650,20 @@
         }
       }
       if (matched.length > 0) {
-        const minX = Math.min(...matched.map(m => m.bbox[0]));
-        const minY = Math.min(...matched.map(m => m.bbox[1]));
-        const maxX = Math.max(...matched.map(m => m.bbox[2]));
-        const maxY = Math.max(...matched.map(m => m.bbox[3]));
-        const primary = matched[0];
+        // If we matched both a specific locality and a state qualifier (e.g. "Newcastle, New South Wales"),
+        // prioritize the specific local entities so we don't blow up the local AOI to the whole state
+        const localMatches = matched.filter(m => !m.isState && m.code !== "AUS" && m.code !== "NSW");
+        const targets = localMatches.length > 0 ? localMatches : matched;
+        const minX = Math.min(...targets.map(m => m.bbox[0]));
+        const minY = Math.min(...targets.map(m => m.bbox[1]));
+        const maxX = Math.max(...targets.map(m => m.bbox[2]));
+        const maxY = Math.max(...targets.map(m => m.bbox[3]));
+        const primary = targets[0];
         return buildReturn({
-          name: matched.map(m => m.name || m.code).join(", "),
+          name: targets.map(m => m.name || m.code).join(", "),
           state: primary.state,
           stateCode: primary.stateCode,
-          isState: matched.length === 1 && !!primary.isState,
+          isState: targets.length === 1 && !!primary.isState,
           center: primary.center
         }, [minX, minY, maxX, maxY]);
       }
