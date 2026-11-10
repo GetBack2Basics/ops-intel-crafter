@@ -59,6 +59,18 @@
       type: "json"
     },
     {
+      name: "next_sa2_boundaries_asgs2021",
+      file: "next_sa2_boundaries_asgs2021.geojson",
+      url: "qa/data/next_sa2_boundaries_asgs2021.geojson",
+      type: "json"
+    },
+    {
+      name: "nsw_lga_boundaries",
+      file: "nsw_lga_boundaries.geojson",
+      url: "qa/data/nsw_lga_boundaries.geojson",
+      type: "json"
+    },
+    {
       name: "nsw_rfs_major_incidents_live",
       file: "nsw_rfs_major_incidents_live.geojson",
       url: "qa/data/nsw_rfs_major_incidents_live.geojson",
@@ -236,3 +248,4 @@
     initDuckDB();
   }
 })();
+
