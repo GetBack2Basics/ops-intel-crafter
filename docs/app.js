@@ -194,6 +194,11 @@
     const raw = (areaText || "").trim();
     if (!raw) return "-- No additional area filter";
 
+    // 0. Check for National / All Australia scope explicitly
+    if (/^(all australia|australia national|australia|national|continental|all states|entire country)$/i.test(raw)) {
+      return "-- Area scope: Continental Australia (All States and Territories)";
+    }
+
     // 1. Explicit 4-coordinate bounding box numbers
     const bboxMatch = raw.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
     if (bboxMatch) {
@@ -207,20 +212,33 @@
       const [minX, minY, maxX, maxY] = resolved.bbox;
       const isStateCol = /state/i.test(columnExpr);
 
+      // If querying national scope across all states:
+      if (resolved.stateCode === "AUS" || /australia|national/i.test(resolved.name)) {
+        return `-- Area scope: Continental Australia (${resolved.name})`;
+      }
+
       // If querying a state column AND input is an actual State/Territory (e.g. NSW, VIC, QLD)
       if (isStateCol && resolved.isState && resolved.stateCode) {
         return `AND (COALESCE(state, '') = '${resolved.stateCode}')\n  -- Area scope: ${resolved.name}`;
       }
 
-      // If querying a state column BUT input is a city or locality (e.g. Sydney, Parramatta, Newcastle):
+      // If querying a state column BUT input is a city or locality (e.g. Sydney, Parramatta, Newcastle, Hunter):
       // State is never equal to Sydney as it is a city/locality. Search spatially within the resolved extent!
       if (isStateCol && !resolved.isState) {
         return `AND _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)} AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Area scope: ${resolved.name} (Smoothed extent in ${resolved.state || 'Australia'})`;
       }
 
-      // For LGA boundary queries
+      // For LGA boundary queries:
       if (columnExpr && columnExpr.includes("lga")) {
-        return `AND (l.lga_name_2025 ILIKE '%${raw.replace(/'/g, "")}%' OR (_bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)} AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}))`;
+        const lgaTokens = raw
+          .split(/[,;/]+/)
+          .map(s => s.trim().replace(/\s*\([^)]*\)/g, "").replace(/^(city of|shire of|municipality of|borough of|regional council of)\s+/i, "").trim())
+          .filter(s => s && !/lower hunter|statewide|national|australia|all/i.test(s));
+        if (lgaTokens.length > 0) {
+          const lgaIlikes = lgaTokens.map(t => `l.lga_name ILIKE '%${t.replace(/'/g, "")}%'`).join(" OR ");
+          return `AND (${lgaIlikes})\n  -- Multi-LGA filter (${lgaTokens.join(", ")})`;
+        }
+        return `AND (l.lga_name ILIKE '%${raw.replace(/'/g, "")}%' OR (_bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)} AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}))`;
       }
 
       // General spatial bbox predicate
@@ -230,7 +248,7 @@
     // 3. Fallback token ILIKE
     const tokens = raw
       .split(/[,;/]+/)
-      .map(s => s.trim())
+      .map(s => s.trim().replace(/\s*\([^)]*\)/g, "").trim())
       .filter(s => s && !/lower hunter|statewide|national|australia|all|floodplain/i.test(s));
     if (!tokens.length) return `-- Area scope: ${raw.replace(/'/g, "")}`;
     const isStateCol = /state/i.test(columnExpr);
@@ -377,6 +395,29 @@ LIMIT 100;`;
     }
 
     if (key === "national_power") {
+      const resolved = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(areaText) : null;
+      // If the user specified a local region (e.g. Hunter, Latrobe Valley, Newcastle, Pilbara) rather than national or entire state:
+      if (resolved && resolved.bbox && !resolved.isState && resolved.stateCode !== "AUS") {
+        const [minX, minY, maxX, maxY] = resolved.bbox;
+        return `-- Power Generation Facilities in ${resolved.name} (${resolved.state || 'Australia'})
+-- User Area: ${areaText}
+-- Bounding Extent: [${minX.toFixed(4)}, ${minY.toFixed(4)}, ${maxX.toFixed(4)}, ${maxY.toFixed(4)}]
+SELECT
+    name AS station_name,
+    locality,
+    state,
+    primary_fuel_type,
+    ROUND(TRY_CAST(generation_capacity_mw AS DOUBLE), 1) AS capacity_mw,
+    ROUND(TRY_CAST(latitude AS DOUBLE), 4) AS lat,
+    ROUND(TRY_CAST(longitude AS DOUBLE), 4) AS lon
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261108T223144Z/part-00000.parquet')
+WHERE 1=1
+  AND TRY_CAST(longitude AS DOUBLE) >= ${minX.toFixed(4)} AND TRY_CAST(longitude AS DOUBLE) <= ${maxX.toFixed(4)}
+  AND TRY_CAST(latitude AS DOUBLE) >= ${minY.toFixed(4)} AND TRY_CAST(latitude AS DOUBLE) <= ${maxY.toFixed(4)}
+ORDER BY capacity_mw DESC NULLS LAST
+LIMIT 50;`;
+      }
+
       const areaFilterSql = parseAreaWhereClause(areaText, "COALESCE(state, '')");
       return `-- National Power Generation Capacity by State + NSHA 2018 Seismic Baseline
 -- User Area: ${areaText || "Australia National"}
@@ -441,33 +482,56 @@ ORDER BY cell_population DESC
 LIMIT 50;`;
   }
 
-  function inferScenarioFromText(text) {
-    const q = (text || "").toLowerCase();
-    if (!q) return "national_pop_grid";
-    if (q.includes("scada") || q.includes("icu") || q.includes("restricted") || q.includes("token")) {
+  function inferScenarioFromText(text, currentKey) {
+    const q = (text || "").toLowerCase().trim();
+    if (!q) return currentKey || "national_pop_grid";
+
+    // 1. Explicit security/uncatalogued/restricted requests
+    if (q.includes("scada") || q.includes("icu") || q.includes("restricted") || q.includes("token") || q.includes("hospital icu")) {
       return "uncatalogued_reject";
     }
-    if (q.includes("cyclone") || q.includes("typhoon") || q.includes("wp302026") || q.includes("track") || q.includes("in-fa")) {
+
+    // 2. Cyclone / Storm Track
+    if (q.includes("cyclone") || q.includes("typhoon") || q.includes("wp302026") || q.includes("track exposure") || q.includes("in-fa")) {
       return "cyclone_track_exposure";
     }
-    if (q.includes("hunter") || q.includes("study") || q.includes("regime") || q.includes("method a") || q.includes("method b") || q.includes("method c") || q.includes("flood basin")) {
-      return "pop_comparison";
-    }
-    if (q.includes("population") || q.includes("residents") || q.includes("people") || q.includes("pop grid") || q.includes("census")) {
-      return "national_pop_grid";
-    }
-    if (q.includes("substation") || q.includes("5km") || q.includes("5 km") || q.includes("dependent") || q.includes("catchment")) {
+
+    // 3. Electricity substations & transmission catchments
+    if (q.includes("substation") || q.includes("sub-station") || q.includes("grid sub") || q.includes("electricity sub") || q.includes("catchment") || q.includes("feeder")) {
       return "substation_flood";
     }
-    if (q.includes("rfs") || q.includes("bushfire") || q.includes("fire") || q.includes("live")) {
+
+    // 4. Bushfire / RFS Incidents
+    if (q.includes("rfs") || q.includes("bushfire") || q.includes("wildfire") || q.includes("fire incident") || q.includes("major incident")) {
       return "live_rfs";
     }
-    if (q.includes("national") || q.includes("power station") || q.includes("seismic") || q.includes("pga")) {
+
+    // 5. Power stations & seismic contours
+    if (q.includes("power station") || q.includes("generation capacity") || q.includes("generator") || q.includes("seismic") || q.includes("pga contour") || q.includes("nsha")) {
       return "national_power";
     }
-    if (q.includes("lga") || q.includes("council") || q.includes("rollup") || q.includes("summary")) {
+
+    // 6. LGA multi-hazard / administrative summaries
+    if (q.includes("lga") || q.includes("local government") || q.includes("council") || q.includes("multi-hazard summary")) {
       return "lga_multi_hazard";
     }
+
+    // 7. Population 3-method comparison (explicitly method A/B/C or comparison)
+    if (q.includes("method a") || q.includes("method b") || q.includes("method c") || q.includes("pop comparison") || q.includes("population comparison") || q.includes("regime") || q.includes("flood basin")) {
+      return "pop_comparison";
+    }
+
+    // 8. General Population Grid (ABS 1 km²)
+    if (q.includes("population grid") || q.includes("1 km") || q.includes("1km") || q.includes("population") || q.includes("residents") || q.includes("census") || q.includes("erp")) {
+      return "national_pop_grid";
+    }
+
+    // 9. If an active scenario key already exists and no specific topic was triggered, PRESERVE it!
+    // (This ensures that typing an area or adjusting a query doesn't hijack the user's active preset!)
+    if (currentKey && SCENARIO_PRESETS[currentKey]) {
+      return currentKey;
+    }
+
     return "national_pop_grid";
   }
 
@@ -482,7 +546,7 @@ LIMIT 50;`;
       scenarioKey = "live_rfs";
     } else if (lower.includes("ga_major_power_stations") || lower.includes("seismic_hazard_pga") || lower.includes("nsha")) {
       scenarioKey = "national_power";
-    } else if (lower.includes("next_lga_boundaries_asgs2025") || lower.includes("lga_code_2025") || lower.includes("lga_name_2025")) {
+    } else if (lower.includes("next_lga_boundaries_asgs2025") || lower.includes("lga_code_2025") || lower.includes("lga_name_2025") || lower.includes("lga_name") || lower.includes("lga_code")) {
       scenarioKey = "lga_multi_hazard";
     } else if (lower.includes("ga_electricity_substations") || lower.includes("distance_to_inundation_m") || lower.includes("substation_flood")) {
       scenarioKey = "substation_flood";
@@ -1336,7 +1400,7 @@ LIMIT 50;`;
     }
     const inputEl = document.getElementById("nlInput");
     const rawNl = (inputEl ? inputEl.value : "").trim();
-    const key = scenarioKeyOverride || inferScenarioFromText(rawNl);
+    const key = scenarioKeyOverride || inferScenarioFromText(rawNl, activeScenarioKey);
     activeScenarioKey = key;
     highlightActivePresetChip(key);
     const preset = SCENARIO_PRESETS[key] || SCENARIO_PRESETS.pop_comparison;
@@ -1850,7 +1914,7 @@ LIMIT 50;`;
     let maxVal = 0;
     let hasNumeric = false;
     res.rows.forEach(r => {
-      const p = r.cell_population ?? r.population ?? r.total_capacity_mw ?? r.area_sqkm;
+      const p = r.cell_population ?? r.population ?? r.total_capacity_mw ?? r.capacity_mw ?? r.area_sqkm;
       if (typeof p === "number") {
         hasNumeric = true;
         sumPop += p;
@@ -5043,9 +5107,7 @@ th { color: var(--muted); font-weight: 600; }
       btnAnalyze.addEventListener("click", async () => {
         const inputEl = document.getElementById("nlInput");
         const rawNl = (inputEl ? inputEl.value : "").trim();
-        // Keep the selected preset if the text is still its question; otherwise infer from text
-        const presetQ = activeScenarioKey && SCENARIO_PRESETS[activeScenarioKey] ? SCENARIO_PRESETS[activeScenarioKey].question : null;
-        const key = (presetQ && rawNl === presetQ) ? activeScenarioKey : inferScenarioFromText(rawNl);
+        const key = inferScenarioFromText(rawNl, activeScenarioKey);
         await analyzeQuery(key, false);
         scrollToStep("panel-sql");
       });
@@ -5057,7 +5119,7 @@ th { color: var(--muted); font-weight: 600; }
         if (e.key === "Enter") {
           e.preventDefault();
           const rawNl = nlInputEl.value.trim();
-          const key = inferScenarioFromText(rawNl);
+          const key = inferScenarioFromText(rawNl, activeScenarioKey);
           await analyzeQuery(key, false);
           scrollToStep("panel-sql");
         }
@@ -5174,7 +5236,7 @@ th { color: var(--muted); font-weight: 600; }
         if (e.key === "Enter") {
           const nl = document.getElementById("nlInput");
           if (nl) nl.value = e.target.value;
-          const key = inferScenarioFromText(e.target.value.trim());
+          const key = inferScenarioFromText(e.target.value.trim(), activeScenarioKey);
           await analyzeQuery(key, true);
           await runActiveQuery();
         }

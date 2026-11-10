@@ -326,5 +326,30 @@ def test_workflow_stepper_and_fault_tolerant_execution():
     assert 'scrollToStep("panel-map")' in app_content
 
 
+def test_accurate_duckdb_scenario_inference_and_data_selection():
+    """Verifies that scenario inference does not hijack topic by place name,
+    national scope does not exclude states, and multi-LGA queries match on tokens."""
+    docs_dir = os.path.join(os.path.dirname(__file__), "..", "..", "docs")
+
+    with open(os.path.join(docs_dir, "app.js"), "r", encoding="utf-8") as f:
+        app_content = f.read()
+
+    # 1. Place names like 'hunter' are not topic hijackers in inferScenarioFromText
+    assert 'q.includes("hunter")' not in app_content
+    # Preserves currentKey when area text is modified
+    assert "if (currentKey && SCENARIO_PRESETS[currentKey]) {" in app_content
+
+    # 2. National scope handling does not filter state = 'AUS'
+    assert 'resolved.stateCode === "AUS" || /australia|national/i.test(resolved.name)' in app_content
+
+    # 3. Multi-LGA matching uses token ILIKE clauses
+    assert "lgaTokens.map(t => `l.lga_name ILIKE" in app_content
+
+    # 4. Regional power stations query coordinates and station details
+    assert "Power Generation Facilities in" in app_content
+    assert "capacity_mw" in app_content
+
+
+
 
 
