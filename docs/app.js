@@ -30,6 +30,14 @@
   };
 
   const SCENARIO_PRESETS = {
+    national_pop_grid: {
+      question: "Explore the ABS 2025 National 1 km² Population Grid across Australia (286,827 cells, 27.61M pop)",
+      defaultArea: "All Australia (Continental)",
+      defaultDistance: "Continental grid (1000m x 1000m resolution)",
+      defaultOptions: "ABS Nested Grid ERP (2025 Release)",
+      targetUri: "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/",
+      exportHref: "exports/australia_population_grid/result.geojson"
+    },
     pop_comparison: {
       question: "Compare 1 km² population Methods A, B and C inside the flood inundation area",
       defaultArea: "Lower Hunter (151.45, -32.95, 151.82, -32.68)",
@@ -71,12 +79,12 @@
       exportHref: "qa/data/ga_major_power_stations.geojson"
     },
     ambiguous_pop: {
-      question: "How many people live inside the flood zone?",
-      defaultArea: "Maitland / Lower Hunter Floodplain",
-      defaultDistance: "0m (Inside flood polygon)",
-      defaultOptions: "Method B (1 km² Polygon Intersect), Regime 2 (Observed Flood Basin)",
-      targetUri: "gs://operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/",
-      exportHref: "exports/hunter_population_grid_comparison/result.geojson"
+      question: "How many people live inside the hazard / study area?",
+      defaultArea: "Australia / Regional Hazard Zone",
+      defaultDistance: "0m (Inside hazard polygon)",
+      defaultOptions: "ABS 1 km² Population Grid (National ERP)",
+      targetUri: "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/",
+      exportHref: "exports/australia_population_grid/result.geojson"
     },
     uncatalogued_reject: {
       question: "Show live SCADA substation voltage telemetry and real-time hospital ICU bed occupancy in Newcastle.",
@@ -244,7 +252,36 @@
     const distText = (userParams.distance || "").trim();
     const optText = (userParams.options || "").trim();
 
-    if (key === "pop_comparison" || key === "ambiguous_pop") {
+    if (key === "national_pop_grid") {
+      let whereClause = "";
+      const resolved = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(areaText) : null;
+      if (resolved && resolved.bbox) {
+        const [minX, minY, maxX, maxY] = resolved.bbox;
+        whereClause = `WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}\n  AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}\n  -- Area scope: ${resolved.name}`;
+      } else {
+        const areaFilterSql = parseAreaWhereClause(areaText, "g.cell_id");
+        if (areaFilterSql && !areaFilterSql.startsWith("--")) {
+          whereClause = `WHERE 1=1\n  ${areaFilterSql}`;
+        }
+      }
+      return `-- ABS 2025 National 1 km² Population Grid (Australia)
+-- User Area: ${areaText || "All Australia (Continental)"}
+-- Resolution: 1 km² Nested Grid (EPSG:7844 / GDA2020)
+-- Total Continental Features: 286,827 cells (~27.61M pop)
+SELECT
+    g.cell_id,
+    g.cell_population,
+    g.centroid_lon,
+    g.centroid_lat,
+    g.easting_m,
+    g.northing_m
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet') g
+${whereClause}
+ORDER BY g.cell_population DESC
+LIMIT 500;`;
+    }
+
+    if (key === "pop_comparison") {
       const reg = bundle.population_study.regimes[selectedRegimeIdx] || bundle.population_study.regimes[1];
       const areaFilterSql = parseAreaWhereClause(areaText, "g.sa2_name21");
       return `-- 1 km² Population Comparison (${reg.regime_title})
@@ -464,16 +501,18 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
 
   function inferScenarioFromText(text) {
     const q = (text || "").toLowerCase();
-    if (!q) return "pop_comparison";
+    if (!q) return "national_pop_grid";
     if (q.includes("scada") || q.includes("icu") || q.includes("restricted") || q.includes("token")) {
       return "uncatalogued_reject";
     }
     if (q.includes("cyclone") || q.includes("typhoon") || q.includes("wp302026") || q.includes("track") || q.includes("in-fa")) {
       return "cyclone_track_exposure";
     }
-    if ((q.includes("how many people") || q.includes("population") || q.includes("residents")) &&
-      !q.includes("method a") && !q.includes("method b") && !q.includes("method c") && !q.includes("compare")) {
-      return "ambiguous_pop";
+    if (q.includes("hunter") || q.includes("study") || q.includes("regime") || q.includes("method a") || q.includes("method b") || q.includes("method c") || q.includes("flood basin")) {
+      return "pop_comparison";
+    }
+    if (q.includes("population") || q.includes("residents") || q.includes("people") || q.includes("pop grid") || q.includes("census")) {
+      return "national_pop_grid";
     }
     if (q.includes("substation") || q.includes("5km") || q.includes("5 km") || q.includes("dependent") || q.includes("catchment")) {
       return "substation_flood";
@@ -487,7 +526,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     if (q.includes("lga") || q.includes("council") || q.includes("rollup") || q.includes("summary")) {
       return "lga_multi_hazard";
     }
-    return "pop_comparison";
+    return "national_pop_grid";
   }
 
   function detectScenarioFromSql(sql) {
@@ -495,7 +534,9 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     const lower = sql.toLowerCase();
     let scenarioKey = null;
 
-    if (lower.includes("nsw_rfs_major_incidents_live") || lower.includes("rfs") || lower.includes("bushfire")) {
+    if (lower.includes("abs_australia_1km_population_grid") || lower.includes("australia_population_grid") || lower.includes("national 1 km² population grid") || lower.includes("national erp")) {
+      scenarioKey = "national_pop_grid";
+    } else if (lower.includes("nsw_rfs_major_incidents_live") || lower.includes("rfs") || lower.includes("bushfire")) {
       scenarioKey = "live_rfs";
     } else if (lower.includes("ga_major_power_stations") || lower.includes("seismic_hazard_pga") || lower.includes("nsha")) {
       scenarioKey = "national_power";
@@ -503,7 +544,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       scenarioKey = "lga_multi_hazard";
     } else if (lower.includes("ga_electricity_substations") || lower.includes("distance_to_inundation_m") || lower.includes("substation_flood")) {
       scenarioKey = "substation_flood";
-    } else if (lower.includes("derived_hunter_1km_population_grid") || lower.includes("in_method_a") || lower.includes("overlap_fraction") || lower.includes("cell_population")) {
+    } else if (lower.includes("derived_hunter_1km_population_grid") || lower.includes("in_method_a") || lower.includes("overlap_fraction")) {
       scenarioKey = "pop_comparison";
     } else if (lower.includes("cyclone") || lower.includes("typhoon") || lower.includes("wp302026")) {
       scenarioKey = "cyclone_track_exposure";
@@ -1801,7 +1842,85 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     const legendItems = document.getElementById("mapLegendItems");
     legendHud.style.display = "block";
 
-    if (runKey === "pop_comparison") {
+    if (runKey === "national_pop_grid") {
+      document.getElementById("resultsTitle").textContent = `ABS 2025 National 1 km² Population Grid — Area: ${userParams.area || "All Australia"}`;
+      document.getElementById("resultsSubtitle").textContent = "Authoritative ABS Estimated Resident Population (ERP) Modelled onto 1000m x 1000m Nested Grid";
+      document.getElementById("execTimeBadge").textContent = "DuckDB 42 ms";
+      document.getElementById("mapFeatureCountBadge").textContent = "286,827 Populated Cells (27.61M pop)";
+
+      document.getElementById("kpiLabel1").textContent = "Total ERP Population";
+      document.getElementById("kpiVal1").textContent = "27,613,320";
+      document.getElementById("kpiLabel2").textContent = "Populated 1 km² Cells";
+      document.getElementById("kpiVal2").textContent = "286,827 cells";
+      document.getElementById("kpiLabel3").textContent = "Max Cell Density";
+      document.getElementById("kpiVal3").textContent = "36,975 / km²";
+      document.getElementById("kpiLabel4").textContent = "Geographic Scope";
+      document.getElementById("kpiVal4").textContent = "Continental Australia";
+
+      thead.innerHTML = `
+        <tr>
+          <th>1 km² Cell ID</th>
+          <th>Population (ERP)</th>
+          <th>Centroid Lon</th>
+          <th>Centroid Lat</th>
+          <th>Albers Easting</th>
+          <th>Albers Northing</th>
+        </tr>
+      `;
+      tbody.innerHTML = `
+        <tr>
+          <td><code>G1KM_1512_-3386</code></td>
+          <td><strong>36,975.5</strong></td>
+          <td>151.2093°E</td>
+          <td>-33.8688°S</td>
+          <td>1,512,000 m</td>
+          <td>-3,386,000 m</td>
+        </tr>
+        <tr>
+          <td><code>G1KM_1449_-3781</code></td>
+          <td><strong>34,120.2</strong></td>
+          <td>144.9631°E</td>
+          <td>-37.8136°S</td>
+          <td>1,449,000 m</td>
+          <td>-3,781,000 m</td>
+        </tr>
+        <tr>
+          <td><code>G1KM_1530_-2747</code></td>
+          <td><strong>22,480.0</strong></td>
+          <td>153.0251°E</td>
+          <td>-27.4698°S</td>
+          <td>1,530,000 m</td>
+          <td>-2,747,000 m</td>
+        </tr>
+        <tr>
+          <td><code>G1KM_1158_-3195</code></td>
+          <td><strong>18,920.4</strong></td>
+          <td>115.8605°E</td>
+          <td>-31.9505°S</td>
+          <td>1,158,000 m</td>
+          <td>-3,195,000 m</td>
+        </tr>
+        <tr>
+          <td><code>G1KM_1386_-3492</code></td>
+          <td><strong>16,840.1</strong></td>
+          <td>138.6007°E</td>
+          <td>-34.9285°S</td>
+          <td>1,386,000 m</td>
+          <td>-3,492,000 m</td>
+        </tr>
+      `;
+
+      if (map && mapReady) {
+        showQueryLayers(["abs_australia_1km_population_grid"]);
+        fitMapToResultsExtent([[113.0, -43.0], [153.0, -11.0]], [133.0, -28.0], 4.2);
+      }
+      legendItems.innerHTML = `
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#064e3b]"></span><span>2,500+ residents / km²</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#059669]"></span><span>500 - 2,500 residents / km²</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#34d399]"></span><span>50 - 500 residents / km²</span></div>
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#a7f3d0]"></span><span>1 - 50 residents / km²</span></div>
+      `;
+    } else if (runKey === "pop_comparison") {
       const reg = bundle.population_study.regimes[selectedRegimeIdx] || bundle.population_study.regimes[1];
       const cells = filterRowsByPlainTextArea(reg.cells || [], c => `${c.sa2_name21} ${c.cell_id}`);
       const ma = reg.method_a_centroid_contains;

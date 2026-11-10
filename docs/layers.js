@@ -14,6 +14,12 @@
   // ---------- Catalogue registry (real GeoJSON previews / derived exports) ----------
   const CATALOG = [
     {
+      key: "abs_australia_1km_population_grid", title: "ABS National 1 km² Population Grid (Australia)", kind: "circle", color: "#006973",
+      path: "qa/data/abs_australia_1km_population_grid.geojson", theme: "NExT Population & Geography", scale: "national", radius: 3,
+      paint: { "circle-color": ["interpolate", ["linear"], ["get", "cell_population"], 1, "#a7f3d0", 50, "#34d399", 500, "#059669", 2500, "#065f46", 10000, "#064e3b"], "circle-radius": 3 },
+      legendClasses: [["#a7f3d0", "1 - 50 pop"], ["#34d399", "50 - 500 pop"], ["#059669", "500 - 2,500 pop"], ["#064e3b", "2,500+ pop"]]
+    },
+    {
       key: "derived_hunter_1km_population_grid", title: "1 km² Population Grid (Methods A/B/C)", kind: "fill", color: "#006973",
       path: "exports/hunter_population_grid_comparison/result.geojson", theme: "Population (Derived)", scale: "local",
       derivedFrom: ["next_sa2_boundaries_asgs2021", "nsw_foi_building_complexes", "nsw_water_inundation_areas"],
@@ -213,10 +219,10 @@
     } else {
       map.addLayer({
         id: `L-${key}-circle`, type: "circle", source: `S-${key}`,
-        paint: {
+        paint: Object.assign({
           "circle-radius": c.radius || 6, "circle-color": c.color, "circle-opacity": st.opacity,
           "circle-stroke-width": 1.5, "circle-stroke-color": "#ffffff", "circle-stroke-opacity": st.opacity
-        }
+        }, c.paint || {})
       });
     }
   }

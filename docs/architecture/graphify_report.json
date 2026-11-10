@@ -1,5 +1,5 @@
 {
-  "files_scanned": 52,
+  "files_scanned": 53,
   "secret_leaks_detected": 0,
   "mock_violations_detected": 0,
   "secret_hits": [],
@@ -247,13 +247,17 @@
       "typing"
     ],
     "src/validation/source_contracts.py": [
+      "PIL",
+      "io",
       "json",
+      "numpy",
       "src.catalogue.manifest_loader",
       "ssl",
       "time",
       "typing",
       "urllib.parse",
-      "urllib.request"
+      "urllib.request",
+      "zipfile"
     ],
     "src/validation/__init__.py": [],
     "src/ingestion/source_connectors/arcgis_connector.py": [
@@ -336,6 +340,30 @@
       "src.ingestion.snapshot_ingest",
       "src.validation.qa_report",
       "sys"
+    ],
+    "tools/ingest_national_population_grid.py": [
+      "PIL",
+      "geopandas",
+      "google.cloud",
+      "io",
+      "json",
+      "numpy",
+      "os",
+      "pathlib",
+      "pyproj",
+      "shapely",
+      "shutil",
+      "src.catalogue.manifest_loader",
+      "src.ingestion.gcs_storage",
+      "src.ingestion.telemetry",
+      "src.validation.geoparquet_validation",
+      "src.validation.reconciliation",
+      "src.validation.source_contracts",
+      "sys",
+      "time",
+      "typing",
+      "urllib.request",
+      "zipfile"
     ],
     "tools/publish_docs_to_gcs.py": [
       "google.cloud",

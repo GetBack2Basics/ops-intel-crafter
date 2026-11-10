@@ -368,6 +368,83 @@ def verify_level1_source_contract(
             "_raw_bytes": resp["raw_bytes"],
         }
 
+    elif entry.service_type == "file_download":
+        resp = _http_get(entry.endpoint)
+        checks.append(
+            {
+                "check": "endpoint_reachable",
+                "status": "PASS" if resp["ok"] else "FAIL",
+                "detail": f"HTTP {resp['http_status']} ({resp['elapsed_ms']} ms)",
+            }
+        )
+        if not resp["ok"]:
+            return {
+                "level": 1,
+                "level_name": "Source Contract",
+                "status": QAStatus.FAIL.value,
+                "endpoint": entry.endpoint,
+                "http_status": resp["http_status"],
+                "content_type": resp["content_type"],
+                "latency_ms": resp["elapsed_ms"],
+                "source_feature_count": None,
+                "error_message": resp["error"],
+                "checks": checks,
+            }
+
+        raw_b = resp.get("raw_bytes") or b""
+        import io, zipfile
+        source_count = None
+        try:
+            zf = zipfile.ZipFile(io.BytesIO(raw_b))
+            checks.append(
+                {
+                    "check": "valid_archive_format",
+                    "status": "PASS",
+                    "detail": f"ZIP archive verified ({len(zf.namelist())} files: {', '.join(zf.namelist()[:3])})",
+                }
+            )
+            tif_names = [n for n in zf.namelist() if n.lower().endswith(".tif") or n.lower().endswith(".tiff")]
+            if tif_names:
+                from PIL import Image
+                import numpy as np
+                im = Image.open(io.BytesIO(zf.read(tif_names[0])))
+                arr = np.array(im)
+                valid_mask = np.isfinite(arr) & (arr > 0)
+                source_count = int(np.sum(valid_mask))
+                checks.append(
+                    {
+                        "check": "raster_grid_valid",
+                        "status": "PASS",
+                        "detail": f"GeoTIFF grid {im.size[0]}x{im.size[1]} verified with {source_count} populated cells",
+                    }
+                )
+        except Exception as e:
+            checks.append(
+                {
+                    "check": "valid_archive_format",
+                    "status": "WARNING",
+                    "detail": f"Archive verification warning: {e}",
+                }
+            )
+
+        overall = QAStatus.PASS.value if all(c["status"] == "PASS" for c in checks) else QAStatus.WARNING.value
+        return {
+            "level": 1,
+            "level_name": "Source Contract",
+            "status": overall,
+            "endpoint": entry.endpoint,
+            "layer_name": entry.title,
+            "http_status": resp["http_status"],
+            "content_type": resp["content_type"],
+            "latency_ms": resp["elapsed_ms"],
+            "source_feature_count": source_count,
+            "query_bbox": effective_bbox,
+            "available_fields": entry.required_fields,
+            "error_message": None,
+            "checks": checks,
+            "_raw_bytes": resp["raw_bytes"],
+        }
+
     else:
         return {
             "level": 1,

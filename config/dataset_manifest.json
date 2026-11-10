@@ -2,7 +2,7 @@
   "manifest_version": "1.0.0",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
-  "updated_at_utc": "2026-11-09T07:33:10Z",
+  "updated_at_utc": "2026-11-10T02:26:39Z",
   "default_stored_crs": "EPSG:7844",
   "default_metric_crs": "EPSG:3112",
   "default_export_crs": "EPSG:4326",
@@ -541,6 +541,63 @@
       "qa_status": "FAIL",
       "latest_snapshot_path": null,
       "latest_retrieval_utc": "2026-11-09T07:31:28Z"
+    },
+    "abs_australia_1km_population_grid": {
+      "dataset_key": "abs_australia_1km_population_grid",
+      "title": "ABS 2025 \u2014 Australian Population Grid 1 km\u00b2 (National Modeled ERP Grid)",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "NExT Population & Geography",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "Australian Bureau of Statistics",
+      "source_agency": "Australian Bureau of Statistics (ABS)",
+      "service_type": "file_download",
+      "endpoint": "https://www.abs.gov.au/statistics/people/population/regional-population/2024-25/GEOTIFF.zip",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 Commonwealth of Australia (Australian Bureau of Statistics 2025) \u2014 CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-10"
+      },
+      "source_publication_date": "2026-03-26",
+      "source_vintage": "2025-ABS",
+      "refresh_policy": "annual_release",
+      "original_crs": "EPSG:3577",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Polygon",
+      "primary_key": "cell_id",
+      "required_fields": [
+        "cell_id",
+        "easting_m",
+        "northing_m",
+        "cell_population",
+        "centroid_lon",
+        "centroid_lat"
+      ],
+      "schema_mapping": {
+        "cell_id": "cell_id",
+        "cell_population": "cell_population",
+        "easting_m": "easting_m",
+        "northing_m": "northing_m"
+      },
+      "known_limitations": [
+        "Official ABS modeled 1 km\u00b2 Estimated Resident Population (ERP) grid based on the National Nested Grid Standard.",
+        "Population counts are disaggregated from SA1 using ABS Address Register and ICP points; modelled proxy, not a direct headcount."
+      ],
+      "operational_suitability": "National baseline for Method A, B, and C exposure calculations across Australia.",
+      "default_bbox": [
+        95.0,
+        -45.0,
+        168.0,
+        -9.0
+      ],
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-10T02:26:39Z"
     }
   }
 }
