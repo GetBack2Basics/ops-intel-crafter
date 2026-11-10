@@ -9,7 +9,7 @@
   - **Method A:** NExT 1 km² cell-centroid point-in-polygon baseline (`ST_Contains`).
   - **Method B:** 1 km² cell polygon footprint intersection (`ST_Intersects`), reporting full-cell population totals and boundary-straddling edge cases separately.
   - **Method C:** Optional area-weighted proportional estimate (`ST_Area(ST_Intersection) / ST_Area(cell)`), explicitly labelled as a uniform within-cell population assumption (never reported as an observed count).
-- **Wherobots & Valhalla Lifecycle:** Use DuckDB Spatial locally and Wherobots DB-API / headless `tiny` jobs for distributed Sedona workloads with mandatory `try...finally` teardown (`$0.00/hr` idle cost). Spin up GCE `valhalla-tuffs` or local Valhalla container only during accessibility benchmarks and verify termination immediately after.
+- **Wherobots & Valhalla Lifecycle:** Use DuckDB Spatial locally and Wherobots DB-API / headless `tiny` jobs for distributed Sedona workloads with mandatory `try...finally` teardown (`$0.00/hr` idle cost). Spin up GCE `valhalla-routing` or local Valhalla container only during accessibility benchmarks and verify termination immediately after.
 - **Zero-Mock & Three-Level Validation:**
   - Zero synthetic coordinates, `sampleFeatures`, `mock_data`, hardcoded `AUTHORITATIVE_COUNTS`, or silent Euclidean buffer substitutions.
   - Every dataset and analysis must record **Level 1 (Source Contract)**, **Level 2 (Stored GeoParquet Artifact)**, and **Level 3 (Source-to-Storage Reconciliation)** with explicit `PASS`, `WARNING`, `FAIL`, `NOT TESTED`, or `NOT APPLICABLE` statuses.

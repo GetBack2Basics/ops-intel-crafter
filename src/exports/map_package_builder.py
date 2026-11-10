@@ -203,7 +203,7 @@ OFFLINE_VECTOR_MAP_JS = """/* Zero-Dependency Offline HTML5 Canvas Vector Map En
     if (!rings.length) return;
 
     ctx.save();
-    // Tuffs-style focus mask: #030712 @ 80% opacity
+    // Focus mask: #030712 @ 80% opacity
     ctx.fillStyle = 'rgba(3, 7, 18, 0.80)';
     ctx.beginPath();
     // Outer canvas world bounds
@@ -422,7 +422,7 @@ OFFLINE_VECTOR_MAP_JS = """/* Zero-Dependency Offline HTML5 Canvas Vector Map En
       });
     }
 
-    // 7. Tuffs-Style Territory / Incident AOI Focus Mask (#030712 @ 80% Opacity)
+    // 7. Territory / Incident AOI Focus Mask (#030712 @ 80% Opacity)
     if (regime && regime.incident_wkt_7844) {
       drawAoiMask(regime.incident_wkt_7844);
     }

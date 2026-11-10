@@ -47,7 +47,7 @@
     { key: "qld_transmission_grid_v2", title: "AURA: QLD Transmission Grid", kind: "line", color: "#f59e0b", endpoint: "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2", theme: "AURA: Transmission Grid", scale: "state" },
     { key: "national_cyclone_hazard_tcha_v2", title: "AURA: Tropical Cyclone Hazard (TCHA)", kind: "line", color: "#06b6d4", endpoint: "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/15", theme: "AURA: Cyclone Hazard", scale: "national", dash: true },
     { key: "nsw_coastal_inundation_hazard_v2", title: "AURA: NSW Coastal Inundation & Surge", kind: "fill", color: "#0284c7", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7", theme: "AURA: Coastal Hazard", scale: "state", opacity: 0.45 },
-    { key: "aoi_focus_mask", title: "Selection Focus Mask (Tuffs AOI)", kind: "fill", color: "#030712", theme: "AOI & Focus Mask", scale: "local", opacity: 0.80, isSystemLayer: true, paint: { "fill-color": "#030712", "fill-opacity": 0.80 } }
+    { key: "aoi_focus_mask", title: "Selection Focus Mask (AOI)", kind: "fill", color: "#030712", theme: "AOI & Focus Mask", scale: "local", opacity: 0.80, isSystemLayer: true, paint: { "fill-color": "#030712", "fill-opacity": 0.80 } }
   ];
   const BY_KEY = Object.fromEntries(CATALOG.map(c => [c.key, c]));
   const TITLE_FIELDS = ["feature_name", "title", "incident_title", "LGA_NAME_2025", "lga_name", "lganame", "sa2_name_2021", "hydroname", "cell_id", "contour_id", "generalname", "name"];
@@ -267,7 +267,7 @@
     const bottomFirst = order.slice().reverse().sort((a, b) => rank[BY_KEY[a].kind] - rank[BY_KEY[b].kind]);
     bottomFirst.forEach(k => mapIds(k).forEach(id => { if (map.getLayer(id)) map.moveLayer(id); }));
 
-    // Keep Tuffs Territory / AOI Focus Mask and boundary on top of data layers
+    // Keep Territory / AOI Focus Mask and boundary on top of data layers
     if (map.getLayer("territory-mask-fill")) map.moveLayer("territory-mask-fill");
     if (map.getLayer("aoi-boundary-line")) map.moveLayer("aoi-boundary-line");
 
@@ -336,7 +336,7 @@
     if (map && map.getLayer(lid)) map.setPaintProperty(lid, "raster-opacity", o);
   }
 
-  // ---------- Tuffs-Style Territory / AOI Focus Mask (#030712 @ 80% Opacity) ----------
+  // ---------- Territory / AOI Focus Mask (#030712 @ 80% Opacity) ----------
   const DEFAULT_HUNTER_AOI_WKT =
     "POLYGON ((151.79677994467662 -32.81913824355183, 151.78397271217995 -32.82029275994482, 151.7726097748274 -32.825222751525864, 151.76982765107 -32.8295542986488, 151.7715143673733 -32.83154661495801, 151.7736883388699 -32.83660964116112, 151.77043816949327 -32.84175382709676, 151.76633422689753 -32.84059984932129, 151.76443347799463 -32.84215919648963, 151.7602722812743 -32.842867296375566, 151.74421211977642 -32.843063553762725, 151.74145444097448 -32.843935444319655, 151.74369442247482 -32.84437906260999, 151.73954665466962 -32.84406935728741, 151.7440268521305 -32.84552967054209, 151.74373571084186 -32.84577034398082, 151.74204220866488 -32.845725694875966, 151.74181992953098 -32.845881094584264, 151.75259536778938 -32.84549255933217, 151.75311654246946 -32.84582679965913, 151.7521811959344 -32.84607632947809, 151.7552171530484 -32.84724986711033, 151.75247880060147 -32.84666650014506, 151.75388222779006 -32.84826960974522, 151.75601342330947 -32.84861825476914, 151.75715134622934 -32.85485542719534, 151.76869721291308 -32.85517563849434, 151.77376474777137 -32.85627575246893, 151.7756692704968 -32.85838266373424, 151.77970852001897 -32.8664385121965, 151.7777537365534 -32.86822683514129, 151.7760223883535 -32.86839791268702, 151.7764484646827 -32.87231350399591, 151.77545253935807 -32.87238006184951, 151.77739804592167 -32.87423117737012, 151.78073798843624 -32.87434952005207, 151.7789989317929 -32.875020097432724, 151.77925117782635 -32.87772934381088, 151.78176345935051 -32.881420056376456, 151.78324367183467 -32.88236529007135, 151.78415427786857 -32.889162586325924, 151.78291820771568 -32.89405244572854, 151.77768060829936 -32.90179613224216, 151.77485085047573 -32.902307124050104, 151.77372929486032 -32.9013553821394, 151.77334969736398 -32.8944421191881, 151.77460862514926 -32.88957848754901, 151.76251680824993 -32.8856558323314, 151.76044595885634 -32.88909843986314, 151.76460527180956 -32.89165304851319, 151.7680285896606 -32.894877535433416, 151.76931762717751 -32.897303618754556, 151.7716700445137 -32.913722859714206, 151.77333364267324 -32.91804447503354, 151.7769593123302 -32.923448060688784, 151.77415926987783 -32.922887516469544, 151.7723943965515 -32.91975848686534, 151.77136568182073 -32.91967780230686, 151.7702547487836 -32.91632884110931, 151.7685624117215 -32.91677993532892, 151.76854566712458 -32.921446359171064, 151.766928063606 -32.92263652507709, 151.76527794736228 -32.92270129874724, 151.76527742723775 -32.92100559151838, 151.76424524321337 -32.92206483831959, 151.76157121642905 -32.91762719326368, 151.7598113988211 -32.917611793170906, 151.7615814527317 -32.922699559153926, 151.7650322356742 -32.92524752598405, 151.77324084760266 -32.92479340149, 151.78166368976017 -32.9256243983137, 151.78551423917378 -32.92552514970958, 151.78713786679472 -32.9247431497577, 151.78521851737548 -32.92023973625069, 151.78186088882964 -32.91945962756841, 151.7802147970384 -32.918303784969645, 151.77976079837524 -32.91697699059947, 151.7792294134437 -32.917242450303796, 151.77761125386783 -32.91142569658315, 151.78038481668065 -32.90638286648878, 151.78650226651035 -32.89929435712408, 151.78602028263123 -32.89889728014649, 151.79100296442434 -32.890899814073336, 151.79395431012006 -32.88345055919914, 151.79375550665947 -32.882857367516316, 151.79196017415686 -32.884326518719405, 151.78951042615623 -32.88479151611785, 151.78911038210566 -32.88580892841249, 151.78889001099347 -32.88320389707869, 151.79134759409996 -32.882024004057065, 151.79256823658613 -32.88310266666914, 151.79429197425895 -32.87937398260146, 151.79346958278597 -32.872833406441906, 151.78977134991536 -32.86563784914153, 151.7902726601495 -32.86069864288168, 151.79281631533496 -32.85646491022585, 151.8024382961073 -32.85137495614685, 151.80596088857706 -32.84817781828668, 151.80856479017538 -32.84503123731239, 151.80856849303098 -32.8438321169918, 151.81170241681662 -32.84070709377984, 151.81417420677934 -32.839510088744056, 151.8185786133797 -32.83115038941542, 151.817054746366 -32.823944192291826, 151.80869080584344 -32.820563122564586, 151.79677994467662 -32.81913824355183))";
   let aoiMaskEnabled = true;
@@ -389,7 +389,7 @@
   function extractBufferMeters(str) {
     if (!str || typeof str !== "string") return 0;
     const m = str.match(/(?:buffer|catchment|proximity|radius|within)(?:\s*(?:of|is|:))?\s*(\d+(?:\.\d+)?)\s*(km|m|meters|metres|kilometres|kilometers)?/i) ||
-              str.match(/(\d+(?:\.\d+)?)\s*(km|m|meters|metres|kilometres|kilometers)\s*(?:buffer|catchment|proximity|radius)?/i);
+      str.match(/(\d+(?:\.\d+)?)\s*(km|m|meters|metres|kilometres|kilometers)\s*(?:buffer|catchment|proximity|radius)?/i);
     if (!m) return 0;
     const val = parseFloat(m[1]);
     const isKm = (m[2] || "").toLowerCase().startsWith("k");
@@ -399,7 +399,7 @@
   function extractSimplificationTolerance(str) {
     if (!str || typeof str !== "string") return 6;
     const m = str.match(/(?:simplif(?:y|ication)|tolerance|tolerance:|smooth(?:ing)?|fillet)(?:\s*(?:of|is|:))?\s*(\d+(?:\.\d+)?)\s*(m|km|%|deg)?/i) ||
-              str.match(/(\d+(?:\.\d+)?)\s*(m|km|%|deg)\s*(?:simplif(?:y|ication)|tolerance|smoothing)?/i);
+      str.match(/(\d+(?:\.\d+)?)\s*(m|km|%|deg)\s*(?:simplif(?:y|ication)|tolerance|smoothing)?/i);
     if (!m) return 6;
     const val = parseFloat(m[1]);
     if (val >= 100 || val >= 0.01 || val >= 20) return 3;
@@ -494,7 +494,7 @@
 
     if (typeof input === "object" && !Array.isArray(input)) {
       if (input.type === "FeatureCollection" || input.type === "Feature" ||
-          input.type === "Polygon" || input.type === "MultiPolygon") {
+        input.type === "Polygon" || input.type === "MultiPolygon") {
         const bbox = geomBounds(input.geometry || input);
         return { polygon: input, bbox, bufferMeters };
       }
@@ -714,7 +714,7 @@
   }
 
   function installAoiMask() {
-    // 1. Territory Focus Mask source & fill layer (#030712 @ 80% opacity from Tuffs)
+    // 1. Territory Focus Mask source & fill layer (#030712 @ 80% opacity)
     if (!map.getSource("territory-mask")) {
       map.addSource("territory-mask", {
         type: "geojson",
@@ -759,29 +759,43 @@
   function setAoiMask(geomOrInput, opts = {}) {
     currentAoiGeometry = geomOrInput;
     if (!map || !map.getSource("territory-mask")) return;
-    if (!aoiMaskEnabled || !geomOrInput) {
+
+    if (!geomOrInput) {
       map.getSource("territory-mask").setData({ type: "FeatureCollection", features: [] });
       if (map.getSource("aoi-boundary")) map.getSource("aoi-boundary").setData({ type: "FeatureCollection", features: [] });
       updateMaskButtonUi();
       return;
     }
 
+    aoiMaskEnabled = true;
+    if (state["aoi_focus_mask"]) {
+      state["aoi_focus_mask"].visible = true;
+      state["aoi_focus_mask"].inList = true;
+    }
+    if (map.getLayer("territory-mask-fill")) map.setLayoutProperty("territory-mask-fill", "visibility", "visible");
+    if (map.getLayer("aoi-boundary-line")) map.setLayoutProperty("aoi-boundary-line", "visibility", "visible");
+
     let maskData = createInvertedMaskGeoJSON(geomOrInput);
     let boundaryData = extractBoundaryGeoJSON(geomOrInput);
 
-    // If mask resolution produced empty features, try resolving from active SQL input
+    // If mask resolution produced empty features, try resolving from active SQL input or search bar
     if (!maskData || !maskData.features || !maskData.features.length) {
       const sqlText = (document.getElementById("sqlInput")?.value || "").trim();
-      if (sqlText && sqlText !== geomOrInput) {
-        maskData = createInvertedMaskGeoJSON(sqlText);
-        boundaryData = extractBoundaryGeoJSON(sqlText);
+      const nlText = (document.getElementById("nlInput")?.value || "").trim();
+      for (const candidate of [sqlText, nlText]) {
+        if (candidate && candidate !== geomOrInput) {
+          maskData = createInvertedMaskGeoJSON(candidate);
+          boundaryData = extractBoundaryGeoJSON(candidate);
+          if (maskData && maskData.features && maskData.features.length) break;
+        }
       }
     }
 
-    // Ultimate fallback if still empty: restore default Hunter AOI polygon
     if (!maskData || !maskData.features || !maskData.features.length) {
-      maskData = createInvertedMaskGeoJSON(DEFAULT_HUNTER_AOI_WKT);
-      boundaryData = extractBoundaryGeoJSON(DEFAULT_HUNTER_AOI_WKT);
+      map.getSource("territory-mask").setData({ type: "FeatureCollection", features: [] });
+      if (map.getSource("aoi-boundary")) map.getSource("aoi-boundary").setData({ type: "FeatureCollection", features: [] });
+      updateMaskButtonUi();
+      return;
     }
 
     map.getSource("territory-mask").setData(maskData);
@@ -792,7 +806,7 @@
     if (map.getLayer("aoi-boundary-line")) map.moveLayer("aoi-boundary-line");
     ["oic-hl-fill", "oic-hl-line", "oic-hl-point"].forEach(id => { if (map.getLayer(id)) map.moveLayer(id); });
     if (state["aoi_focus_mask"]) {
-      state["aoi_focus_mask"].visible = aoiMaskEnabled;
+      state["aoi_focus_mask"].visible = true;
       state["aoi_focus_mask"].inList = true;
       state["aoi_focus_mask"].data = maskData;
       if (!order.includes("aoi_focus_mask")) {
@@ -804,7 +818,9 @@
 
     // Auto-fit camera to the active AOI bounds if not explicitly disabled
     if (opts.fitBounds !== false && map) {
-      const resolved = resolveLocalityExtent(geomOrInput, opts) || resolveLocalityExtent(document.getElementById("sqlInput")?.value || "", opts);
+      const resolved = resolveLocalityExtent(geomOrInput, opts) ||
+                       resolveLocalityExtent(document.getElementById("sqlInput")?.value || "", opts) ||
+                       resolveLocalityExtent(document.getElementById("nlInput")?.value || "", opts);
       if (resolved && resolved.bbox) {
         map.fitBounds([[resolved.bbox[0], resolved.bbox[1]], [resolved.bbox[2], resolved.bbox[3]]], {
           padding: 50,
@@ -813,6 +829,7 @@
         });
       }
     }
+  }
   }
 
   function clearAoiMask() {
@@ -1131,7 +1148,7 @@
     if (act === "zoom") { if (!state[key].visible) await setVisible(key, true); return zoomToLayer(key); }
     if (act === "meta") {
       if (key === "aoi_focus_mask") {
-        alert("Selection Focus Mask (Tuffs AOI)\n\nInverted world ring polygon (#030712 @ 80% default opacity) highlighting the active spatial query extent, locality or incident bounding box.\n\nUse the checkbox to toggle visibility, or open the opacity drawer (🎚️) to adjust focus density from 0% to 100%.");
+        alert("AOI Focus Mask\n\nInverted world ring polygon (#030712 @ 80% default opacity) highlighting the active spatial query extent, locality or incident bounding box.\n\nUse the checkbox to toggle visibility, or open the opacity drawer (🎚️) to adjust focus density from 0% to 100%.");
         return;
       }
       return openMeta(key);
@@ -1514,11 +1531,21 @@
   async function activate(keys, opts) {
     if (!map) { pending = { keys, opts }; return; }
     closePopup();
-    CATALOG.forEach(c => { if (!keys.includes(c.key) && state[c.key].visible) { state[c.key].visible = false; state[c.key].inList = false; applyVisibility(c.key); } });
-    order = order.filter(k => keys.includes(k));
+    CATALOG.forEach(c => {
+      if (c.key === "aoi_focus_mask" || c.isSystemLayer) return;
+      if (!keys.includes(c.key) && state[c.key].visible) {
+        state[c.key].visible = false;
+        state[c.key].inList = false;
+        applyVisibility(c.key);
+      }
+    });
+    order = order.filter(k => keys.includes(k) || k === "aoi_focus_mask");
     // keys are given top-first
     for (const k of keys.slice().reverse()) await setVisible(k, true);
     order = keys.filter(k => state[k].visible).concat(order.filter(k => !keys.includes(k)));
+    if (state["aoi_focus_mask"] && state["aoi_focus_mask"].visible && !order.includes("aoi_focus_mask")) {
+      order.unshift("aoi_focus_mask");
+    }
     applyOrder();
     afterChange();
     if (opts && opts.fit) map.fitBounds(opts.fit, { padding: 30, duration: 700 });
@@ -1527,8 +1554,13 @@
   function clear(preserveMask = false) {
     closePopup();
     if (!preserveMask) clearAoiMask();
-    CATALOG.forEach(c => { state[c.key].visible = false; state[c.key].inList = false; applyVisibility(c.key); });
-    order = [];
+    CATALOG.forEach(c => {
+      if (preserveMask && (c.key === "aoi_focus_mask" || c.isSystemLayer)) return;
+      state[c.key].visible = false;
+      state[c.key].inList = false;
+      applyVisibility(c.key);
+    });
+    order = preserveMask && state["aoi_focus_mask"]?.visible ? ["aoi_focus_mask"] : [];
     dockKey = null;
     if ($("attrTableDock")) $("attrTableDock").style.display = "none";
     if ($("btnToggleAttrDock")) $("btnToggleAttrDock").classList.remove("active");

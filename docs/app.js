@@ -1006,6 +1006,12 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       }
     }
 
+    // 6. Direct gazetteer resolution against Australian administrative & infrastructure catalog
+    const fullCheck = verifyLocationInCatalogue(text);
+    if (fullCheck && fullCheck.exists) {
+      return { status: "CLEAR", locationText: fullCheck.locationText, entity: null, bbox: fullCheck.bbox };
+    }
+
     return { status: "MISSING", locationText: "", entity: null };
   }
 
@@ -1921,7 +1927,16 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
 
       if (map && mapReady) {
         showQueryLayers(["abs_australia_1km_population_grid"]);
-        fitMapToResultsExtent([[113.0, -43.0], [153.0, -11.0]], [133.0, -28.0], 4.2);
+        const targetBbox = detected.bbox || (window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(userParams.area)?.bbox : null);
+        if (targetBbox) {
+          map.fitBounds([[targetBbox[0], targetBbox[1]], [targetBbox[2], targetBbox[3]]], { padding: 40, duration: 800 });
+        } else {
+          fitMapToResultsExtent([[113.0, -43.0], [153.0, -11.0]], [133.0, -28.0], 4.2);
+        }
+      }
+      if (window.OICLayers) {
+        const targetBbox = detected.bbox || (window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(userParams.area)?.bbox : null);
+        window.OICLayers.setAoiMask(targetBbox || userParams.area || [113.0, -43.0, 153.0, -11.0]);
       }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#064e3b]"></span><span>2,500+ residents / km²</span></div>
@@ -1980,9 +1995,9 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       }
       if (window.OICLayers) {
         window.OICLayers.bindResultsRows(tbody, "derived_hunter_1km_population_grid", "cell_id");
-        if (reg && reg.incident_wkt_7844) {
-          window.OICLayers.setAoiMask(reg.incident_wkt_7844);
-        }
+        const targetBbox = detected.bbox || (window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(userParams.area)?.bbox : null);
+        const aoi = targetBbox || (reg && reg.incident_wkt_7844) || userParams.area;
+        window.OICLayers.setAoiMask(aoi);
       }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#006973]"></span><span>Fully Contained 1km² Cell (A &amp; B)</span></div>
@@ -4068,7 +4083,7 @@ th { color: var(--muted); font-weight: 600; }
     if (!rings.length) return;
 
     ctx.save();
-    // Tuffs-style focus mask: #030712 @ 80% opacity
+    // Focus mask: #030712 @ 80% opacity
     ctx.fillStyle = 'rgba(3, 7, 18, 0.80)';
     ctx.beginPath();
     ctx.rect(0, 0, canvas.width, canvas.height);
@@ -4220,7 +4235,7 @@ th { color: var(--muted); font-weight: 600; }
       });
     });
 
-    // Tuffs-Style Territory / Incident AOI Focus Mask (#030712 @ 80% Opacity)
+    // Territory / Incident AOI Focus Mask (#030712 @ 80% Opacity)
     if (pkg.manifest && pkg.manifest.aoi_geometry) {
       drawAoiMask(pkg.manifest.aoi_geometry);
     }
