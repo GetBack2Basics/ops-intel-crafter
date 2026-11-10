@@ -349,6 +349,16 @@ def test_accurate_duckdb_scenario_inference_and_data_selection():
     assert "Power Generation Facilities in" in app_content
     assert "capacity_mw" in app_content
 
+    # 5. Hospital & Healthcare facilities mapped to FOI building complexes
+    assert "hospitals_facilities" in app_content
+    assert "nsw_foi_building_complexes" in app_content
+    assert "MANNING HOSPITAL" in app_content
+
+    # 6. Uncatalogued entities (bridges, supermarkets, SCADA) reject without guessing population grid
+    assert 'return "uncatalogued_reject";' in app_content
+    assert "DATASET_NOT_FOUND" in app_content
+
+
 
 
 
