@@ -1228,9 +1228,16 @@ LIMIT 50;`;
     document.getElementById("ctxGateVal").textContent = "SQL Generated — Ready to Run";
     document.getElementById("ctxGateSub").textContent = "Review SQL below and click Run Query";
 
+    const aoiInputEl = document.getElementById("aoiInput");
+    if (aoiInputEl && userParams.area && aoiInputEl.value !== userParams.area) {
+      aoiInputEl.value = userParams.area;
+    }
+
     if (window.OICLayers && userParams.area) {
       window.OICLayers.setAoiMask(userParams.area);
     }
+    const overlay = document.getElementById("mapEmptyOverlay");
+    if (overlay) overlay.style.display = "none";
 
     document.getElementById("clarificationBox").style.display = "none";
 
@@ -1245,6 +1252,42 @@ LIMIT 50;`;
       }
     }
   }
+
+  // Sets target AOI area across UI, parameters, map mask and SQL generator
+  function setTargetArea(area, triggerMask = true) {
+    userParams.area = (area || "").trim();
+    const aoiEl = document.getElementById("aoiInput");
+    if (aoiEl && aoiEl.value !== userParams.area) {
+      aoiEl.value = userParams.area;
+    }
+    const ctxVal = document.getElementById("ctxScaleVal");
+    if (ctxVal) {
+      ctxVal.textContent = userParams.area || "—";
+    }
+    const ctxSub = document.getElementById("ctxScaleSub");
+    if (ctxSub) {
+      ctxSub.textContent = userParams.area ? `Distance / Scope: ${userParams.distance || "Active AOI"}` : "No target area specified yet";
+    }
+
+    if (triggerMask && window.OICLayers && userParams.area) {
+      window.OICLayers.setAoiMask(userParams.area);
+      const overlay = document.getElementById("mapEmptyOverlay");
+      if (overlay) overlay.style.display = "none";
+    }
+
+    // Rebuild SQL with the updated area if a scenario is active
+    if (activeScenarioKey) {
+      const sqlInput = document.getElementById("sqlInput");
+      if (sqlInput) {
+        sqlInput.value = buildSqlForScenario(activeScenarioKey);
+      }
+    }
+  }
+
+  window.OICApp = {
+    setTargetArea: setTargetArea,
+    getUserParams: () => userParams
+  };
 
   // Highlights active preset chip in Step 01 and un-highlights others
   function highlightActivePresetChip(scenarioKey) {
@@ -1274,11 +1317,14 @@ LIMIT 50;`;
       return;
     }
 
-    if (inputEl && (scenarioKeyOverride || !rawNl)) {
+    if (inputEl && !rawNl) {
       inputEl.value = preset.question;
     }
 
-    const locDetection = detectLocationStatus(rawNl || preset.question);
+    const aoiInputEl = document.getElementById("aoiInput");
+    const aoiVal = (aoiInputEl ? aoiInputEl.value : "").trim();
+
+    const locDetection = detectLocationStatus(aoiVal || rawNl || preset.question);
     if (locDetection && (locDetection.status === "AMBIGUOUS" || locDetection.status === "NOT_FOUND")) {
       openLocationClarificationModal(key, locDetection);
       document.getElementById("clarificationBox").scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -1286,13 +1332,14 @@ LIMIT 50;`;
     }
 
     // Direct run: extract parameters (area must come from the user — never preset defaults)
-    const parsed = parseParametersFromNaturalLanguage(inputEl ? inputEl.value : "", preset);
+    const parsed = parseParametersFromNaturalLanguage(rawNl || (inputEl ? inputEl.value : ""), preset);
     userParams.distance = parsed.distance;
     userParams.options = parsed.options;
 
     const activeUploadArea = getActiveUploadAreaLabel();
     const typedLoc = locDetection && locDetection.status === "CLEAR" ? (locDetection.locationText || parsed.area) : "";
-    userParams.area = typedLoc || activeUploadArea || preset.defaultArea || "Lower Hunter";
+    const chosenArea = aoiVal || typedLoc || activeUploadArea || preset.defaultArea || "Lower Hunter";
+    setTargetArea(chosenArea, true);
 
     const box = document.getElementById("clarificationBox");
     if (box) box.style.display = "none";
@@ -3065,6 +3112,8 @@ LIMIT 50;`;
     highlightActivePresetChip(null);
     userParams = { area: "", distance: "", options: "" };
     document.getElementById("nlInput").value = "";
+    const aoiEl = document.getElementById("aoiInput");
+    if (aoiEl) aoiEl.value = "";
     document.getElementById("globalSearch").value = "";
     document.getElementById("sqlInput").value = "";
     document.getElementById("sqlTargetUri").textContent = "gs://operational-intelligence-crafter-lake/geoparquet/ (awaiting query)";
@@ -5027,9 +5076,28 @@ th { color: var(--muted); font-weight: 600; }
         const sql = sqlInput.value || "";
         const detected = detectScenarioFromSql(sql);
         if (detected.area) {
-          userParams.area = detected.area;
-          if (window.OICLayers) window.OICLayers.setAoiMask(detected.area);
+          setTargetArea(detected.area, true);
         }
+      });
+    }
+
+    const aoiInput = document.getElementById("aoiInput");
+    if (aoiInput) {
+      aoiInput.addEventListener("input", () => {
+        setTargetArea(aoiInput.value, true);
+      });
+      aoiInput.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          setTargetArea(aoiInput.value, true);
+        }
+      });
+    }
+
+    const targetAreaCard = document.getElementById("targetAreaCard");
+    if (targetAreaCard) {
+      targetAreaCard.addEventListener("click", () => {
+        openLocationClarificationModal(activeScenarioKey || "national_pop_grid");
       });
     }
 
@@ -5125,7 +5193,7 @@ th { color: var(--muted); font-weight: 600; }
           nl.value = preset.question;
         }
         if (preset) {
-          userParams.area = preset.defaultArea;
+          setTargetArea(preset.defaultArea, true);
           userParams.distance = preset.defaultDistance;
           userParams.options = preset.defaultOptions;
         }

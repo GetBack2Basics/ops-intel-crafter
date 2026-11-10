@@ -246,4 +246,36 @@ def test_aoi_mask_layer_registration_in_layers_js():
     assert 'map.setPaintProperty("territory-mask-fill", "fill-opacity", o);' in layers_content
 
 
+def test_aoi_ui_controls_and_wiring():
+    """Verifies that the user AOI input controls, target area card, and event wiring exist and prevent input clobbering."""
+    docs_dir = os.path.join(os.path.dirname(__file__), "..", "..", "docs")
+
+    # 1. docs/index.html checks
+    with open(os.path.join(docs_dir, "index.html"), "r", encoding="utf-8") as f:
+        html_content = f.read()
+
+    assert 'id="aoiInput"' in html_content
+    assert 'id="targetAreaCard"' in html_content
+    assert 'id="nlInput"' in html_content
+
+    # 2. docs/app.js checks
+    with open(os.path.join(docs_dir, "app.js"), "r", encoding="utf-8") as f:
+        app_content = f.read()
+
+    # setTargetArea helper defined and exposed
+    assert "function setTargetArea(area, triggerMask = true)" in app_content
+    assert "window.OICApp = {" in app_content
+    assert "setTargetArea," in app_content
+    # aoiInput event listener wired
+    assert 'aoiInput.addEventListener("input"' in app_content
+    # analyzeQuery does NOT overwrite custom queries or areas
+    assert "if (inputEl && !rawNl)" in app_content
+
+    # 3. docs/layers.js region buttons update AOI
+    with open(os.path.join(docs_dir, "layers.js"), "r", encoding="utf-8") as f:
+        layers_content = f.read()
+
+    assert "window.OICApp.setTargetArea(chosenArea);" in layers_content
+
+
 

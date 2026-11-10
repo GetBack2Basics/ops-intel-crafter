@@ -1453,7 +1453,24 @@
     });
     document.querySelectorAll('input[name="basemapChoice"]').forEach(r => r.addEventListener("change", () => setBasemap(r.value)));
     on("basemapOpacitySlider", "input", e => { $("basemapOpacityVal").textContent = `${e.target.value}%`; setBasemapOpacity(Number(e.target.value) / 100); });
-    document.querySelectorAll("[data-zoom-scale]").forEach(b => b.addEventListener("click", () => map && map.fitBounds(EXTENTS[b.getAttribute("data-zoom-scale")], { padding: 30, duration: 700 })));
+    document.querySelectorAll("[data-zoom-scale]").forEach(b => {
+      b.addEventListener("click", () => {
+        const scale = b.getAttribute("data-zoom-scale");
+        if (map && EXTENTS[scale]) {
+          map.fitBounds(EXTENTS[scale], { padding: 30, duration: 700 });
+        }
+        const areaMap = {
+          hunter: "Lower Hunter Floodplain (151.45, -32.95, 151.82, -32.68)",
+          nsw: "NSW Statewide",
+          australia: "Australia National"
+        };
+        const chosenArea = areaMap[scale] || scale;
+        setAoiMask(chosenArea);
+        if (window.OICApp && window.OICApp.setTargetArea) {
+          window.OICApp.setTargetArea(chosenArea);
+        }
+      });
+    });
 
     on("btnToggleLayerPanel", "click", () => {
       const col = $("layerControlCol"), mapCol = $("mapCanvasCol");
