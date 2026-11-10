@@ -168,7 +168,7 @@
 
   function clearMapLayers() {
     if (window.OICLayers) {
-      window.OICLayers.clear();
+      window.OICLayers.clear(true);
       // AOI mask preserved across query execution to avoid visual flicker
     }
   }
@@ -512,12 +512,21 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
     }
 
     const areaMatch = sql.match(/--\s*User Area:\s*([^\r\n]+)/i);
+    const scopeMatch = sql.match(/--\s*Area scope:\s*([^\r\n]+)/i);
     const distMatch = sql.match(/--\s*User (?:Distance|Catchment Distance|Buffer|Clip):\s*([^\r\n]+)/i);
     const optMatch = sql.match(/--\s*User Options:\s*([^\r\n]+)/i);
 
+    let bbox = null;
+    const bboxMatch = sql.match(/(?:_bbox_maxx|_bbox_xmax)\s*>=\s*(-?\d+\.?\d*)\s*AND\s*(?:_bbox_minx|_bbox_xmin)\s*<=\s*(-?\d+\.?\d*)\s*AND\s*(?:_bbox_maxy|_bbox_ymax)\s*>=\s*(-?\d+\.?\d*)\s*AND\s*(?:_bbox_miny|_bbox_ymin)\s*<=\s*(-?\d+\.?\d*)/i);
+    if (bboxMatch) {
+      bbox = [parseFloat(bboxMatch[1]), parseFloat(bboxMatch[3]), parseFloat(bboxMatch[2]), parseFloat(bboxMatch[4])];
+    }
+
     return {
       scenarioKey,
-      area: areaMatch ? areaMatch[1].trim() : "",
+      area: areaMatch ? areaMatch[1].trim() : (scopeMatch ? scopeMatch[1].trim() : ""),
+      areaScope: scopeMatch ? scopeMatch[1].trim() : "",
+      bbox,
       distance: distMatch ? distMatch[1].trim() : "",
       options: optMatch ? optMatch[1].trim() : ""
     };
@@ -1631,6 +1640,22 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
   // Fits map camera directly to the spatial bounding box of the SQL query results
   function fitMapToResultsExtent(coordsList, fallbackCenter, fallbackZoom) {
     if (!map || !mapReady) return;
+
+    // Prioritize specific user-specified locality extent or explicit SQL bounding box
+    const activeSql = (document.getElementById("sqlInput")?.value || "").trim();
+    const detected = detectScenarioFromSql(activeSql);
+    const targetArea = detected.bbox || userParams.area || detected.areaScope;
+    if (targetArea && window.OICLayers && window.OICLayers.resolveLocalityExtent) {
+      const isBroadOrHunter = typeof targetArea === "string" && /statewide|national|australia|lower hunter/i.test(targetArea);
+      if (!isBroadOrHunter) {
+        const res = window.OICLayers.resolveLocalityExtent(targetArea);
+        if (res && res.bbox) {
+          map.fitBounds([[res.bbox[0], res.bbox[1]], [res.bbox[2], res.bbox[3]]], { padding: 40, maxZoom: 12.5, duration: 800 });
+          return;
+        }
+      }
+    }
+
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     if (coordsList && coordsList.length > 0) {
       for (const pt of coordsList) {
@@ -1894,7 +1919,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       if (window.OICLayers) {
         window.OICLayers.bindResultsRows(tbody, isHunter ? "hunter_substation_flood_dependency" : "ga_electricity_substations", "feature_name");
         const floodAoi = (bundle && bundle.population_study && bundle.population_study.regimes && bundle.population_study.regimes[1].incident_wkt_7844) || null;
-        window.OICLayers.setAoiMask(userParams.area || floodAoi);
+        window.OICLayers.setAoiMask(detected.bbox || userParams.area || floodAoi);
       }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#ea580c]"></span><span>GA Power Substation</span></div>
@@ -1958,7 +1983,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       }
       if (window.OICLayers) {
         window.OICLayers.bindResultsRows(tbody, "next_lga_boundaries_asgs2025", "lga_code");
-        window.OICLayers.setAoiMask(userParams.area || [151.10, -33.35, 151.95, -32.55]);
+        window.OICLayers.setAoiMask(detected.bbox || userParams.area || [151.10, -33.35, 151.95, -32.55]);
       }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3.5 h-1 rounded bg-[#006973]"></span><span>ABS ASGS 2025 LGA Boundary</span></div>
@@ -2011,7 +2036,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       }
       if (window.OICLayers) {
         window.OICLayers.bindResultsRows(tbody, "nsw_rfs_major_incidents_live", "title");
-        window.OICLayers.setAoiMask(userParams.area || [141.0, -37.5, 153.6, -28.1]);
+        window.OICLayers.setAoiMask(detected.bbox || userParams.area || [141.0, -37.5, 153.6, -28.1]);
       }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#dc2626]"></span><span>NSW RFS Active Incident</span></div>
@@ -2079,7 +2104,7 @@ SELECT * FROM pop_exposure, substations_near, facilities_inside;`;
       }
       if (window.OICLayers) {
         window.OICLayers.bindResultsRows(tbody, null, null);
-        window.OICLayers.setAoiMask(userParams.area || (resolved && resolved.polygon) || [112.9, -43.7, 153.7, -10.0]);
+        window.OICLayers.setAoiMask(detected.bbox || userParams.area || (resolved && resolved.polygon) || [112.9, -43.7, 153.7, -10.0]);
       }
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#7c3aed]"></span><span>GA Major Power Station</span></div>

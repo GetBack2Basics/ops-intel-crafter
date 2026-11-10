@@ -171,3 +171,60 @@ def test_tweed_locality_and_power_query():
 
     assert "validStateTokens" in app_content
 
+
+def test_mannering_park_and_gcs_data_source_localities():
+    """Verifies that Mannering park, Lake Munmorah, and infrastructure localities from GCS GeoParquet are indexed."""
+    gaz_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "data", "locality_gazetteer.json")
+    with open(gaz_path, "r", encoding="utf-8") as f:
+        gaz = json.load(f)
+
+    # 1. Check Mannering Park and Lake Munmorah
+    assert "mannering park" in gaz, "mannering park must exist in locality gazetteer"
+    assert "lake munmorah" in gaz, "lake munmorah must exist in locality gazetteer"
+    mannering = gaz["mannering park"]
+    assert mannering["bbox"] == [151.5262, -33.2093, 151.6305, -33.1433]
+
+    # 2. Check prominent power station / substation infrastructure localities from GCS
+    for loc_key in ["vales point", "eraring", "bayswater", "liddell"]:
+        assert loc_key in gaz, f"Infrastructure node '{loc_key}' must exist in gazetteer"
+
+    # 3. Check presence in layers.js embedded gazetteer
+    layers_js_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "layers.js")
+    with open(layers_js_path, "r", encoding="utf-8") as f:
+        layers_content = f.read()
+
+    assert "mannering park" in layers_content, "mannering park must be embedded in layers.js for zero-latency synchronous access"
+    assert "vales point" in layers_content, "vales point must be embedded in layers.js"
+
+
+def test_sql_bbox_extraction_and_extent_resolution():
+    """Verifies that SQL queries with explicit _bbox_maxx/_bbox_minx or _bbox_xmax/_bbox_xmin predicates extract the bbox correctly."""
+    sql = """
+    WITH substations AS (
+        SELECT
+            name AS substation_name,
+            state,
+            locality,
+            voltage_kv,
+            ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
+        FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet') s
+        WHERE _bbox_maxx >= 151.5262 AND _bbox_minx <= 151.6305
+          AND _bbox_maxy >= -33.2093 AND _bbox_miny <= -33.1433
+      -- Area scope: Lake Munmorah - Mannering Park
+    )
+    """
+    bbox_match = re.search(r"(?:_bbox_maxx|_bbox_xmax)\s*>=\s*(-?\d+\.?\d*)\s*AND\s*(?:_bbox_minx|_bbox_xmin)\s*<=\s*(-?\d+\.?\d*)\s*AND\s*(?:_bbox_maxy|_bbox_ymax)\s*>=\s*(-?\d+\.?\d*)\s*AND\s*(?:_bbox_miny|_bbox_ymin)\s*<=\s*(-?\d+\.?\d*)", sql, re.I)
+    assert bbox_match is not None
+    minx = float(bbox_match.group(1))
+    maxx = float(bbox_match.group(2))
+    miny = float(bbox_match.group(3))
+    maxy = float(bbox_match.group(4))
+    bbox = [minx, miny, maxx, maxy]
+    assert bbox == [151.5262, -33.2093, 151.6305, -33.1433]
+
+    # Verify Area scope extraction
+    scope_match = re.search(r"--\s*Area scope:\s*([^\r\n]+)", sql, re.I)
+    assert scope_match is not None
+    assert scope_match.group(1).strip() == "Lake Munmorah - Mannering Park"
+
+

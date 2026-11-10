@@ -1,5 +1,5 @@
 {
-  "files_scanned": 52,
+  "files_scanned": 53,
   "secret_leaks_detected": 0,
   "mock_violations_detected": 0,
   "secret_hits": [],
@@ -291,6 +291,7 @@
     ],
     "tools/build_locality_gazetteer.py": [
       "duckdb",
+      "glob",
       "json",
       "pathlib"
     ],
@@ -364,6 +365,9 @@
       "src.ingestion.gcs_storage",
       "src.validation.qa_report",
       "sys"
+    ],
+    "tools/test_sources.py": [
+      "duckdb"
     ],
     "tools/update_layers_gazetteer.py": [
       "json",
