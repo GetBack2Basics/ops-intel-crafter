@@ -512,7 +512,8 @@
     if (typeof input === "object" && !Array.isArray(input)) {
       if (input.type === "FeatureCollection" || input.type === "Feature" ||
         input.type === "Polygon" || input.type === "MultiPolygon") {
-        const bbox = geomBounds(input.geometry || input);
+        const bounds = geomBounds(input.geometry || input);
+        const bbox = bounds ? [bounds[0][0], bounds[0][1], bounds[1][0], bounds[1][1]] : null;
         return { polygon: input, bbox, bufferMeters };
       }
       if (input.bbox && Array.isArray(input.bbox) && input.bbox.length === 4) {
@@ -531,7 +532,11 @@
       const upper = clean.toUpperCase();
       if (upper.startsWith("POLYGON") || upper.startsWith("MULTIPOLYGON")) {
         const parsed = parseWktPolygon(clean);
-        if (parsed) return { polygon: parsed, bbox: geomBounds(parsed), bufferMeters };
+        if (parsed) {
+          const bounds = geomBounds(parsed);
+          const bbox = bounds ? [bounds[0][0], bounds[0][1], bounds[1][0], bounds[1][1]] : null;
+          return { polygon: parsed, bbox, bufferMeters };
+        }
       }
 
       // Check for SQL bounding box predicates, e.g. _bbox_maxx >= 151.5262 AND _bbox_minx <= 151.6305 AND _bbox_maxy >= -33.2093 AND _bbox_miny <= -33.1433
@@ -767,6 +772,20 @@
     return { type: "FeatureCollection", features: [] };
   }
 
+  function toMapBounds(b) {
+    if (!b) return null;
+    if (Array.isArray(b) && b.length === 2 && Array.isArray(b[0]) && Array.isArray(b[1])) {
+      const sw = b[0], ne = b[1];
+      if (typeof sw[0] === "number" && typeof sw[1] === "number" && typeof ne[0] === "number" && typeof ne[1] === "number") {
+        return [[sw[0], sw[1]], [ne[0], ne[1]]];
+      }
+    }
+    if (Array.isArray(b) && b.length === 4 && b.every(n => typeof n === "number" && !isNaN(n))) {
+      return [[b[0], b[1]], [b[2], b[3]]];
+    }
+    return null;
+  }
+
   function installAoiMask() {
     // 1. Territory Focus Mask source & fill layer (#030712 @ 80% opacity)
     if (!map.getSource("territory-mask")) {
@@ -804,9 +823,9 @@
     }
 
     if (currentAoiGeometry) {
-      setAoiMask(currentAoiGeometry);
+      setAoiMask(currentAoiGeometry, { fitBounds: false });
     } else {
-      setAoiMask(DEFAULT_HUNTER_AOI_WKT);
+      setAoiMask(DEFAULT_HUNTER_AOI_WKT, { fitBounds: false });
     }
   }
 
@@ -878,8 +897,9 @@
       const resolved = resolveLocalityExtent(geomOrInput, opts) ||
                        resolveLocalityExtent(document.getElementById("sqlInput")?.value || "", opts) ||
                        resolveLocalityExtent(document.getElementById("nlInput")?.value || "", opts);
-      if (resolved && resolved.bbox) {
-        map.fitBounds([[resolved.bbox[0], resolved.bbox[1]], [resolved.bbox[2], resolved.bbox[3]]], {
+      const b = resolved && toMapBounds(resolved.bbox);
+      if (b) {
+        map.fitBounds(b, {
           padding: 50,
           maxZoom: 12.0,
           duration: 800
@@ -1583,21 +1603,25 @@
   }
 
   function attach(mapInstance) {
-    map = mapInstance;
-    installBasemaps();
-    installHighlight();
-    installAoiMask();
-    map.on("click", handleMapClick);
-    map.on("mousemove", e => {
-      const r = $("mapCoordReadout");
-      if (r) r.textContent = `Lon: ${e.lngLat.lng.toFixed(4)}°E, Lat: ${e.lngLat.lat.toFixed(4)}°`;
-      if (mode !== "identify") return;
-      const layers = visibleHitLayers();
-      const hit = layers.length && map.queryRenderedFeatures([[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]], { layers }).length;
-      map.getCanvas().style.cursor = hit ? "pointer" : "";
-    });
-    renderLayerControl();
-    if (pending) { const p = pending; pending = null; activate(p.keys, p.opts); }
+    try {
+      map = mapInstance;
+      installBasemaps();
+      installHighlight();
+      installAoiMask();
+      map.on("click", handleMapClick);
+      map.on("mousemove", e => {
+        const r = $("mapCoordReadout");
+        if (r) r.textContent = `Lon: ${e.lngLat.lng.toFixed(4)}°E, Lat: ${e.lngLat.lat.toFixed(4)}°`;
+        if (mode !== "identify") return;
+        const layers = visibleHitLayers();
+        const hit = layers.length && map.queryRenderedFeatures([[e.point.x - 6, e.point.y - 6], [e.point.x + 6, e.point.y + 6]], { layers }).length;
+        map.getCanvas().style.cursor = hit ? "pointer" : "";
+      });
+      renderLayerControl();
+      if (pending) { const p = pending; pending = null; activate(p.keys, p.opts); }
+    } catch (err) {
+      console.error("OICLayers attach error:", err);
+    }
   }
 
   // Replace the active layer set (used by query presets). opts.fit = bounds to fit after load.
@@ -1687,6 +1711,7 @@
     clearAoiMask,
     toggleAoiMask,
     resolveLocalityExtent,
+    toMapBounds,
     createSmoothedExtentPolygon,
     createInvertedMaskGeoJSON,
     isAoiMaskEnabled: () => aoiMaskEnabled,

@@ -197,6 +197,26 @@
     }
   }
 
+  function safeFitBounds(bboxOrBounds, options = {}) {
+    if (!map || !bboxOrBounds) return;
+    try {
+      if (window.OICLayers && window.OICLayers.toMapBounds) {
+        const b = window.OICLayers.toMapBounds(bboxOrBounds);
+        if (b) { map.fitBounds(b, options); return; }
+      }
+      if (Array.isArray(bboxOrBounds) && bboxOrBounds.length === 2 && Array.isArray(bboxOrBounds[0])) {
+        map.fitBounds(bboxOrBounds, options);
+        return;
+      }
+      if (Array.isArray(bboxOrBounds) && bboxOrBounds.length === 4) {
+        map.fitBounds([[bboxOrBounds[0], bboxOrBounds[1]], [bboxOrBounds[2], bboxOrBounds[3]]], options);
+        return;
+      }
+    } catch (e) {
+      console.warn("safeFitBounds warning:", e);
+    }
+  }
+
   function parseNumericDistance(text, fallbackMeters) {
     if (!text) return fallbackMeters;
     const kmMatch = text.match(/(\d+(?:\.\d+)?)\s*km/i);
@@ -1941,7 +1961,7 @@ LIMIT 50;`;
       if (!isBroadOrHunter) {
         const res = window.OICLayers.resolveLocalityExtent(targetArea);
         if (res && res.bbox) {
-          map.fitBounds([[res.bbox[0], res.bbox[1]], [res.bbox[2], res.bbox[3]]], { padding: 40, maxZoom: 12.5, duration: 800 });
+          safeFitBounds(res.bbox, { padding: 40, maxZoom: 12.5, duration: 800 });
           return;
         }
       }
@@ -1987,7 +2007,7 @@ LIMIT 50;`;
     if (userParams.area) {
       const res = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(userParams.area) : null;
       if (res && res.bbox) {
-        map.fitBounds([[res.bbox[0], res.bbox[1]], [res.bbox[2], res.bbox[3]]], { padding: 40, maxZoom: 12.5, duration: 800 });
+        safeFitBounds(res.bbox, { padding: 40, maxZoom: 12.5, duration: 800 });
         return;
       }
     }
@@ -2322,7 +2342,7 @@ LIMIT 50;`;
       if (map && mapReady) {
         const targetBbox = detected.bbox || (window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(userParams.area)?.bbox : null);
         if (targetBbox) {
-          map.fitBounds([[targetBbox[0], targetBbox[1]], [targetBbox[2], targetBbox[3]]], { padding: 40, duration: 800 });
+          safeFitBounds(targetBbox, { padding: 40, duration: 800 });
         } else {
           fitMapToResultsExtent([[113.0, -43.0], [153.0, -11.0]], [133.0, -28.0], 4.2);
         }
@@ -2489,7 +2509,7 @@ LIMIT 50;`;
       showQueryLayers([subLayer, "ga_electricity_transmission_lines", "nsw_water_inundation_areas"]);
       if (map && mapReady) {
         if (targetBbox) {
-          map.fitBounds([[targetBbox[0], targetBbox[1]], [targetBbox[2], targetBbox[3]]], { padding: 40, duration: 800 });
+          safeFitBounds(targetBbox, { padding: 40, duration: 800 });
         } else {
           const coords = rows.map(s => {
             try {
@@ -2681,7 +2701,7 @@ LIMIT 50;`;
       showQueryLayers(["ga_major_power_stations", "ga_seismic_hazard_pga_10pct"]);
       if (map && mapReady) {
         if (resolved && resolved.bbox) {
-          map.fitBounds([[resolved.bbox[0], resolved.bbox[1]], [resolved.bbox[2], resolved.bbox[3]]], { padding: 40, duration: 800 });
+          safeFitBounds(resolved.bbox, { padding: 40, duration: 800 });
         } else {
           map.fitBounds([[112.9, -43.7], [153.7, -10.0]], { padding: 30, duration: 800 });
         }
