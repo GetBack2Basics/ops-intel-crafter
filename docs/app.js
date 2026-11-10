@@ -273,7 +273,6 @@
   }
 
   function buildSqlForScenario(key) {
-    if (!bundle) return "-- Loading catalogue metadata...";
     const areaText = (userParams.area || "").trim();
     const distText = (userParams.distance || "").trim();
     const optText = (userParams.options || "").trim();
@@ -1520,7 +1519,8 @@ LIMIT 50;`;
       const rejectSql = (window.GeoLibreCatalogEngine && match)
         ? window.GeoLibreCatalogEngine.compileSql(match, aoiVal || userParams.area)
         : buildSqlForScenario("uncatalogued_reject");
-      setSqlCode(rejectSql);
+      const sqlInputEl = document.getElementById("sqlInput");
+      if (sqlInputEl) sqlInputEl.value = rejectSql;
       const targetUriEl = document.getElementById("sqlTargetUri");
       if (targetUriEl) targetUriEl.textContent = "BLOCKED — Source Not in Catalogue";
       const ctxScaleVal = document.getElementById("ctxScaleVal");
@@ -1543,9 +1543,6 @@ LIMIT 50;`;
       inputEl.value = preset.question;
     }
 
-    const aoiInputEl = document.getElementById("aoiInput");
-    const aoiVal = (aoiInputEl ? aoiInputEl.value : "").trim();
-
     const locDetection = detectLocationStatus(aoiVal || rawNl || preset.question);
     if (locDetection && (locDetection.status === "AMBIGUOUS" || locDetection.status === "NOT_FOUND")) {
       openLocationClarificationModal(key, locDetection);
@@ -1560,7 +1557,8 @@ LIMIT 50;`;
 
     const activeUploadArea = getActiveUploadAreaLabel();
     const typedLoc = locDetection && locDetection.status === "CLEAR" ? (locDetection.locationText || parsed.area) : "";
-    const chosenArea = aoiVal || typedLoc || activeUploadArea || preset.defaultArea || "Lower Hunter";
+    const queryLoc = (match && match.locality && match.locality.name) || typedLoc;
+    const chosenArea = queryLoc || aoiVal || activeUploadArea || preset.defaultArea || "Lower Hunter";
     setTargetArea(chosenArea, true);
 
     const box = document.getElementById("clarificationBox");
