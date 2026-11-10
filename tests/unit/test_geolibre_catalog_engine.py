@@ -41,13 +41,16 @@ def test_geolibre_catalog_engine_datasets_and_zero_mock_contracts() -> None:
     assert "pop_comparison" in content
     assert "lga_multi_hazard" in content
 
-    # 3. Explicit uncatalogued entity rejection guardrails
+    # 3. Public infrastructure keywords mapped to FOI building complexes
     assert "bridges" in content
     assert "airports" in content
-    assert "icu" in content
-    assert "supermarkets" in content
-    assert "telecom" in content
+    assert "school" in content
+    assert "police" in content
+    assert "ambulance" in content
+
+    # 4. Explicit restricted guardrails & genuine dataset absence
     assert "scada" in content
+    assert "nsw_emergency_management_restricted" in content
     assert "REJECTED_UNCATALOGUED" in content
     assert "DATASET_NOT_FOUND" in content
 
@@ -70,3 +73,4 @@ def test_app_js_wires_geolibre_catalog_engine() -> None:
 
     btn_gen_block = content[content.find('const btnGenerateSql = document.getElementById("btnGenerateSql");'):]
     assert "await analyzeQuery(null, false);" in btn_gen_block[:500]
+

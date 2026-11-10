@@ -3,13 +3,14 @@
  * GeoLibre Catalogue Discovery & Spatial SQL Compilation Engine
  *
  * Implements GeoLibre's catalogue indexing, semantic keyword matching,
- * uncatalogued entity rejection, and DuckDB Spatial SQL compilation for
- * authoritative Australian emergency lakehouse datasets.
+ * and DuckDB Spatial SQL compilation for authoritative Australian emergency lakehouse datasets.
  *
- * Zero-Mock Guarantees:
- * - Strictly matches against verified GCS lakehouse GeoParquet contracts.
- * - Rejects uncatalogued or restricted requests (bridges, airports, SCADA, ICU) with explicit diagnostics.
- * - Compiles targeted DuckDB-WASM SQL reading direct GCS lakehouse Parquet paths.
+ * Grounding Rule:
+ * - If data exists in a public catalogue source (such as NSW FOI for hospitals,
+ *   schools, bridges, airports, emergency services, or GA for substations and power stations),
+ *   it is queried directly.
+ * - Rejection ONLY occurs if the data genuinely does not exist in any catalogue dataset,
+ *   or if explicitly marked restricted in the catalogue contract (e.g. nsw_emergency_management_restricted).
  */
 
 (function (root, factory) {
@@ -39,17 +40,13 @@
     "would", "you", "your", "yours", "yourself", "yourselves"
   ]);
 
-  // Uncatalogued / restricted concepts blocked under Zero-Mock
-  const UNCATALOGUED_PATTERNS = [
-    { pattern: /\bbridges?\b/i, label: "Bridge infrastructure" },
-    { pattern: /\bairports?\b|\baerodromes?\b|\bairstrips?\b/i, label: "Airports & Aerodromes" },
-    { pattern: /\bicu\b|\bhospital icu\b|\bintensive care\b/i, label: "Real-time ICU bed occupancy telemetry" },
-    { pattern: /\bsupermarkets?\b|\bgrocery\b|\bshopping cent(?:er|re)s?\b/i, label: "Commercial retail & supermarket data" },
-    { pattern: /\bmobile towers?\b|\bcell towers?\b|\btelecom\b|\b5g\b/i, label: "Live carrier telecom tower outage feeds" },
-    { pattern: /\btrain timetables?\b|\btransit schedules?\b|\bflights?\b/i, label: "Real-time transit timetable feeds" },
-    { pattern: /\breal estate\b|\bhouse prices?\b|\bproperty values?\b/i, label: "Commercial property transaction feeds" },
-    { pattern: /\bambulance dispatch\b|\bpolice dispatch\b|\bcad dispatch\b|\b911\b|\b000 calls?\b/i, label: "Emergency services CAD dispatch streams" },
-    { pattern: /\bscada\b|\brestricted\b|\btoken required\b|\bsecret\b/i, label: "Restricted SCADA telemetry feeds" }
+  // Explicitly restricted datasets or private sensor streams (Failed Contract / Security)
+  const RESTRICTED_TRIGGERS = [
+    { pattern: /\bnsw_emergency_management_restricted\b/i, label: "NSW Emergency Management Restricted Service", reason: "Failed Level 1 Source Contract validation (ArcGIS error 499: Token Required)." },
+    { pattern: /\btoken required\b/i, label: "Token-Gated Service", reason: "Endpoint requires proprietary authentication token." },
+    { pattern: /\bscada\b/i, label: "Live SCADA Sensor Stream", reason: "Real-time substation load SCADA feeds are restricted; static infrastructure is available via ga_electricity_substations." },
+    { pattern: /\bicu bed\b|\bhospital icu occupancy\b/i, label: "Live ICU Bed Telemetry", reason: "Real-time hospital ICU bed occupancy telemetry is restricted; hospital facilities are available in nsw_foi_building_complexes." },
+    { pattern: /\bambulance dispatch stream\b|\bpolice cad stream\b/i, label: "Live CAD Dispatch Telemetry", reason: "Live emergency dispatch streams are restricted; physical stations are available in nsw_foi_building_complexes." }
   ];
 
   // Australian Locality Gazetteer for natural-language spatial extraction
@@ -79,7 +76,7 @@
     {
       id: "nsw_foi_building_complexes",
       scenarioKey: "hospitals_facilities",
-      title: "NSW Features of Interest — Hospitals, Medical & Emergency Facilities",
+      title: "NSW Features of Interest — Emergency, Health, Education & Infrastructure Facilities",
       theme: "Emergency & Health Facilities",
       provider: "NSW Spatial Services (DCS)",
       geometryType: "Point",
@@ -87,14 +84,26 @@
       parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261108T223144Z/part-00000.parquet",
       viewName: "nsw_foi_building_complexes",
       keywords: [
+        // Healthcare
         "hospital", "hospitals", "medical", "clinic", "clinics", "health", "healthcare",
         "infirmary", "doctor", "nursing", "aged care", "facility", "facilities",
         "community health", "health centre", "emergency department", "health complex",
-        "manning hospital", "mayo private", "medical complex"
+        "manning hospital", "mayo private", "medical complex",
+        // Education
+        "school", "schools", "primary school", "high school", "college", "education",
+        "public school", "grammar", "tafe", "campus",
+        // Emergency Services
+        "police", "police station", "ambulance", "ambulance station", "fire station",
+        "fire brigade", "ses", "emergency facility", "fire depot",
+        // Transport & Infrastructure Facilities
+        "bridge", "bridges", "road bridge", "crossing", "bridge depot", "bridge plaza",
+        "airport", "airports", "aerodrome", "airstrip", "airfield", "aviation",
+        // Civic & Community
+        "community centre", "public hall", "civic centre", "sports complex", "mall"
       ],
       targetColumns: ["facility_name", "facility_type", "facility_subtype", "classsubtype", "generalname", "latitude", "longitude"],
       defaultSort: "facility_type, facility_name",
-      sqlBuilder: function (areaText, localityInfo) {
+      sqlBuilder: function (areaText, localityInfo, matchedConcept) {
         let whereClause = "";
         let areaLabel = areaText || "Taree, NSW";
         if (localityInfo && localityInfo.bbox) {
@@ -103,25 +112,59 @@
           areaLabel = localityInfo.name;
         }
 
-        return `-- Authoritative Hospital & Healthcare Facilities (NSW FOI)
--- User Area: ${areaLabel}
--- Theme: Emergency & Health Facilities (Hospitals, Medical Centres, Clinics)
-SELECT
-    COALESCE(facility_name, generalname, 'Medical Complex') AS facility_name,
-    CASE facility_subtype
-        WHEN 3 THEN 'Major Hospital / Health Facility'
-        WHEN 2 THEN 'Medical Centre / Clinic'
-        ELSE 'Health & Community Complex'
-    END AS facility_type,
-    ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
-    ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
-FROM read_parquet('${this.parquetUri}')
-WHERE (
+        // Determine specific facility category filter from matched concept or query
+        const concept = (matchedConcept || "").toLowerCase();
+        let categoryFilter = "";
+        let categoryTitle = "Emergency & Community Facilities";
+
+        if (concept.includes("bridge")) {
+          categoryTitle = "Bridges & Transport Infrastructure";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%bridge%')`;
+        } else if (concept.includes("airport") || concept.includes("aerodrome") || concept.includes("airfield") || concept.includes("aviation")) {
+          categoryTitle = "Airports & Aviation Facilities";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%airport%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%aerodrome%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%airfield%')`;
+        } else if (concept.includes("school") || concept.includes("college") || concept.includes("education")) {
+          categoryTitle = "Educational Facilities & Schools";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%school%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%college%' OR facility_subtype = 1)`;
+        } else if (concept.includes("police")) {
+          categoryTitle = "Police Stations & Law Enforcement";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%police%')`;
+        } else if (concept.includes("fire")) {
+          categoryTitle = "Fire Stations & Emergency Response";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%fire%')`;
+        } else if (concept.includes("ambulance")) {
+          categoryTitle = "Ambulance Stations & Paramedic Facilities";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%ambulance%')`;
+        } else if (concept.includes("hospital") || concept.includes("health") || concept.includes("medical") || concept.includes("clinic") || concept.includes("aged care")) {
+          categoryTitle = "Hospitals & Healthcare Facilities";
+          categoryFilter = `(
     LOWER(COALESCE(facility_name, generalname, '')) LIKE '%hospital%'
     OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%health%'
     OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%medical%'
     OR facility_subtype = 3
-)
+)`;
+        } else {
+          categoryFilter = "1=1";
+        }
+
+        return `-- Authoritative NSW Features of Interest (${categoryTitle})
+-- User Area: ${areaLabel}
+-- Source: NSW Spatial Services (DCS) Features of Interest
+SELECT
+    COALESCE(facility_name, generalname, 'Facility') AS facility_name,
+    CASE facility_subtype
+        WHEN 3 THEN 'Major Hospital / Health Facility'
+        WHEN 2 THEN 'Community / Health Facility'
+        WHEN 1 THEN 'Educational Institution'
+        WHEN 4 THEN 'Civic / Infrastructure Facility'
+        WHEN 5 THEN 'Utility / Substation'
+        WHEN 6 THEN 'Recreational / Public Complex'
+        ELSE 'Feature of Interest'
+    END AS facility_type,
+    ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
+    ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
+FROM read_parquet('${this.parquetUri}')
+WHERE ${categoryFilter}
   ${whereClause}
 ORDER BY facility_type, facility_name
 LIMIT 100;`;
@@ -207,6 +250,32 @@ ORDER BY total_capacity_mw DESC;`;
       }
     },
     {
+      id: "ga_electricity_transmission_lines",
+      scenarioKey: "substation_flood",
+      title: "Geoscience Australia — High-Voltage Transmission Lines",
+      theme: "Critical Infrastructure",
+      provider: "Geoscience Australia",
+      geometryType: "LineString",
+      scale: "national",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261108T223144Z/part-00000.parquet",
+      viewName: "ga_electricity_transmission_lines",
+      keywords: [
+        "transmission line", "transmission lines", "power line", "high voltage", "pylons",
+        "feeder", "grid lines", "kv line"
+      ],
+      targetColumns: ["name", "feature_name", "voltage_kv", "state"],
+      defaultSort: "voltage_kv DESC",
+      sqlBuilder: function (areaText) {
+        return `-- High-Voltage Transmission Grid Lines (>=66kV)
+SELECT
+    COALESCE(name, feature_name, 'Transmission Line') AS line_name,
+    state,
+    TRY_CAST(voltage_kv AS INT) AS voltage_kv
+FROM read_parquet('${this.parquetUri}')
+LIMIT 100;`;
+      }
+    },
+    {
       id: "nsw_rfs_major_incidents_live",
       scenarioKey: "live_rfs",
       title: "NSW Rural Fire Service — Major Bushfire Incidents (Live)",
@@ -242,6 +311,57 @@ ORDER BY
         ELSE 4
     END,
     incident_title
+LIMIT 50;`;
+      }
+    },
+    {
+      id: "nsw_water_inundation_areas",
+      scenarioKey: "substation_flood",
+      title: "NSW Spatial Services — Water Inundation & Flood Extent Areas",
+      theme: "Flood & Hydrography",
+      provider: "NSW Spatial Services (DCS)",
+      geometryType: "Polygon",
+      scale: "state",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-Q1/20261108T223144Z/part-00000.parquet",
+      viewName: "nsw_water_inundation_areas",
+      keywords: [
+        "flood", "floods", "water inundation", "inundation", "flood extent", "flood basin",
+        "flood plain", "wetland", "submerged", "inundated area"
+      ],
+      targetColumns: ["hydroname", "waterbody_name", "classsubtype"],
+      defaultSort: "hydroname",
+      sqlBuilder: function () {
+        return `-- NSW Water Inundation & Flood Extent Footprints
+SELECT
+    COALESCE(hydroname, waterbody_name, 'Inundation Area') AS waterbody_name,
+    classsubtype AS subtype
+FROM read_parquet('${this.parquetUri}')
+LIMIT 50;`;
+      }
+    },
+    {
+      id: "ga_seismic_hazard_pga_10pct",
+      scenarioKey: "national_power",
+      title: "National Seismic Hazard Assessment 2018 — PGA Contours (10% in 50 Years)",
+      theme: "Hazards",
+      provider: "Geoscience Australia",
+      geometryType: "LineString",
+      scale: "national",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/2018-NSHA/20261108T223144Z/part-00000.parquet",
+      viewName: "ga_seismic_hazard_pga_10pct",
+      keywords: [
+        "seismic", "earthquake", "pga", "ground motion", "nsha", "hazard contour",
+        "seismic hazard", "shaking"
+      ],
+      targetColumns: ["pga_value", "contour_id"],
+      defaultSort: "pga_value DESC",
+      sqlBuilder: function () {
+        return `-- National Seismic Hazard Assessment 2018 — Ground Motion PGA Contours
+SELECT
+    contour_id,
+    pga_value
+FROM read_parquet('${this.parquetUri}')
+ORDER BY pga_value DESC
 LIMIT 50;`;
       }
     },
@@ -423,19 +543,20 @@ LIMIT 30;`;
 
   /**
    * Discover dataset in catalogue matching natural language query.
+   * Rejection ONLY happens if the dataset genuinely does not exist or failed source contract.
    */
   function findDataset(queryText, activeArea) {
     const rawQ = (queryText || "").trim();
     let q = rawQ.toLowerCase();
 
-    // 1. Guardrail: Check for uncatalogued or restricted concepts
-    for (const item of UNCATALOGUED_PATTERNS) {
+    // 1. Guardrail: Check for explicitly restricted sources or private sensor streams
+    for (const item of RESTRICTED_TRIGGERS) {
       if (item.pattern.test(q)) {
         return {
           status: "REJECTED_UNCATALOGUED",
           query: rawQ,
           blockedLabel: item.label,
-          reason: `The requested entity (${item.label}) is not in the authoritative Australian Lakehouse catalogue. Under Zero-Mock policy, synthetic data or mock coordinates cannot be fabricated.`,
+          reason: `Access to ${item.label} is blocked: ${item.reason}`,
           availableDatasets: CATALOGUE.map(d => ({ id: d.id, title: d.title, theme: d.theme }))
         };
       }
@@ -471,19 +592,24 @@ LIMIT 30;`;
 
     for (const dataset of CATALOGUE) {
       let score = 0;
+      let matchedKeyword = null;
 
       // Tier 1: Exact keyword match
       for (const kw of dataset.keywords) {
         if (kw === joinedQ) {
           score += 20.0;
+          matchedKeyword = kw;
         } else if (joinedQ.includes(kw)) {
           score += 12.0;
+          if (!matchedKeyword) matchedKeyword = kw;
         } else {
           for (const tok of tokens) {
             if (tok === kw) {
               score += 6.0;
+              if (!matchedKeyword) matchedKeyword = tok;
             } else if (tok.length > 3 && (kw.includes(tok) || tok.includes(kw))) {
               score += 3.0;
+              if (!matchedKeyword) matchedKeyword = tok;
             }
           }
         }
@@ -503,7 +629,7 @@ LIMIT 30;`;
       }
 
       if (score > 0) {
-        scored.push({ dataset, score });
+        scored.push({ dataset, score, matchedKeyword: matchedKeyword || tokens[0] });
       }
     }
 
@@ -517,15 +643,16 @@ LIMIT 30;`;
         dataset: best,
         scenarioKey: best.scenarioKey,
         locality: localityInfo,
-        areaText: localityInfo ? localityInfo.name : activeArea
+        areaText: localityInfo ? localityInfo.name : activeArea,
+        matchedConcept: scored[0].matchedKeyword || rawQ
       };
     }
 
-    // No catalogue dataset matched query
+    // No catalogue dataset matched query — genuine data absence
     return {
       status: "DATASET_NOT_FOUND",
       query: rawQ,
-      reason: `No catalogue dataset matched requested terms: [${tokens.join(", ")}].`,
+      reason: `No dataset matching "${rawQ}" exists in the authoritative Australian spatial lakehouse.`,
       availableDatasets: CATALOGUE.map(d => ({ id: d.id, title: d.title, theme: d.theme }))
     };
   }
@@ -545,7 +672,7 @@ LIMIT 30;`;
     if (matchResult.status === "MATCHED" && matchResult.dataset) {
       const ds = matchResult.dataset;
       const area = matchResult.areaText || fallbackAreaText;
-      return ds.sqlBuilder(area, matchResult.locality);
+      return ds.sqlBuilder(area, matchResult.locality, matchResult.matchedConcept);
     }
 
     // Fallback uncatalogued reject
@@ -566,7 +693,7 @@ LIMIT 30;`;
 -- The requested entity or telemetry is not part of the verified spatial lakehouse catalogue.
 --
 -- Authoritative datasets available in catalogue:
--- 1. NSW Features of Interest — Hospitals, Medical & Emergency Facilities (nsw_foi_building_complexes)
+-- 1. NSW Features of Interest — Hospitals, Schools, Bridges, Airports, Police & Emergency Facilities (nsw_foi_building_complexes)
 -- 2. Geoscience Australia Critical Infrastructure — Substations (ga_electricity_substations)
 -- 3. Geoscience Australia Critical Infrastructure — Major Power Stations (ga_major_power_stations)
 -- 4. Geoscience Australia Critical Infrastructure — Transmission Lines (ga_electricity_transmission_lines)

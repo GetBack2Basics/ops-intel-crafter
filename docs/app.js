@@ -560,12 +560,8 @@ LIMIT 50;`;
 
     const q = raw.toLowerCase();
 
-    // 1. Explicit uncatalogued / restricted sources
-    if (q.includes("scada") || q.includes("icu") || q.includes("restricted") || q.includes("token") || q.includes("hospital icu") ||
-        q.includes("telecom") || q.includes("mobile tower") || q.includes("cell tower") || q.includes("ambulance dispatch") ||
-        q.includes("bridge") || q.includes("bridges") || q.includes("airport") || q.includes("airports") ||
-        q.includes("supermarket") || q.includes("supermarkets") || q.includes("flight") || q.includes("train timetable") ||
-        q.includes("real estate") || q.includes("police dispatch")) {
+    // 1. Explicit restricted sources (Failed Contract / Token Gated)
+    if (q.includes("scada") || q.includes("restricted") || q.includes("token required") || q.includes("nsw_emergency_management_restricted")) {
       return "uncatalogued_reject";
     }
 
@@ -574,8 +570,12 @@ LIMIT 50;`;
       return "cyclone_track_exposure";
     }
 
-    // 3. Hospitals & Emergency Health Facilities (NSW FOI)
-    if (q.includes("hospital") || q.includes("medical") || q.includes("clinic") || q.includes("health facility") || q.includes("health centre") || q.includes("health care") || q.includes("aged care") || q.includes("nursing home") || q.includes("doctor")) {
+    // 3. NSW Features of Interest (Hospitals, Schools, Bridges, Airports, Police, Ambulance, Fire, Emergency Complexes)
+    if (q.includes("hospital") || q.includes("medical") || q.includes("clinic") || q.includes("health") ||
+        q.includes("school") || q.includes("education") || q.includes("college") ||
+        q.includes("bridge") || q.includes("airport") || q.includes("aerodrome") ||
+        q.includes("police") || q.includes("ambulance") || q.includes("fire station") || q.includes("ses") ||
+        q.includes("facility") || q.includes("facilities") || q.includes("complex")) {
       return "hospitals_facilities";
     }
 
