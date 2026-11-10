@@ -1,6 +1,6 @@
 {
-  "report_id": "qa-report-20261110T012117Z",
-  "generated_at_utc": "2026-11-10T01:21:17Z",
+  "report_id": "qa-report-20261110T013913Z",
+  "generated_at_utc": "2026-11-10T01:39:13Z",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
   "total_datasets": 47,
@@ -319,7 +319,7 @@
       ],
       "file_size_bytes": 323389,
       "sha256": "d9bf2909c6fb6a3665f2755276341214608a89413d0bbea53f814092797daee7",
-      "gcs_generation": "1794273643695441",
+      "gcs_generation": "1794274717512674",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
       "local_parquet_path": "data/lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_electricity_substations/20261109T073013Z/source_payload.json",
@@ -399,7 +399,7 @@
         "status": "PASS",
         "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_electricity_substations\\2024-GA-NEI\\20261109T073013Z\\part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
-        "gcs_generation": "1794273643695441",
+        "gcs_generation": "1794274717512674",
         "file_size_bytes": 323389,
         "sha256": "d9bf2909c6fb6a3665f2755276341214608a89413d0bbea53f814092797daee7",
         "geoparquet_version": "1.1.0",
@@ -609,7 +609,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=d9bf2909c6fb6a36... | generation=1794273643695441"
+            "detail": "sha256=d9bf2909c6fb6a36... | generation=1794274717512674"
           }
         ]
       },
@@ -696,7 +696,7 @@
       ],
       "file_size_bytes": 6374729,
       "sha256": "6f3be3b0108767a0fb60de38041cd8fecb8212b1fcaabeb32a554fabc95d4763",
-      "gcs_generation": "1794273645089016",
+      "gcs_generation": "1794274718946780",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
       "local_parquet_path": "data/lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_electricity_transmission_lines/20261109T073016Z/source_payload.json",
@@ -775,7 +775,7 @@
         "status": "PASS",
         "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_electricity_transmission_lines\\2024-GA-NEI\\20261109T073016Z\\part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
-        "gcs_generation": "1794273645089016",
+        "gcs_generation": "1794274718946780",
         "file_size_bytes": 6374729,
         "sha256": "6f3be3b0108767a0fb60de38041cd8fecb8212b1fcaabeb32a554fabc95d4763",
         "geoparquet_version": "1.1.0",
@@ -985,7 +985,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=6f3be3b0108767a0... | generation=1794273645089016"
+            "detail": "sha256=6f3be3b0108767a0... | generation=1794274718946780"
           }
         ]
       },
@@ -1071,7 +1071,7 @@
       ],
       "file_size_bytes": 108601,
       "sha256": "4ceb334b09a13e3d5dc4a063f930a5cc097b4b5882873476ac041e052fcc27bd",
-      "gcs_generation": "1794273645358330",
+      "gcs_generation": "1794274719254519",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
       "local_parquet_path": "data/lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_major_power_stations/20261109T073026Z/source_payload.json",
@@ -1156,7 +1156,7 @@
         "status": "PASS",
         "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_major_power_stations\\2024-GA-NEI\\20261109T073026Z\\part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
-        "gcs_generation": "1794273645358330",
+        "gcs_generation": "1794274719254519",
         "file_size_bytes": 108601,
         "sha256": "4ceb334b09a13e3d5dc4a063f930a5cc097b4b5882873476ac041e052fcc27bd",
         "geoparquet_version": "1.1.0",
@@ -1401,7 +1401,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=4ceb334b09a13e3d... | generation=1794273645358330"
+            "detail": "sha256=4ceb334b09a13e3d... | generation=1794274719254519"
           }
         ]
       },
@@ -1488,7 +1488,7 @@
       ],
       "file_size_bytes": 224737,
       "sha256": "66f9bda36bfd1b75314aecbecc71cfa329c363e6dae8b59be9c239afea4a6269",
-      "gcs_generation": "1794273645784656",
+      "gcs_generation": "1794274719730757",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
       "local_parquet_path": "data/lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_seismic_hazard_pga_10pct/20261109T073027Z/source_payload.json",
@@ -1552,7 +1552,7 @@
         "status": "PASS",
         "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_seismic_hazard_pga_10pct\\NSHA-2018\\20261109T073027Z\\part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
-        "gcs_generation": "1794273645784656",
+        "gcs_generation": "1794274719730757",
         "file_size_bytes": 224737,
         "sha256": "66f9bda36bfd1b75314aecbecc71cfa329c363e6dae8b59be9c239afea4a6269",
         "geoparquet_version": "1.1.0",
@@ -1682,7 +1682,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=66f9bda36bfd1b75... | generation=1794273645784656"
+            "detail": "sha256=66f9bda36bfd1b75... | generation=1794274719730757"
           }
         ]
       },
@@ -2145,7 +2145,7 @@
       ],
       "file_size_bytes": 53870639,
       "sha256": "274ea5e2af3265ce33e02f0ec6cc6f7bc575628bd9b484cc2622ab3240133c3f",
-      "gcs_generation": "1794273655188016",
+      "gcs_generation": "1794274729689555",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
       "local_parquet_path": "data/lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/next_lga_boundaries_asgs2025/20261109T073027Z/source_payload.json",
@@ -2216,7 +2216,7 @@
         "status": "WARNING",
         "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\next_lga_boundaries_asgs2025\\ASGS-2025\\20261109T073027Z\\part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
-        "gcs_generation": "1794273655188016",
+        "gcs_generation": "1794274729689555",
         "file_size_bytes": 53870639,
         "sha256": "274ea5e2af3265ce33e02f0ec6cc6f7bc575628bd9b484cc2622ab3240133c3f",
         "geoparquet_version": "1.1.0",
@@ -2398,7 +2398,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=274ea5e2af3265ce... | generation=1794273655188016"
+            "detail": "sha256=274ea5e2af3265ce... | generation=1794274729689555"
           }
         ]
       },
@@ -2484,7 +2484,7 @@
       ],
       "file_size_bytes": 69056426,
       "sha256": "a762acf90baf181b525c6264c28e52b0e413ec514bf6fa5fb6318e66686bd912",
-      "gcs_generation": "1794273667004414",
+      "gcs_generation": "1794274741843622",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
       "local_parquet_path": "data/lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/next_sa2_boundaries_asgs2021/20261109T073056Z/source_payload.json",
@@ -2564,7 +2564,7 @@
         "status": "WARNING",
         "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\next_sa2_boundaries_asgs2021\\ASGS-2021\\20261109T073056Z\\part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
-        "gcs_generation": "1794273667004414",
+        "gcs_generation": "1794274741843622",
         "file_size_bytes": 69056426,
         "sha256": "a762acf90baf181b525c6264c28e52b0e413ec514bf6fa5fb6318e66686bd912",
         "geoparquet_version": "1.1.0",
@@ -2791,7 +2791,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=a762acf90baf181b... | generation=1794273667004414"
+            "detail": "sha256=a762acf90baf181b... | generation=1794274741843622"
           }
         ]
       },
@@ -3250,7 +3250,7 @@
       ],
       "file_size_bytes": 11977228,
       "sha256": "db491ca198de72a70c2c6b24f859d7e13100262257b414d2052f5cc85b94c7cc",
-      "gcs_generation": "1794273669340650",
+      "gcs_generation": "1794274744323718",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
       "local_parquet_path": "data/lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_foi_building_complexes/20261109T073128Z/source_payload.json",
@@ -3337,7 +3337,7 @@
         "status": "PASS",
         "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_foi_building_complexes\\2026-NSW-FOI\\20261109T073128Z\\part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
-        "gcs_generation": "1794273669340650",
+        "gcs_generation": "1794274744323718",
         "file_size_bytes": 11977228,
         "sha256": "db491ca198de72a70c2c6b24f859d7e13100262257b414d2052f5cc85b94c7cc",
         "geoparquet_version": "1.1.0",
@@ -3592,7 +3592,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=db491ca198de72a7... | generation=1794273669340650"
+            "detail": "sha256=db491ca198de72a7... | generation=1794274744323718"
           }
         ]
       },
@@ -3726,7 +3726,7 @@
       ],
       "file_size_bytes": 26510856,
       "sha256": "ea89196886922a2d95645bcd434b680364af0d9ad15c66117b39ab926c3ba13a",
-      "gcs_generation": "1794273674127285",
+      "gcs_generation": "1794274749328896",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
       "local_parquet_path": "data/lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_lga_boundaries/20261109T073249Z/source_payload.json",
@@ -3807,7 +3807,7 @@
         "status": "PASS",
         "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_lga_boundaries\\2026-NSW-DCS\\20261109T073249Z\\part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
-        "gcs_generation": "1794273674127285",
+        "gcs_generation": "1794274749328896",
         "file_size_bytes": 26510856,
         "sha256": "ea89196886922a2d95645bcd434b680364af0d9ad15c66117b39ab926c3ba13a",
         "geoparquet_version": "1.1.0",
@@ -4039,7 +4039,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=ea89196886922a2d... | generation=1794273674127285"
+            "detail": "sha256=ea89196886922a2d... | generation=1794274749328896"
           }
         ]
       },
@@ -4172,7 +4172,7 @@
       ],
       "file_size_bytes": 25113,
       "sha256": "7ef111c64bc3a12df8880016d7ccb37585bcbccefc25d78b379931a646efbf12",
-      "gcs_generation": "1794273674490309",
+      "gcs_generation": "1794274749734242",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
       "local_parquet_path": "data/lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_rfs_major_incidents_live/20261109T073310Z/source_payload.json",
@@ -4228,7 +4228,7 @@
         "status": "PASS",
         "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_rfs_major_incidents_live\\LIVE-FEED\\20261109T073310Z\\part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
-        "gcs_generation": "1794273674490309",
+        "gcs_generation": "1794274749734242",
         "file_size_bytes": 25113,
         "sha256": "7ef111c64bc3a12df8880016d7ccb37585bcbccefc25d78b379931a646efbf12",
         "geoparquet_version": "1.1.0",
@@ -4398,7 +4398,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=7ef111c64bc3a12d... | generation=1794273674490309"
+            "detail": "sha256=7ef111c64bc3a12d... | generation=1794274749734242"
           }
         ]
       },
@@ -4533,7 +4533,7 @@
       ],
       "file_size_bytes": 6931951,
       "sha256": "b7d64b861b816c46a3db85467310677af1e00b016b5293f6b9d8504c993ecc4a",
-      "gcs_generation": "1794273676357547",
+      "gcs_generation": "1794274751649133",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
       "local_parquet_path": "data/lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_water_inundation_areas/20261109T073310Z/source_payload.json",
@@ -4620,7 +4620,7 @@
         "status": "PASS",
         "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_water_inundation_areas\\2026-NSW-Water\\20261109T073310Z\\part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
-        "gcs_generation": "1794273676357547",
+        "gcs_generation": "1794274751649133",
         "file_size_bytes": 6931951,
         "sha256": "b7d64b861b816c46a3db85467310677af1e00b016b5293f6b9d8504c993ecc4a",
         "geoparquet_version": "1.1.0",
@@ -4882,7 +4882,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=b7d64b861b816c46... | generation=1794273676357547"
+            "detail": "sha256=b7d64b861b816c46... | generation=1794274751649133"
           }
         ]
       },
