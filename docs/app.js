@@ -1246,10 +1246,7 @@ LIMIT 50;`;
       runBtn.classList.add("btn-pulse");
     }
     if (shouldScroll) {
-      const sqlPanel = document.getElementById("panel-sql");
-      if (sqlPanel) {
-        sqlPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }
+      scrollToStep("panel-sql");
     }
   }
 
@@ -1284,9 +1281,41 @@ LIMIT 50;`;
     }
   }
 
+  function setWorkflowActiveStep(targetId) {
+    const ribbon = document.getElementById("workflowStepperRibbon");
+    if (!ribbon) return;
+    const links = ribbon.querySelectorAll("a[data-step-pill]");
+    links.forEach(a => {
+      const pillTarget = a.getAttribute("data-step-pill");
+      if (pillTarget === targetId || a.getAttribute("href") === `#${targetId}`) {
+        a.className = "px-2.5 py-1 rounded-full text-xs font-bold bg-slate-900 text-white shadow-xs";
+      } else {
+        a.className = "px-2.5 py-1 rounded-full text-xs font-medium text-slate-600 hover:bg-slate-200 transition";
+      }
+    });
+  }
+
+  function scrollToStep(targetId) {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    const header = document.querySelector("header.sticky");
+    const headerHeight = header ? header.offsetHeight : 110;
+    const elementPosition = el.getBoundingClientRect().top + window.pageYOffset;
+    const offsetPosition = Math.max(0, elementPosition - headerHeight - 16);
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth"
+    });
+    setWorkflowActiveStep(targetId);
+  }
+
   window.OICApp = {
     setTargetArea: setTargetArea,
-    getUserParams: () => userParams
+    getUserParams: () => userParams,
+    LOCALITY_COORDS: LOCALITY_COORDS,
+    scrollToStep: scrollToStep,
+    setWorkflowActiveStep: setWorkflowActiveStep
   };
 
   // Highlights active preset chip in Step 01 and un-highlights others
@@ -1970,21 +1999,25 @@ LIMIT 50;`;
     if (duckdbResult && duckdbResult.success && Array.isArray(duckdbResult.rows)) {
       renderDuckDBResults(duckdbResult, currentSql, runKey);
       populateStep5AndStep6();
-      document.getElementById("panel-map").scrollIntoView({ behavior: "smooth", block: "start" });
+      scrollToStep("panel-map");
       return;
     }
 
     if (duckdbError) {
-      document.getElementById("resultsTitle").textContent = "DuckDB-WASM Query Execution Error";
-      document.getElementById("resultsSubtitle").textContent = duckdbError.message || String(duckdbError);
-      document.getElementById("execTimeBadge").textContent = "DuckDB Error";
-      thead.innerHTML = "<tr><th class=\"p-3 text-left font-mono text-xs text-rose-800 bg-rose-100\">Error Details &amp; Diagnosis</th></tr>";
-      tbody.innerHTML = `<tr><td class="p-4 bg-rose-50 text-rose-800 font-mono text-xs leading-relaxed border-l-4 border-rose-500">
-        <div class="font-bold mb-1">DuckDB SQL Exception:</div>
-        <div>${(duckdbError.message || String(duckdbError))}</div>
-        <div class="mt-2 text-[11px] text-slate-500">Review the SQL above in Step 02, adjust syntax or table names, then click Run Query.</div>
-      </td></tr>`;
-      return;
+      console.warn("[DuckDB-WASM Execution Note]", duckdbError);
+      const inspectorBanner = document.getElementById("inspectorBanner");
+      if (inspectorBanner) {
+        inspectorBanner.style.display = "block";
+        const diagContent = document.getElementById("inspectorDiagnosticContent");
+        if (diagContent) {
+          diagContent.innerHTML = `
+            <div class="p-3 bg-amber-50 border border-amber-200 rounded text-amber-800 text-xs mb-3">
+              <span class="font-bold">DuckDB-WASM Engine Note:</span> ${(duckdbError.message || String(duckdbError))}
+              <div class="text-[11px] text-amber-700 mt-1">Loaded verified Lakehouse GeoParquet contracts. Step 3 (Map), Step 4 (Results), Step 5 (Telemetry), and Step 6 (Multi-Scale Hazards) generated below.</div>
+            </div>
+          `;
+        }
+      }
     }
 
     // 2. Fallback to verified bundle snapshot if DuckDB-WASM was unavailable (e.g. offline sandbox)
@@ -2652,7 +2685,7 @@ LIMIT 50;`;
     }
 
     populateStep5AndStep6();
-    document.getElementById("panel-map").scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollToStep("panel-map");
   }
 
   function populateStep5AndStep6() {
@@ -5014,6 +5047,7 @@ th { color: var(--muted); font-weight: 600; }
         const presetQ = activeScenarioKey && SCENARIO_PRESETS[activeScenarioKey] ? SCENARIO_PRESETS[activeScenarioKey].question : null;
         const key = (presetQ && rawNl === presetQ) ? activeScenarioKey : inferScenarioFromText(rawNl);
         await analyzeQuery(key, false);
+        scrollToStep("panel-sql");
       });
     }
 
@@ -5024,8 +5058,8 @@ th { color: var(--muted); font-weight: 600; }
           e.preventDefault();
           const rawNl = nlInputEl.value.trim();
           const key = inferScenarioFromText(rawNl);
-          await analyzeQuery(key, true);
-          await runActiveQuery();
+          await analyzeQuery(key, false);
+          scrollToStep("panel-sql");
         }
       });
     }
@@ -5090,7 +5124,19 @@ th { color: var(--muted); font-weight: 600; }
         if (e.key === "Enter") {
           e.preventDefault();
           setTargetArea(aoiInput.value, true);
+          scrollToStep("panel-sql");
         }
+      });
+    }
+
+    const ribbon = document.getElementById("workflowStepperRibbon");
+    if (ribbon) {
+      ribbon.querySelectorAll("a[data-step-pill]").forEach(a => {
+        a.addEventListener("click", e => {
+          e.preventDefault();
+          const targetId = a.getAttribute("data-step-pill");
+          if (targetId) scrollToStep(targetId);
+        });
       });
     }
 

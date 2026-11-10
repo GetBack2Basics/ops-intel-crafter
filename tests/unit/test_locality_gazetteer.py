@@ -278,4 +278,53 @@ def test_aoi_ui_controls_and_wiring():
     assert "window.OICApp.setTargetArea(chosenArea);" in layers_content
 
 
+def test_locality_overrides_and_inverted_mask_wiring():
+    """Verifies that locality overrides exist in layers.js and the inverted mask uses antimeridian-safe coordinates."""
+    docs_dir = os.path.join(os.path.dirname(__file__), "..", "..", "docs")
+
+    with open(os.path.join(docs_dir, "layers.js"), "r", encoding="utf-8") as f:
+        layers_content = f.read()
+
+    # Locality overrides defined and merged into gazetteer
+    assert "LOCALITY_OVERRIDES" in layers_content
+    for loc in ["maitland", "newcastle", "cessnock", "singleton", "port stephens", "lake macquarie", "hunter"]:
+        assert f'"{loc}"' in layers_content or f"{loc}:" in layers_content, f"Locality override missing for {loc}"
+
+    assert "const GAZETTEER = Object.assign({}, EMBEDDED_LGA_GAZETTEER, LOCALITY_OVERRIDES);" in layers_content
+
+    # World ring in inverted mask is antimeridian-safe (prevents polygon width collapse at ±180)
+    assert "-179.9999" in layers_content
+    assert "179.9999" in layers_content
+
+
+def test_workflow_stepper_and_fault_tolerant_execution():
+    """Verifies workflow stepper ribbon smooth scroll with offset, and fault-tolerant Step 3, 4, 5, 6 generation."""
+    docs_dir = os.path.join(os.path.dirname(__file__), "..", "..", "docs")
+
+    with open(os.path.join(docs_dir, "index.html"), "r", encoding="utf-8") as f:
+        html_content = f.read()
+
+    assert 'id="workflowStepperRibbon"' in html_content
+    for step in ["panel-query", "panel-sql", "panel-map", "panel-recommendations", "panel-analytics", "panel-ai-steps"]:
+        assert f'data-step-pill="{step}"' in html_content
+
+    with open(os.path.join(docs_dir, "app.js"), "r", encoding="utf-8") as f:
+        app_content = f.read()
+
+    # scrollToStep with header offset
+    assert "function scrollToStep(targetId)" in app_content
+    assert "setWorkflowActiveStep(targetId)" in app_content
+    assert "headerHeight" in app_content
+
+    # btnAnalyze scrolls to panel-sql
+    assert 'scrollToStep("panel-sql")' in app_content
+
+    # duckdbError does not abort execution of steps 3, 4, 5, 6
+    assert "if (duckdbError) {" in app_content
+    assert "DuckDB-WASM Engine Note:" in app_content
+    # scrollToStep("panel-map") is called
+    assert 'scrollToStep("panel-map")' in app_content
+
+
+
 

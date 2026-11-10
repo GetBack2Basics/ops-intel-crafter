@@ -24,15 +24,26 @@ def upload_web_assets():
         ("data/WP302026_TRACK_latest.geojson", "application/geo+json; charset=utf-8"),
         ("data/WP302026_CYCLONE_ZONES.geojson", "application/geo+json; charset=utf-8"),
         ("data/workbench_bundle.json", "application/json; charset=utf-8"),
+        ("data/locality_gazetteer.json", "application/json; charset=utf-8"),
     ]
 
     # Also include qa/data parquet and geojson assets
     qa_data_dir = DOCS_DIR / "qa" / "data"
     if qa_data_dir.exists():
-        for p in sorted(qa_data_dir.glob("*.parquet")):
+        for p in sorted(qa_data_dir.rglob("*")):
             if p.is_file():
                 rel = p.relative_to(DOCS_DIR).as_posix()
-                files_to_upload.append((rel, "application/octet-stream"))
+                ct = "application/octet-stream" if p.suffix == ".parquet" else "application/geo+json; charset=utf-8" if p.suffix == ".geojson" else "application/json; charset=utf-8"
+                files_to_upload.append((rel, ct))
+
+    # Also include exports files (parquet, geojson, json)
+    exports_dir = DOCS_DIR / "exports"
+    if exports_dir.exists():
+        for p in sorted(exports_dir.rglob("*")):
+            if p.is_file():
+                rel = p.relative_to(DOCS_DIR).as_posix()
+                ct = "application/octet-stream" if p.suffix == ".parquet" else "application/geo+json; charset=utf-8" if p.suffix == ".geojson" else "application/json; charset=utf-8"
+                files_to_upload.append((rel, ct))
 
     # Also include map_packages
     map_packages_dir = DOCS_DIR / "map_packages"
