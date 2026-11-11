@@ -223,8 +223,8 @@ LIMIT 100;`;
         "power plant", "megawatt", "mw", "renewable", "solar farm", "wind farm",
         "coal station", "gas peaker", "hydroelectric", "generation capacity"
       ],
-      targetColumns: ["name", "generationmw", "primaryfueltype", "state", "operationalstatus", "latitude", "longitude"],
-      defaultSort: "generationmw DESC NULLS LAST",
+      targetColumns: ["name", "generation_capacity_mw", "primary_fuel_type", "state", "status", "latitude", "longitude"],
+      defaultSort: "capacity_mw DESC NULLS LAST",
       sqlBuilder: function (areaText, localityInfo) {
         const loc = getActiveAoiRegion(areaText, localityInfo);
         const areaLabel = loc ? loc.name : (areaText || "Australia National");
@@ -234,12 +234,12 @@ LIMIT 100;`;
 -- Spatial Filter: within generated AOI region (${loc.name})
 -- Extent: [${minX.toFixed(4)}, ${minY.toFixed(4)}, ${maxX.toFixed(4)}, ${maxY.toFixed(4)}] (EPSG:7844 / GDA2020)
 SELECT
-    COALESCE(name, 'Power Station') AS station_name,
+    COALESCE(name, feature_name, 'Power Station') AS station_name,
     locality,
     state,
-    primaryfueltype AS fuel_type,
-    ROUND(TRY_CAST(generationmw AS DOUBLE), 1) AS capacity_mw,
-    operationalstatus AS status,
+    COALESCE(primary_fuel_type, fuel_type, 'Unknown') AS fuel_type,
+    ROUND(TRY_CAST(COALESCE(generation_capacity_mw, capacity_mw) AS DOUBLE), 1) AS capacity_mw,
+    status,
     ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')
@@ -249,15 +249,15 @@ WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}
 ORDER BY capacity_mw DESC NULLS LAST
 LIMIT 100;`;
         }
-        let areaFilterSql = (loc && loc.state && loc.state !== "ALL") ? `WHERE state = '${loc.state}'` : "";
+        let areaFilterSql = (loc && loc.state && loc.state !== "ALL") ? `WHERE state = '${loc.state}'` : "WHERE state IS NOT NULL";
         return `-- National Major Power Stations & Generation Capacity (GA NEI)
 -- Scope: ${areaLabel}
 SELECT
     COALESCE(state, 'Unknown') AS state,
     COUNT(*) AS total_power_stations,
-    ROUND(SUM(TRY_CAST(generationmw AS DOUBLE)), 1) AS total_capacity_mw,
-    ROUND(AVG(TRY_CAST(generationmw AS DOUBLE)), 1) AS avg_capacity_mw,
-    COUNT(CASE WHEN LOWER(operationalstatus) = 'operating' THEN 1 END) AS active_operating
+    ROUND(SUM(TRY_CAST(COALESCE(generation_capacity_mw, capacity_mw) AS DOUBLE)), 1) AS total_capacity_mw,
+    ROUND(AVG(TRY_CAST(COALESCE(generation_capacity_mw, capacity_mw) AS DOUBLE)), 1) AS avg_capacity_mw,
+    COUNT(CASE WHEN LOWER(status) = 'operating' THEN 1 END) AS active_operating
 FROM read_parquet('${this.parquetUri}')
 ${areaFilterSql}
 GROUP BY COALESCE(state, 'Unknown')
@@ -278,7 +278,7 @@ ORDER BY total_capacity_mw DESC;`;
         "transmission line", "transmission lines", "power line", "high voltage", "pylons",
         "feeder", "grid lines", "kv line"
       ],
-      targetColumns: ["name", "feature_name", "voltage_kv", "state"],
+      targetColumns: ["name", "feature_name", "capacity_kv", "state"],
       defaultSort: "voltage_kv DESC",
       sqlBuilder: function (areaText, localityInfo) {
         const loc = getActiveAoiRegion(areaText, localityInfo);
@@ -290,7 +290,7 @@ ORDER BY total_capacity_mw DESC;`;
 SELECT
     COALESCE(name, feature_name, 'Transmission Line') AS line_name,
     state,
-    TRY_CAST(voltage_kv AS INT) AS voltage_kv,
+    TRY_CAST(capacity_kv AS INT) AS voltage_kv,
     ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')
@@ -316,7 +316,7 @@ LIMIT 100;`;
         "major incident", "emergency incident", "out of control", "emergency warning",
         "watch and act", "burn"
       ],
-      targetColumns: ["title", "category", "status", "agency", "council_area", "latitude", "longitude"],
+      targetColumns: ["title", "category", "alert_level", "pubDate", "description"],
       defaultSort: "title",
       sqlBuilder: function (areaText, localityInfo) {
         const loc = getActiveAoiRegion(areaText, localityInfo);
@@ -332,16 +332,15 @@ LIMIT 100;`;
 -- Spatial Filter: within generated AOI region (${areaLabel})
 SELECT
     title AS incident_title,
-    category AS alert_level,
-    status AS fire_status,
-    agency,
-    council_area,
-    ROUND(TRY_CAST(latitude AS DOUBLE), 4) AS lat,
-    ROUND(TRY_CAST(longitude AS DOUBLE), 4) AS lon
+    COALESCE(alert_level, category, 'Incident') AS alert_level,
+    pubDate AS published_at,
+    SUBSTRING(description, 1, 120) AS summary,
+    ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
+    ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')
 ${whereClause}
 ORDER BY
-    CASE category
+    CASE COALESCE(alert_level, category)
         WHEN 'Emergency Warning' THEN 1
         WHEN 'Watch and Act' THEN 2
         WHEN 'Advice' THEN 3
@@ -402,7 +401,7 @@ LIMIT 100;`;
         "seismic", "earthquake", "pga", "ground motion", "nsha", "hazard contour",
         "seismic hazard", "shaking"
       ],
-      targetColumns: ["pga_value", "contour_id"],
+      targetColumns: ["pga_level_g", "contour_id"],
       defaultSort: "pga_value DESC",
       sqlBuilder: function (areaText, localityInfo) {
         const loc = getActiveAoiRegion(areaText, localityInfo);
@@ -418,7 +417,7 @@ LIMIT 100;`;
 -- Spatial Filter: within generated AOI region (${areaLabel})
 SELECT
     contour_id,
-    pga_value,
+    ROUND(TRY_CAST(pga_level_g AS DOUBLE), 4) AS pga_value,
     ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')

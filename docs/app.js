@@ -684,7 +684,13 @@ LIMIT 50;`;
       scenarioKey = "national_pop_grid";
     } else if (lower.includes("nsw_rfs_major_incidents_live") || lower.includes("rfs") || lower.includes("bushfire")) {
       scenarioKey = "live_rfs";
-    } else if (lower.includes("ga_major_power_stations") || lower.includes("seismic_hazard_pga") || lower.includes("nsha")) {
+    } else if (lower.includes("ga_electricity_transmission_lines") || lower.includes("transmission_line") || lower.includes("high-voltage transmission")) {
+      scenarioKey = "transmission_lines";
+    } else if (lower.includes("nsw_water_inundation_areas") || lower.includes("water_inundation") || lower.includes("inundation area")) {
+      scenarioKey = "water_inundation";
+    } else if (lower.includes("ga_seismic_hazard_pga_10pct") || lower.includes("ground motion pga") || lower.includes("seismic hazard assessment")) {
+      scenarioKey = "seismic_hazard";
+    } else if (lower.includes("ga_major_power_stations") || lower.includes("power_station") || lower.includes("power plant") || lower.includes("generation capacity")) {
       scenarioKey = "national_power";
     } else if (lower.includes("next_lga_boundaries_asgs2025") || lower.includes("lga_code_2025") || lower.includes("lga_name_2025") || lower.includes("lga_name") || lower.includes("lga_code")) {
       scenarioKey = "lga_multi_hazard";
@@ -698,7 +704,7 @@ LIMIT 50;`;
       scenarioKey = "uploaded_aoi_exposure";
     }
 
-    const areaMatch = sql.match(/--\s*User Area:\s*([^\r\n]+)/i);
+    const areaMatch = sql.match(/--\s*(?:User Area|Spatial Filter:\s*within generated AOI region\s*\(?|Area Scope:)\s*([^\r\n\)]+)/i);
     const scopeMatch = sql.match(/--\s*Area scope:\s*([^\r\n]+)/i);
     const distMatch = sql.match(/--\s*User (?:Distance|Catchment Distance|Buffer|Clip):\s*([^\r\n]+)/i);
     const optMatch = sql.match(/--\s*User Options:\s*([^\r\n]+)/i);
@@ -2166,6 +2172,21 @@ LIMIT 50;`;
       legendItems.innerHTML = `
         <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#dc2626]"></span><span>NSW RFS Active Incident</span></div>
       `;
+    } else if (lowerSql.includes("ga_electricity_transmission_lines") || runKey === "transmission_lines") {
+      showQueryLayers(["ga_electricity_transmission_lines"]);
+      legendItems.innerHTML = `
+        <div class="flex items-center gap-2"><span class="w-3.5 h-1 rounded bg-[#eab308]"></span><span>GA Transmission Line</span></div>
+      `;
+    } else if (lowerSql.includes("nsw_water_inundation_areas") || runKey === "water_inundation") {
+      showQueryLayers(["nsw_water_inundation_areas"]);
+      legendItems.innerHTML = `
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-sm bg-[#38bdf8]"></span><span>NSW Water Inundation Polygon</span></div>
+      `;
+    } else if (lowerSql.includes("ga_seismic_hazard_pga_10pct") || runKey === "seismic_hazard") {
+      showQueryLayers(["ga_seismic_hazard_pga_10pct"]);
+      legendItems.innerHTML = `
+        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#f59e0b]"></span><span>NSHA Seismic Contour</span></div>
+      `;
     } else if (lowerSql.includes("ga_major_power_stations") || runKey === "national_power") {
       showQueryLayers(["ga_major_power_stations", "ga_seismic_hazard_pga_10pct"]);
       legendItems.innerHTML = `
@@ -2178,8 +2199,33 @@ LIMIT 50;`;
       `;
     }
 
+    // Bind row clicks to zoom to coordinate & open popup
+    tbody.querySelectorAll("tr[data-duckdb-idx]").forEach(tr => {
+      tr.addEventListener("click", () => {
+        const idx = parseInt(tr.getAttribute("data-duckdb-idx"), 10);
+        const r = res.rows[idx];
+        if (!r) return;
+        const lon = r.centroid_lon ?? r.lon ?? r.longitude;
+        const lat = r.centroid_lat ?? r.lat ?? r.latitude;
+        if (typeof lon === "number" && typeof lat === "number" && !isNaN(lon) && !isNaN(lat)) {
+          if (map && mapReady) {
+            map.flyTo({ center: [lon, lat], zoom: Math.max(map.getZoom(), 13), duration: 800 });
+            if (window.OICLayers && window.OICLayers.openFeaturePopup) {
+              const name = r.substation_name || r.station_name || r.facility_name || r.incident_title || r.line_name || r.waterbody_name || r.cell_id || "Feature";
+              window.OICLayers.openFeaturePopup([lon, lat], name, r);
+            }
+          }
+        }
+      });
+    });
+
     if (coordsList.length > 0) {
       fitMapToResultsExtent(coordsList);
+    } else {
+      const resolved = window.OICLayers && window.OICLayers.resolveLocalityExtent ? window.OICLayers.resolveLocalityExtent(userParams.area) : null;
+      if (resolved && resolved.bbox) {
+        safeFitBounds(resolved.bbox, { padding: 40, duration: 800 });
+      }
     }
   }
 
@@ -2202,71 +2248,92 @@ LIMIT 50;`;
     }
 
     if (!currentSql || currentSql.startsWith("-- Select a preset") || currentSql.startsWith("-- Loading")) {
+      showToast("Please select a scenario preset or click 'Generate SQL Pipeline' in Step 01 first", "info");
+      scrollToStep("panel-query");
       return;
     }
 
     if (currentSql.includes("-- BLOCKED") || activeScenarioKey === "uncatalogued_reject") {
       openLocationClarificationModal("uncatalogued_reject");
+      scrollToStep("clarificationBox");
       return;
     }
 
-    document.getElementById("btnRunQuery").classList.remove("btn-pulse");
-    document.getElementById("mapEmptyOverlay").style.display = "none";
-    document.getElementById("inspectorBanner").style.display = "none";
-    clearMapLayers();
-
-    const runKey = activeScenarioKey === "ambiguous_pop" ? "pop_comparison" : (activeScenarioKey || "pop_comparison");
-    const preset = SCENARIO_PRESETS[runKey] || SCENARIO_PRESETS.pop_comparison;
-    const exportBtn = document.getElementById("btnExportGeojson");
-    if (preset && preset.exportHref) {
-      exportBtn.href = preset.exportHref;
-      exportBtn.style.display = "inline-flex";
-    } else if (exportBtn) {
-      exportBtn.style.display = "none";
+    const runBtn = document.getElementById("btnRunQuery");
+    const origHtml = runBtn ? runBtn.innerHTML : "";
+    if (runBtn) {
+      runBtn.disabled = true;
+      runBtn.classList.remove("btn-pulse");
+      runBtn.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-3.5 w-3.5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Executing DuckDB-WASM...</span>
+      `;
     }
 
-    const thead = document.getElementById("resultsTableHead");
-    const tbody = document.getElementById("resultsTableBody");
-    const legendHud = document.getElementById("mapLegendHud");
-    const legendItems = document.getElementById("mapLegendItems");
-    if (legendHud) legendHud.style.display = "block";
+    try {
+      document.getElementById("mapEmptyOverlay").style.display = "none";
+      document.getElementById("inspectorBanner").style.display = "none";
+      clearMapLayers();
 
-    // 1. Attempt real execution in DuckDB-WASM first
-    let duckdbResult = null;
-    let duckdbError = null;
-
-    if (window.OICDuckDB) {
-      try {
-        duckdbResult = await window.OICDuckDB.executeQuery(currentSql);
-      } catch (err) {
-        console.warn("[DuckDB-WASM Execution Note]", err);
-        duckdbError = err;
+      const runKey = activeScenarioKey === "ambiguous_pop" ? "pop_comparison" : (activeScenarioKey || "pop_comparison");
+      const preset = SCENARIO_PRESETS[runKey] || SCENARIO_PRESETS.pop_comparison;
+      const exportBtn = document.getElementById("btnExportGeojson");
+      if (preset && preset.exportHref) {
+        exportBtn.href = preset.exportHref;
+        exportBtn.style.display = "inline-flex";
+      } else if (exportBtn) {
+        exportBtn.style.display = "none";
       }
-    }
 
-    if (duckdbResult && duckdbResult.success && Array.isArray(duckdbResult.rows)) {
-      renderDuckDBResults(duckdbResult, currentSql, runKey);
-      populateStep5AndStep6();
-      scrollToStep("panel-map");
-      return;
-    }
+      const thead = document.getElementById("resultsTableHead");
+      const tbody = document.getElementById("resultsTableBody");
+      const legendHud = document.getElementById("mapLegendHud");
+      const legendItems = document.getElementById("mapLegendItems");
+      if (legendHud) legendHud.style.display = "block";
 
-    if (duckdbError) {
-      console.warn("[DuckDB-WASM Execution Note]", duckdbError);
-      const inspectorBanner = document.getElementById("inspectorBanner");
-      if (inspectorBanner) {
-        inspectorBanner.style.display = "block";
-        const diagContent = document.getElementById("inspectorDiagnosticContent");
-        if (diagContent) {
-          diagContent.innerHTML = `
-            <div class="p-3 bg-amber-50 border border-amber-200 rounded text-amber-800 text-xs mb-3">
-              <span class="font-bold">DuckDB-WASM Engine Note:</span> ${(duckdbError.message || String(duckdbError))}
-              <div class="text-[11px] text-amber-700 mt-1">Loaded verified Lakehouse GeoParquet contracts. Step 3 (Map), Step 4 (Results), Step 5 (Telemetry), and Step 6 (Multi-Scale Hazards) generated below.</div>
-            </div>
-          `;
+      // 1. Attempt real execution in DuckDB-WASM first
+      let duckdbResult = null;
+      let duckdbError = null;
+
+      if (window.OICDuckDB) {
+        try {
+          duckdbResult = await window.OICDuckDB.executeQuery(currentSql);
+        } catch (err) {
+          console.warn("[DuckDB-WASM Execution Note]", err);
+          duckdbError = err;
         }
       }
-    }
+
+      if (duckdbResult && duckdbResult.success && Array.isArray(duckdbResult.rows)) {
+        try {
+          renderDuckDBResults(duckdbResult, currentSql, runKey);
+          populateStep5AndStep6();
+        } catch (renderErr) {
+          console.error("renderDuckDBResults error:", renderErr);
+        }
+        scrollToStep("panel-map");
+        return;
+      }
+
+      if (duckdbError) {
+        console.warn("[DuckDB-WASM Execution Note]", duckdbError);
+        const inspectorBanner = document.getElementById("inspectorBanner");
+        if (inspectorBanner) {
+          inspectorBanner.style.display = "block";
+          const diagContent = document.getElementById("inspectorDiagnosticContent");
+          if (diagContent) {
+            diagContent.innerHTML = `
+              <div class="p-3 bg-amber-50 border border-amber-200 rounded text-amber-800 text-xs mb-3">
+                <span class="font-bold">DuckDB-WASM Engine Note:</span> ${(duckdbError.message || String(duckdbError))}
+                <div class="text-[11px] text-amber-700 mt-1">Loaded verified Lakehouse GeoParquet contracts. Step 3 (Map), Step 4 (Results), Step 5 (Telemetry), and Step 6 (Multi-Scale Hazards) generated below.</div>
+              </div>
+            `;
+          }
+        }
+      }
 
     // 2. Fallback to verified bundle snapshot if DuckDB-WASM was unavailable (e.g. offline sandbox)
 
@@ -3022,6 +3089,18 @@ LIMIT 50;`;
 
     populateStep5AndStep6();
     scrollToStep("panel-map");
+    } finally {
+      if (runBtn) {
+        runBtn.disabled = false;
+        runBtn.innerHTML = origHtml || `
+          <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+          <span>Execute Query &amp; View Map →</span>
+        `;
+        if (typeof lucide !== "undefined" && lucide.createIcons) {
+          lucide.createIcons({ root: runBtn });
+        }
+      }
+    }
   }
 
   function populateStep5AndStep6() {
