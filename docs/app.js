@@ -5447,6 +5447,132 @@ th { color: var(--muted); font-weight: 600; }
   // END OF OFFLINE MAP-IN-A-BOX SECTION
   // =========================================================================
 
+  function wireAoiAutocomplete() {
+    const aoiInput = document.getElementById("aoiInput");
+    const dropdown = document.getElementById("aoiAutocompleteDropdown");
+    if (!aoiInput || !dropdown) return;
+
+    let selectedIndex = -1;
+    let currentResults = [];
+
+    function renderDropdown(results) {
+      currentResults = results || [];
+      selectedIndex = -1;
+
+      if (!results || results.length === 0) {
+        dropdown.innerHTML = "";
+        dropdown.classList.add("hidden");
+        return;
+      }
+
+      dropdown.innerHTML = results.map((item, idx) => `
+        <div class="p-2.5 hover:bg-sky-50 cursor-pointer flex items-center justify-between transition-colors aoi-autocomplete-item" data-index="${idx}">
+          <div class="flex items-center gap-2 overflow-hidden">
+            <svg class="w-3.5 h-3.5 text-sky-500 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span class="font-semibold text-slate-800 truncate">${item.name}</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 shrink-0">${item.state}</span>
+          </div>
+          <span class="text-[10px] text-slate-400 font-mono shrink-0 ml-2">${item.center ? item.center[1].toFixed(2) + ', ' + item.center[0].toFixed(2) : ''}</span>
+        </div>
+      `).join("");
+
+      dropdown.classList.remove("hidden");
+
+      dropdown.querySelectorAll(".aoi-autocomplete-item").forEach(el => {
+        el.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          const idx = parseInt(el.getAttribute("data-index"), 10);
+          selectItem(idx);
+        });
+      });
+    }
+
+    function selectItem(idx) {
+      if (idx < 0 || idx >= currentResults.length) return;
+      const item = currentResults[idx];
+      aoiInput.value = item.name;
+      setTargetArea(item.name, true);
+      dropdown.innerHTML = "";
+      dropdown.classList.add("hidden");
+      selectedIndex = -1;
+
+      const nlVal = (document.getElementById("nlInput")?.value || "").trim();
+      if (activeScenarioKey || nlVal) {
+        analyzeQuery(activeScenarioKey || null, false);
+      }
+    }
+
+    function updateHighlight() {
+      const items = dropdown.querySelectorAll(".aoi-autocomplete-item");
+      items.forEach((el, idx) => {
+        if (idx === selectedIndex) {
+          el.classList.add("bg-sky-100");
+          el.scrollIntoView({ block: "nearest" });
+        } else {
+          el.classList.remove("bg-sky-100");
+        }
+      });
+    }
+
+    aoiInput.addEventListener("input", () => {
+      const val = (aoiInput.value || "").trim();
+      if (val.length >= 3 && window.OICLayers && typeof window.OICLayers.searchGazetteer === "function") {
+        const matches = window.OICLayers.searchGazetteer(val, 8);
+        renderDropdown(matches);
+      } else {
+        dropdown.innerHTML = "";
+        dropdown.classList.add("hidden");
+      }
+    });
+
+    aoiInput.addEventListener("keydown", (e) => {
+      const isHidden = dropdown.classList.contains("hidden") || currentResults.length === 0;
+
+      if (e.key === "ArrowDown") {
+        if (!isHidden) {
+          e.preventDefault();
+          selectedIndex = (selectedIndex + 1) % currentResults.length;
+          updateHighlight();
+        }
+      } else if (e.key === "ArrowUp") {
+        if (!isHidden) {
+          e.preventDefault();
+          selectedIndex = (selectedIndex - 1 + currentResults.length) % currentResults.length;
+          updateHighlight();
+        }
+      } else if (e.key === "Enter") {
+        if (!isHidden && selectedIndex >= 0 && selectedIndex < currentResults.length) {
+          e.preventDefault();
+          selectItem(selectedIndex);
+        } else {
+          dropdown.classList.add("hidden");
+          const val = (aoiInput.value || "").trim();
+          if (val) {
+            setTargetArea(val, true);
+            const nlVal = (document.getElementById("nlInput")?.value || "").trim();
+            if (activeScenarioKey || nlVal) {
+              analyzeQuery(activeScenarioKey || null, false);
+            }
+          }
+        }
+      } else if (e.key === "Escape") {
+        dropdown.classList.add("hidden");
+      }
+    });
+
+    aoiInput.addEventListener("blur", () => {
+      setTimeout(() => {
+        dropdown.classList.add("hidden");
+      }, 200);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!aoiInput.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.add("hidden");
+      }
+    });
+  }
+
   function wireEventListeners() {
     try {
       initMap();
@@ -5529,19 +5655,7 @@ th { color: var(--muted); font-weight: 600; }
       });
     }
 
-    const aoiInput = document.getElementById("aoiInput");
-    if (aoiInput) {
-      aoiInput.addEventListener("input", () => {
-        setTargetArea(aoiInput.value, true);
-      });
-      aoiInput.addEventListener("keydown", e => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          setTargetArea(aoiInput.value, true);
-          scrollToStep("panel-sql");
-        }
-      });
-    }
+    wireAoiAutocomplete();
 
     const ribbon = document.getElementById("workflowStepperRibbon");
     if (ribbon) {

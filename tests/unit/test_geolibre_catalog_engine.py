@@ -101,3 +101,121 @@ def test_spatial_filter_within_generated_aoi_region() -> None:
     assert 'scenarioKey: "water_inundation"' in content
 
 
+def test_geolibre_catalog_engine_category_expansion_and_dynamic_fallback() -> None:
+    import json
+    import subprocess
+
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    node_script = """
+    const engine = require('./docs/geolibre_catalog_engine.js');
+    const queries = [
+      { q: 'libraries in Maitland', cat: 'Library' },
+      { q: 'churches in Newcastle', cat: 'Worship' },
+      { q: 'childcare in Cessnock', cat: 'Childcare' },
+      { q: 'sports grounds in Maitland', cat: 'Recreation' },
+      { q: 'police stations in Singleton', cat: 'Police' },
+      { q: 'fire stations in Lower Hunter', cat: 'Fire' },
+      { q: 'post offices in Newcastle', cat: 'Postal' },
+      { q: 'council depots in Dubbo', cat: 'Depot' },
+      { q: 'surf clubs in Wollongong', cat: 'Surf' },
+      { q: 'golf courses in Maitland', cat: 'Golf' },
+      { q: 'museums in Sydney', cat: 'Museum' }
+    ];
+
+    const results = queries.map(({ q }) => {
+      const match = engine.findDataset(q);
+      const sql = match.status === 'MATCHED' ? engine.compileSql(match, 'Maitland') : '';
+      return { q, status: match.status, datasetId: match.dataset ? match.dataset.id : null, sqlSnippet: sql.split('\\n')[0] };
+    });
+
+    const scadaMatch = engine.findDataset('Show live SCADA load and ICU bed occupancy');
+    console.log(JSON.stringify({ results, scadaStatus: scadaMatch.status }));
+    """
+
+    res = subprocess.run(["node", "-e", node_script], cwd=repo_root, capture_output=True, text=True, check=True)
+    payload = json.loads(res.stdout.strip())
+
+    assert payload["scadaStatus"] == "REJECTED_UNCATALOGUED", "SCADA sensor stream must be rejected"
+
+    for r in payload["results"]:
+        assert r["status"] == "MATCHED", f"Query '{r['q']}' should be MATCHED, got {r['status']}"
+        assert r["datasetId"] == "nsw_foi_building_complexes", f"Query '{r['q']}' should map to FOI building complexes"
+        assert "-- Authoritative NSW Features of Interest" in r["sqlSnippet"], f"SQL snippet should have FOI title: {r['sqlSnippet']}"
+
+
+def test_locality_autocomplete_wiring_and_search_gazetteer() -> None:
+    import json
+    import subprocess
+
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    index_path = os.path.join(repo_root, "docs", "index.html")
+    app_path = os.path.join(repo_root, "docs", "app.js")
+    layers_path = os.path.join(repo_root, "docs", "layers.js")
+
+    with open(index_path, "r", encoding="utf-8") as f:
+        html = f.read()
+    with open(app_path, "r", encoding="utf-8") as f:
+        app_js = f.read()
+    with open(layers_path, "r", encoding="utf-8") as f:
+        layers_js = f.read()
+
+    # 1. Markup verification
+    assert 'id="aoiInputWrapper"' in html, "index.html must have #aoiInputWrapper relative container"
+    assert 'id="aoiInput"' in html, "index.html must have #aoiInput"
+    assert 'id="aoiAutocompleteDropdown"' in html, "index.html must have #aoiAutocompleteDropdown"
+
+    # 2. layers.js verification
+    assert "function searchGazetteer(" in layers_js, "layers.js must implement searchGazetteer"
+    assert "searchGazetteer," in layers_js, "layers.js must export searchGazetteer on window.OICLayers"
+
+    # 3. app.js verification
+    assert "function wireAoiAutocomplete(" in app_js, "app.js must implement wireAoiAutocomplete"
+    assert "wireAoiAutocomplete();" in app_js, "app.js must call wireAoiAutocomplete"
+    assert "aoiAutocompleteDropdown" in app_js, "app.js must reference autocomplete dropdown"
+
+    # 4. Functional test of searchGazetteer via node
+    node_test = """
+    const fs = require('fs');
+    const layersCode = fs.readFileSync('docs/layers.js', 'utf8');
+    const window = { OICApp: {} };
+    const document = { readyState: 'complete', addEventListener: () => {}, getElementById: () => null, querySelectorAll: () => [] };
+    const fetch = () => Promise.resolve({ json: () => Promise.resolve({}) });
+    eval(layersCode);
+    const OICLayers = window.OICLayers;
+
+    // Below 3 chars returns empty
+    const empty1 = OICLayers.searchGazetteer('m');
+    const empty2 = OICLayers.searchGazetteer('ma');
+
+    // 3+ chars returns matches
+    const maiMatches = OICLayers.searchGazetteer('mai', 8);
+    const sydMatches = OICLayers.searchGazetteer('syd', 8);
+    const newMatches = OICLayers.searchGazetteer('new', 8);
+
+    console.log(JSON.stringify({
+      empty1Count: empty1.length,
+      empty2Count: empty2.length,
+      maiCount: maiMatches.length,
+      maiHasMaitland: maiMatches.some(m => m.name.toLowerCase().includes('maitland')),
+      maiSample: maiMatches[0],
+      sydHasSydney: sydMatches.some(m => m.name.toLowerCase().includes('sydney')),
+      newHasNewcastle: newMatches.some(m => m.name.toLowerCase().includes('newcastle'))
+    }));
+    """
+    res = subprocess.run(["node", "-e", node_test], cwd=repo_root, capture_output=True, text=True, check=True)
+    out = json.loads(res.stdout.strip())
+
+    assert out["empty1Count"] == 0, "Query < 3 chars must return empty array"
+    assert out["empty2Count"] == 0, "Query < 3 chars must return empty array"
+    assert out["maiCount"] > 0, "Query 'mai' must return matches"
+    assert out["maiHasMaitland"] is True, "'mai' must include Maitland"
+    assert out["sydHasSydney"] is True, "'syd' must include Sydney"
+    assert out["newHasNewcastle"] is True, "'new' must include Newcastle"
+
+    sample = out["maiSample"]
+    assert "name" in sample and "state" in sample and "bbox" in sample and "center" in sample
+    assert len(sample["bbox"]) == 4, "bbox must have [minx, miny, maxx, maxy]"
+    assert len(sample["center"]) == 2, "center must have [lon, lat]"
+
+
+

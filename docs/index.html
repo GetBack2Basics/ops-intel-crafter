@@ -302,12 +302,16 @@
               type="text"
               placeholder="Select a preset below or enter a spatial query (e.g. Substations within 5km of flood zones in Maitland)..." />
           </div>
-          <div class="relative w-full md:w-72 flex-shrink-0">
-            <i data-lucide="map-pin" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-sky-600"></i>
+          <div class="relative w-full md:w-72 flex-shrink-0" id="aoiInputWrapper">
+            <i data-lucide="map-pin" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-sky-600 z-10 pointer-events-none"></i>
             <input id="aoiInput"
               class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-10 pr-4 py-2.5 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none transition"
               type="text"
+              autocomplete="off"
               placeholder="Target Area / AOI (e.g. Maitland, Lower Hunter, Sydney, 151.4,-32.9,151.8,-32.6)..." />
+            <div id="aoiAutocompleteDropdown"
+              class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto text-xs divide-y divide-slate-100">
+            </div>
           </div>
           <button id="btnAnalyze"
             class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-sky-600 text-white text-xs font-bold hover:bg-sky-500 shadow-sm shadow-sky-600/20 transition flex-shrink-0 cursor-pointer"

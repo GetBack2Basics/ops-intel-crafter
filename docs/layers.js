@@ -503,6 +503,53 @@
     })
     .catch(err => console.warn("locality_gazetteer.json background load warning:", err));
 
+  function searchGazetteer(query, limit = 8) {
+    if (!query || typeof query !== "string") return [];
+    const q = query.trim().toLowerCase();
+    if (q.length < 3) return [];
+
+    const prefixMatches = [];
+    const substringMatches = [];
+    const seen = new Set();
+
+    for (const [key, val] of Object.entries(GAZETTEER)) {
+      if (!val || !val.name) continue;
+      const name = val.name;
+      const state = val.state || val.stateCode || "NSW";
+      const dedupeKey = `${name.toLowerCase()}__${state.toLowerCase()}`;
+      if (seen.has(dedupeKey)) continue;
+
+      const lowerName = name.toLowerCase();
+      const lowerKey = key.toLowerCase();
+
+      if (lowerName.startsWith(q) || lowerKey.startsWith(q)) {
+        seen.add(dedupeKey);
+        prefixMatches.push({
+          name: name,
+          state: state,
+          bbox: val.bbox,
+          center: val.center,
+          isState: val.isState || false,
+          label: `${name}, ${state}`
+        });
+      } else if (lowerName.includes(q) || lowerKey.includes(q)) {
+        seen.add(dedupeKey);
+        substringMatches.push({
+          name: name,
+          state: state,
+          bbox: val.bbox,
+          center: val.center,
+          isState: val.isState || false,
+          label: `${name}, ${state}`
+        });
+      }
+
+      if (prefixMatches.length >= limit) break;
+    }
+
+    return [...prefixMatches, ...substringMatches].slice(0, limit);
+  }
+
   function resolveLocalityExtent(input, opts = {}) {
     if (!input) return null;
     const bufferMeters = opts.bufferMeters !== undefined ? opts.bufferMeters : extractBufferMeters(typeof input === "string" ? input : "");
@@ -1711,6 +1758,7 @@
     clearAoiMask,
     toggleAoiMask,
     resolveLocalityExtent,
+    searchGazetteer,
     toMapBounds,
     createSmoothedExtentPolygon,
     createInvertedMaskGeoJSON,

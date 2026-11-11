@@ -88,18 +88,28 @@
         "hospital", "hospitals", "medical", "clinic", "clinics", "health", "healthcare",
         "infirmary", "doctor", "nursing", "aged care", "facility", "facilities",
         "community health", "health centre", "emergency department", "health complex",
-        "manning hospital", "mayo private", "medical complex",
+        "manning hospital", "mayo private", "medical complex", "dentist", "pharmacy",
         // Education
         "school", "schools", "primary school", "high school", "college", "education",
-        "public school", "grammar", "tafe", "campus",
+        "public school", "grammar", "tafe", "campus", "university", "childcare", "daycare", "kindergarten", "preschool",
         // Emergency Services
         "police", "police station", "ambulance", "ambulance station", "fire station",
-        "fire brigade", "ses", "emergency facility", "fire depot",
+        "fire brigade", "ses", "emergency facility", "fire depot", "station", "watchhouse", "court", "courthouse",
         // Transport & Infrastructure Facilities
         "bridge", "bridges", "road bridge", "crossing", "bridge depot", "bridge plaza",
-        "airport", "airports", "aerodrome", "airstrip", "airfield", "aviation",
-        // Civic & Community
-        "community centre", "public hall", "civic centre", "sports complex", "mall"
+        "airport", "airports", "aerodrome", "airstrip", "airfield", "aviation", "helipad", "heliport",
+        "train station", "railway", "interchange", "wharf", "ferry",
+        // Civic, Community & Cultural
+        "community centre", "public hall", "civic centre", "town hall", "hall", "centre",
+        "library", "libraries", "museum", "museums", "gallery",
+        "post office", "post offices", "postal", "depot", "depots", "works depot", "council depot",
+        "church", "churches", "cathedral", "chapel", "mosque", "temple", "synagogue", "cemetery", "crematorium",
+        // Sports & Recreation
+        "park", "parks", "sports complex", "stadium", "oval", "pool", "aquatic centre", "recreation", "showground", "reserve",
+        "surf club", "surf clubs", "slsc", "lifesaving", "golf course", "golf club", "bowling club", "bowls",
+        "caravan park", "camping ground", "visitor centre", "information centre",
+        // Commercial & Retail
+        "shopping centre", "mall", "market", "plaza", "commercial complex"
       ],
       targetColumns: ["facility_name", "facility_type", "facility_subtype", "classsubtype", "generalname", "latitude", "longitude"],
       defaultSort: "facility_type, facility_name",
@@ -114,34 +124,80 @@
         let categoryFilter = "";
         let categoryTitle = "Emergency & Community Facilities";
 
-        if (concept.includes("bridge")) {
+        if (concept.includes("bridge") || concept.includes("crossing") || concept.includes("viaduct")) {
           categoryTitle = "Bridges & Transport Infrastructure";
-          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%bridge%')`;
-        } else if (concept.includes("airport") || concept.includes("aerodrome") || concept.includes("airfield") || concept.includes("aviation")) {
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%bridge%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%crossing%')`;
+        } else if (concept.includes("airport") || concept.includes("aerodrome") || concept.includes("airfield") || concept.includes("aviation") || concept.includes("helipad") || concept.includes("heliport") || concept.includes("airstrip")) {
           categoryTitle = "Airports & Aviation Facilities";
-          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%airport%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%aerodrome%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%airfield%')`;
-        } else if (concept.includes("school") || concept.includes("college") || concept.includes("education")) {
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%airport%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%aerodrome%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%airfield%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%helipad%')`;
+        } else if (concept.includes("school") || concept.includes("college") || concept.includes("education") || concept.includes("university") || concept.includes("campus") || concept.includes("tafe") || concept.includes("grammar")) {
           categoryTitle = "Educational Facilities & Schools";
-          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%school%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%college%' OR facility_subtype = 1)`;
-        } else if (concept.includes("police")) {
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%school%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%college%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%university%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%tafe%' OR facility_subtype = 1)`;
+        } else if (concept.includes("childcare") || concept.includes("daycare") || concept.includes("preschool") || concept.includes("kindergarten")) {
+          categoryTitle = "Childcare & Early Learning Centres";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%childcare%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%preschool%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%kindergarten%')`;
+        } else if (concept.includes("library") || concept.includes("libraries")) {
+          categoryTitle = "Public Libraries & Community Knowledge";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%library%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%libraries%')`;
+        } else if (concept.includes("police") || concept.includes("court") || concept.includes("justice") || concept.includes("correction") || concept.includes("prison")) {
           categoryTitle = "Police Stations & Law Enforcement";
-          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%police%')`;
-        } else if (concept.includes("fire")) {
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%police%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%court%')`;
+        } else if (concept.includes("fire") || concept.includes("brigade") || /\bses\b/i.test(concept)) {
           categoryTitle = "Fire Stations & Emergency Response";
-          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%fire%')`;
-        } else if (concept.includes("ambulance")) {
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%fire%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%brigade%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%ses%')`;
+        } else if (concept.includes("ambulance") || concept.includes("paramedic")) {
           categoryTitle = "Ambulance Stations & Paramedic Facilities";
-          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%ambulance%')`;
-        } else if (concept.includes("hospital") || concept.includes("health") || concept.includes("medical") || concept.includes("clinic") || concept.includes("aged care")) {
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%ambulance%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%paramedic%')`;
+        } else if (concept.includes("hospital") || concept.includes("health") || concept.includes("medical") || concept.includes("clinic") || concept.includes("aged care") || concept.includes("nursing") || concept.includes("doctor") || concept.includes("pharmacy")) {
           categoryTitle = "Hospitals & Healthcare Facilities";
           categoryFilter = `(
     LOWER(COALESCE(facility_name, generalname, '')) LIKE '%hospital%'
     OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%health%'
     OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%medical%'
+    OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%aged care%'
     OR facility_subtype = 3
 )`;
+        } else if (concept.includes("church") || concept.includes("worship") || concept.includes("cathedral") || concept.includes("chapel") || concept.includes("mosque") || concept.includes("temple") || concept.includes("synagogue") || concept.includes("cemetery") || concept.includes("crematorium")) {
+          categoryTitle = "Places of Worship & Memorial Grounds";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%church%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%cathedral%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%chapel%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%mosque%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%temple%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%cemetery%')`;
+        } else if (concept.includes("park") || concept.includes("sports") || concept.includes("stadium") || concept.includes("oval") || concept.includes("pool") || concept.includes("aquatic") || concept.includes("recreation") || concept.includes("showground") || concept.includes("reserve")) {
+          categoryTitle = "Parks, Sports & Recreation Facilities";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%park%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%stadium%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%oval%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%sports%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%pool%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%recreation%' OR facility_subtype = 6)`;
+        } else if (concept.includes("shopping") || concept.includes("mall") || concept.includes("market") || concept.includes("plaza")) {
+          categoryTitle = "Commercial & Retail Complexes";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%shopping%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%mall%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%market%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%plaza%')`;
+        } else if (concept.includes("station") || concept.includes("train") || concept.includes("railway") || concept.includes("interchange") || concept.includes("ferry") || concept.includes("wharf")) {
+          categoryTitle = "Transport Stations & Interchanges";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%station%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%railway%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%interchange%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%wharf%')`;
+        } else if (concept.includes("community") || concept.includes("civic") || concept.includes("hall") || concept.includes("centre")) {
+          categoryTitle = "Civic & Community Centres";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%community%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%civic%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%hall%' OR facility_subtype = 2)`;
+        } else if (concept.includes("post") || concept.includes("mail")) {
+          categoryTitle = "Postal Facilities & Post Offices";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%post%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%mail%')`;
+        } else if (concept.includes("depot")) {
+          categoryTitle = "Depots & Municipal Works Facilities";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%depot%')`;
+        } else if (concept.includes("surf") || concept.includes("slsc") || concept.includes("lifesaving")) {
+          categoryTitle = "Surf Lifesaving & Coastal Safety Clubs";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%surf%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%slsc%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%lifesaving%')`;
+        } else if (concept.includes("golf") || concept.includes("bowling") || concept.includes("bowls")) {
+          categoryTitle = "Golf & Bowling Recreation Facilities";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%golf%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%bowl%' OR facility_subtype = 6)`;
         } else {
-          categoryFilter = "1=1";
+          // Dynamic token-based search for ANY custom facility term the user enters
+          const cleanTokens = concept.replace(/[^a-z0-9\s]/g, " ")
+            .split(/\s+/)
+            .filter(t => t.length >= 3 && !STOPWORDS.has(t) && !LOCALITIES[t]);
+          if (cleanTokens.length > 0) {
+            const filterParts = cleanTokens.map(t => `LOWER(COALESCE(facility_name, generalname, '')) LIKE '%${t}%'`);
+            categoryFilter = `(${filterParts.join(" OR ")})`;
+            const capitalizedTerm = cleanTokens[0].charAt(0).toUpperCase() + cleanTokens[0].slice(1);
+            categoryTitle = `${capitalizedTerm} Facilities & Infrastructure`;
+          } else {
+            categoryFilter = "1=1";
+            categoryTitle = "Emergency & Community Facilities";
+          }
         }
 
         return `-- Authoritative NSW Features of Interest (${categoryTitle})
@@ -763,22 +819,32 @@ LIMIT 30;`;
       let matchedKeyword = null;
 
       // Tier 1: Exact keyword match
+      let maxKwScore = 0;
       for (const kw of dataset.keywords) {
+        let kwScore = 0;
+        // Short keywords (<= 4 chars) require boundary check to avoid substring traps (e.g. 'courses' containing 'ses')
+        const isKwInQuery = kw.length <= 4
+          ? (tokens.includes(kw) || new RegExp("(^|\\s)" + kw + "(\\s|$)", "i").test(joinedQ))
+          : (joinedQ.includes(kw) || tokens.includes(kw));
+
         if (kw === joinedQ) {
-          score += 20.0;
-          matchedKeyword = kw;
-        } else if (joinedQ.includes(kw)) {
-          score += 12.0;
-          if (!matchedKeyword) matchedKeyword = kw;
+          kwScore = 20.0;
+        } else if (isKwInQuery) {
+          kwScore = 12.0 + (kw.length * 0.1);
         } else {
           for (const tok of tokens) {
             if (tok === kw) {
-              score += 6.0;
-              if (!matchedKeyword) matchedKeyword = tok;
-            } else if (tok.length > 3 && (kw.includes(tok) || tok.includes(kw))) {
-              score += 3.0;
-              if (!matchedKeyword) matchedKeyword = tok;
+              kwScore = Math.max(kwScore, 6.0);
+            } else if (tok.length > 3 && kw.length > 3 && (kw.includes(tok) || tok.includes(kw))) {
+              kwScore = Math.max(kwScore, 3.0);
             }
+          }
+        }
+        if (kwScore > 0) {
+          score += kwScore;
+          if (kwScore > maxKwScore || (kwScore === maxKwScore && kw.length > (matchedKeyword ? matchedKeyword.length : 0))) {
+            maxKwScore = kwScore;
+            matchedKeyword = kw;
           }
         }
       }
@@ -814,6 +880,24 @@ LIMIT 30;`;
         areaText: localityInfo ? localityInfo.name : activeArea,
         matchedConcept: scored[0].matchedKeyword || rawQ
       };
+    }
+
+    // 5. Dynamic fallback for arbitrary facilities / features of interest in a target area:
+    // If user provided a locality or active area, or query contains searchable tokens,
+    // route to nsw_foi_building_complexes to search the authoritative spatial lakehouse
+    if ((localityInfo || activeArea) && tokens.length > 0) {
+      const foiDataset = CATALOGUE_BY_ID["nsw_foi_building_complexes"];
+      if (foiDataset) {
+        return {
+          status: "MATCHED",
+          score: 2.5,
+          dataset: foiDataset,
+          scenarioKey: foiDataset.scenarioKey,
+          locality: localityInfo,
+          areaText: localityInfo ? localityInfo.name : activeArea,
+          matchedConcept: tokens.join(" ")
+        };
+      }
     }
 
     // No catalogue dataset matched query — genuine data absence
