@@ -304,11 +304,12 @@
     const areaText = (userParams.area || "").trim();
     const distText = (userParams.distance || "").trim();
     const optText = (userParams.options || "").trim();
+    const rawNl = (document.getElementById("nlInput")?.value || "").trim();
 
     // Check if GeoLibre Catalog Engine can compile this scenario
     if (window.GeoLibreCatalogEngine && window.GeoLibreCatalogEngine.CATALOGUE_BY_SCENARIO[key]) {
       const loc = window.GeoLibreCatalogEngine.resolveLocality(areaText);
-      return window.GeoLibreCatalogEngine.CATALOGUE_BY_SCENARIO[key].sqlBuilder(areaText, loc);
+      return window.GeoLibreCatalogEngine.CATALOGUE_BY_SCENARIO[key].sqlBuilder(areaText, loc, rawNl);
     }
 
     if (key === "national_pop_grid") {
