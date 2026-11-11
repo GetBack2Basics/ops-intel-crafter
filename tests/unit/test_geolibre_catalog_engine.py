@@ -143,6 +143,49 @@ def test_geolibre_catalog_engine_category_expansion_and_dynamic_fallback() -> No
         assert "-- Authoritative NSW Features of Interest" in r["sqlSnippet"], f"SQL snippet should have FOI title: {r['sqlSnippet']}"
 
 
+def test_hospital_query_sql_generation_and_precision() -> None:
+    """Verifies that entering 'hospitals' targets canonical GCS snapshot and precision-filters hospitals."""
+    import json
+    import subprocess
+
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    node_test = """
+    const engine = require('./docs/geolibre_catalog_engine.js');
+    const match = engine.findDataset('hospitals', 'Central Coast');
+    const sql = engine.compileSql(match, 'Central Coast');
+    console.log(JSON.stringify({
+      status: match.status,
+      datasetId: match.dataset.id,
+      sql: sql
+    }));
+    """
+    res = subprocess.run(["node", "-e", node_test], cwd=repo_root, capture_output=True, text=True, check=True)
+    out = json.loads(res.stdout.strip())
+
+    assert out["status"] == "MATCHED"
+    assert out["datasetId"] == "nsw_foi_building_complexes"
+
+    sql = out["sql"]
+    # 1. Canonical GCS Parquet URI
+    assert "20261109T073128Z" in sql, "Must reference the verified canonical snapshot 20261109T073128Z"
+    assert "20261108T223144Z" not in sql, "Obsolete/non-existent timestamp must not be present"
+
+    # 2. Precision hospital filter: exclude bowling clubs & aged care
+    assert "LIKE '%hospital%'" in sql
+    assert "NOT LIKE '%bowling%'" in sql
+    assert "NOT LIKE '%aged care%'" in sql
+
+    # 3. Precision classification CASE statement
+    assert "Private Hospital" in sql
+    assert "Day Surgery / Day Hospital" in sql or "Day Surgery / Hospital" in sql
+    assert "Public / General Hospital" in sql or "Public / Base Hospital" in sql
+
+    # 4. Spatial filter bounds for Central Coast
+    assert "_bbox_maxx >= 151.1000" in sql
+    assert "_bbox_miny <= -33.1000" in sql
+
+
+
 def test_locality_autocomplete_wiring_and_search_gazetteer() -> None:
     import json
     import subprocess

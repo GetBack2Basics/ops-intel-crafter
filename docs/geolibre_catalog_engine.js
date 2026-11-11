@@ -56,6 +56,10 @@
     "newcastle": { name: "Newcastle, NSW", bbox: [151.6800, -33.0000, 151.8500, -32.8800], state: "NSW" },
     "hunter": { name: "Hunter Region, NSW", bbox: [150.9000, -33.2000, 152.1000, -32.3000], state: "NSW" },
     "lower hunter": { name: "Lower Hunter, NSW", bbox: [151.4000, -32.9500, 151.8500, -32.6500], state: "NSW" },
+    "central coast": { name: "Central Coast, NSW", bbox: [151.1000, -33.6000, 151.6000, -33.1000], state: "NSW" },
+    "gosford": { name: "Gosford, NSW", bbox: [151.3000, -33.4500, 151.4000, -33.3800], state: "NSW" },
+    "wyong": { name: "Wyong, NSW", bbox: [151.3800, -33.3200, 151.5200, -33.2200], state: "NSW" },
+    "port stephens": { name: "Port Stephens, NSW", bbox: [151.6800, -32.8500, 152.2200, -32.6000], state: "NSW" },
     "sydney": { name: "Sydney Metropolitan, NSW", bbox: [150.8000, -34.0500, 151.3500, -33.6500], state: "NSW" },
     "cessnock": { name: "Cessnock, NSW", bbox: [151.2500, -32.9000, 151.4500, -32.7500], state: "NSW" },
     "singleton": { name: "Singleton, NSW", bbox: [151.0500, -32.6500, 151.2500, -32.5000], state: "NSW" },
@@ -81,7 +85,7 @@
       provider: "NSW Spatial Services (DCS)",
       geometryType: "Point",
       scale: "state",
-      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261108T223144Z/part-00000.parquet",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
       viewName: "nsw_foi_building_complexes",
       keywords: [
         // Healthcare
@@ -123,67 +127,124 @@
         const concept = (matchedConcept || "").toLowerCase();
         let categoryFilter = "";
         let categoryTitle = "Emergency & Community Facilities";
+        let facilityTypeCase = `CASE facility_subtype
+        WHEN 1 THEN 'Educational Institution'
+        WHEN 2 THEN 'Community / Health Facility'
+        WHEN 3 THEN 'Health / Care Facility'
+        WHEN 4 THEN 'Civic / Infrastructure Facility'
+        WHEN 5 THEN 'Utility / Substation'
+        WHEN 6 THEN 'Recreational / Public Complex'
+        ELSE 'Feature of Interest'
+    END`;
 
         if (concept.includes("bridge") || concept.includes("crossing") || concept.includes("viaduct")) {
           categoryTitle = "Bridges & Transport Infrastructure";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%bridge%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%crossing%')`;
+          facilityTypeCase = `'Bridge / Transport Infrastructure'`;
         } else if (concept.includes("airport") || concept.includes("aerodrome") || concept.includes("airfield") || concept.includes("aviation") || concept.includes("helipad") || concept.includes("heliport") || concept.includes("airstrip")) {
           categoryTitle = "Airports & Aviation Facilities";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%airport%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%aerodrome%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%airfield%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%helipad%')`;
+          facilityTypeCase = `CASE
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%airport%' THEN 'Airport'
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%aerodrome%' THEN 'Aerodrome'
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%helipad%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%heliport%' THEN 'Helipad'
+        ELSE 'Aviation Facility'
+    END`;
         } else if (concept.includes("school") || concept.includes("college") || concept.includes("education") || concept.includes("university") || concept.includes("campus") || concept.includes("tafe") || concept.includes("grammar")) {
           categoryTitle = "Educational Facilities & Schools";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%school%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%college%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%university%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%tafe%' OR facility_subtype = 1)`;
+          facilityTypeCase = `CASE
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%university%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%campus%' THEN 'University / Campus'
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%tafe%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%college%' THEN 'College / TAFE'
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%high school%' THEN 'High School'
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%primary%' THEN 'Primary School'
+        ELSE 'School / Educational'
+    END`;
         } else if (concept.includes("childcare") || concept.includes("daycare") || concept.includes("preschool") || concept.includes("kindergarten")) {
           categoryTitle = "Childcare & Early Learning Centres";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%childcare%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%preschool%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%kindergarten%')`;
+          facilityTypeCase = `'Early Learning / Childcare'`;
         } else if (concept.includes("library") || concept.includes("libraries")) {
           categoryTitle = "Public Libraries & Community Knowledge";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%library%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%libraries%')`;
+          facilityTypeCase = `'Public Library'`;
         } else if (concept.includes("police") || concept.includes("court") || concept.includes("justice") || concept.includes("correction") || concept.includes("prison")) {
           categoryTitle = "Police Stations & Law Enforcement";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%police%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%court%')`;
+          facilityTypeCase = `CASE WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%police%' THEN 'Police Station' ELSE 'Courthouse / Justice' END`;
         } else if (concept.includes("fire") || concept.includes("brigade") || /\bses\b/i.test(concept)) {
           categoryTitle = "Fire Stations & Emergency Response";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%fire%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%brigade%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%ses%')`;
+          facilityTypeCase = `CASE WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%ses%' THEN 'State Emergency Service (SES)' ELSE 'Fire Station' END`;
         } else if (concept.includes("ambulance") || concept.includes("paramedic")) {
           categoryTitle = "Ambulance Stations & Paramedic Facilities";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%ambulance%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%paramedic%')`;
-        } else if (concept.includes("hospital") || concept.includes("health") || concept.includes("medical") || concept.includes("clinic") || concept.includes("aged care") || concept.includes("nursing") || concept.includes("doctor") || concept.includes("pharmacy")) {
-          categoryTitle = "Hospitals & Healthcare Facilities";
+          facilityTypeCase = `'Ambulance Station'`;
+        } else if (concept.includes("hospital")) {
+          categoryTitle = "Authoritative NSW Hospitals & Acute Care";
           categoryFilter = `(
-    LOWER(COALESCE(facility_name, generalname, '')) LIKE '%hospital%'
-    OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%health%'
-    OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%medical%'
-    OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%aged care%'
-    OR facility_subtype = 3
+    (LOWER(COALESCE(facility_name, generalname, '')) LIKE '%hospital%'
+     OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%health service%')
+    AND LOWER(COALESCE(facility_name, generalname, '')) NOT LIKE '%bowling%'
+    AND LOWER(COALESCE(facility_name, generalname, '')) NOT LIKE '%aged care%'
 )`;
+          facilityTypeCase = `CASE
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%private hospital%' THEN 'Private Hospital'
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%day hospital%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%day surgery%' THEN 'Day Surgery / Day Hospital'
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%community health%' THEN 'Hospital Community Health'
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%hospital%' THEN 'Public / General Hospital'
+        ELSE 'Hospital & Health Service'
+    END`;
+        } else if (concept.includes("aged care") || concept.includes("nursing") || concept.includes("retirement")) {
+          categoryTitle = "Aged Care & Residential Facilities";
+          categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%aged care%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%nursing home%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%retirement%')`;
+          facilityTypeCase = `'Aged Care Facility'`;
+        } else if (concept.includes("medical") || concept.includes("clinic") || concept.includes("health") || concept.includes("doctor") || concept.includes("pharmacy")) {
+          categoryTitle = "Medical Centres & Community Health Facilities";
+          categoryFilter = `(
+    (LOWER(COALESCE(facility_name, generalname, '')) LIKE '%medical%'
+     OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%clinic%'
+     OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%health centre%'
+     OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%community health%')
+    AND LOWER(COALESCE(facility_name, generalname, '')) NOT LIKE '%bowling%'
+)`;
+          facilityTypeCase = `'Medical Centre / Clinic'`;
         } else if (concept.includes("church") || concept.includes("worship") || concept.includes("cathedral") || concept.includes("chapel") || concept.includes("mosque") || concept.includes("temple") || concept.includes("synagogue") || concept.includes("cemetery") || concept.includes("crematorium")) {
           categoryTitle = "Places of Worship & Memorial Grounds";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%church%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%cathedral%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%chapel%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%mosque%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%temple%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%cemetery%')`;
+          facilityTypeCase = `CASE WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%cemetery%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%crematorium%' THEN 'Cemetery / Memorial' ELSE 'Place of Worship' END`;
         } else if (concept.includes("park") || concept.includes("sports") || concept.includes("stadium") || concept.includes("oval") || concept.includes("pool") || concept.includes("aquatic") || concept.includes("recreation") || concept.includes("showground") || concept.includes("reserve")) {
           categoryTitle = "Parks, Sports & Recreation Facilities";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%park%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%stadium%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%oval%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%sports%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%pool%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%recreation%' OR facility_subtype = 6)`;
+          facilityTypeCase = `'Parks & Recreation'`;
         } else if (concept.includes("shopping") || concept.includes("mall") || concept.includes("market") || concept.includes("plaza")) {
           categoryTitle = "Commercial & Retail Complexes";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%shopping%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%mall%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%market%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%plaza%')`;
+          facilityTypeCase = `'Commercial Complex'`;
         } else if (concept.includes("station") || concept.includes("train") || concept.includes("railway") || concept.includes("interchange") || concept.includes("ferry") || concept.includes("wharf")) {
           categoryTitle = "Transport Stations & Interchanges";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%station%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%railway%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%interchange%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%wharf%')`;
+          facilityTypeCase = `'Transport Interchange / Station'`;
         } else if (concept.includes("community") || concept.includes("civic") || concept.includes("hall") || concept.includes("centre")) {
           categoryTitle = "Civic & Community Centres";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%community%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%civic%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%hall%' OR facility_subtype = 2)`;
+          facilityTypeCase = `'Civic & Community Facility'`;
         } else if (concept.includes("post") || concept.includes("mail")) {
           categoryTitle = "Postal Facilities & Post Offices";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%post%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%mail%')`;
+          facilityTypeCase = `'Postal Facility'`;
         } else if (concept.includes("depot")) {
           categoryTitle = "Depots & Municipal Works Facilities";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%depot%')`;
+          facilityTypeCase = `'Municipal Depot'`;
         } else if (concept.includes("surf") || concept.includes("slsc") || concept.includes("lifesaving")) {
           categoryTitle = "Surf Lifesaving & Coastal Safety Clubs";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%surf%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%slsc%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%lifesaving%')`;
+          facilityTypeCase = `'Surf Lifesaving Club'`;
         } else if (concept.includes("golf") || concept.includes("bowling") || concept.includes("bowls")) {
           categoryTitle = "Golf & Bowling Recreation Facilities";
           categoryFilter = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%golf%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%bowl%' OR facility_subtype = 6)`;
+          facilityTypeCase = `'Golf / Bowls Facility'`;
         } else {
           // Dynamic token-based search for ANY custom facility term the user enters
           const cleanTokens = concept.replace(/[^a-z0-9\s]/g, " ")
@@ -194,6 +255,7 @@
             categoryFilter = `(${filterParts.join(" OR ")})`;
             const capitalizedTerm = cleanTokens[0].charAt(0).toUpperCase() + cleanTokens[0].slice(1);
             categoryTitle = `${capitalizedTerm} Facilities & Infrastructure`;
+            facilityTypeCase = `'${capitalizedTerm} Facility'`;
           } else {
             categoryFilter = "1=1";
             categoryTitle = "Emergency & Community Facilities";
@@ -205,15 +267,7 @@
 -- Source: NSW Spatial Services (DCS) Features of Interest
 SELECT
     COALESCE(facility_name, generalname, 'Facility') AS facility_name,
-    CASE facility_subtype
-        WHEN 3 THEN 'Major Hospital / Health Facility'
-        WHEN 2 THEN 'Community / Health Facility'
-        WHEN 1 THEN 'Educational Institution'
-        WHEN 4 THEN 'Civic / Infrastructure Facility'
-        WHEN 5 THEN 'Utility / Substation'
-        WHEN 6 THEN 'Recreational / Public Complex'
-        ELSE 'Feature of Interest'
-    END AS facility_type,
+    ${facilityTypeCase} AS facility_type,
     ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
 FROM read_parquet('${this.parquetUri}')
@@ -231,7 +285,7 @@ LIMIT 100;`;
       provider: "Geoscience Australia",
       geometryType: "Point",
       scale: "national",
-      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
       viewName: "ga_electricity_substations",
       keywords: [
         "substation", "substations", "transformer", "grid sub", "sub-station",
@@ -272,7 +326,7 @@ LIMIT 100;`;
       provider: "Geoscience Australia",
       geometryType: "Point",
       scale: "national",
-      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261108T223144Z/part-00000.parquet",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
       viewName: "ga_major_power_stations",
       keywords: [
         "power station", "power stations", "generator", "generators", "generation",
@@ -328,7 +382,7 @@ ORDER BY total_capacity_mw DESC;`;
       provider: "Geoscience Australia",
       geometryType: "LineString",
       scale: "national",
-      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261108T223144Z/part-00000.parquet",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
       viewName: "ga_electricity_transmission_lines",
       keywords: [
         "transmission line", "transmission lines", "power line", "high voltage", "pylons",
@@ -365,7 +419,7 @@ LIMIT 100;`;
       provider: "NSW Rural Fire Service (RFS)",
       geometryType: "Point",
       scale: "state",
-      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/2026-LIVE/20261110T022639Z/part-00000.parquet",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
       viewName: "nsw_rfs_major_incidents_live",
       keywords: [
         "rfs", "bushfire", "bushfires", "wildfire", "fire", "fires", "fire incident",
@@ -414,7 +468,7 @@ LIMIT 50;`;
       provider: "NSW Spatial Services (DCS)",
       geometryType: "Polygon",
       scale: "state",
-      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-Q1/20261108T223144Z/part-00000.parquet",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
       viewName: "nsw_water_inundation_areas",
       keywords: [
         "flood", "floods", "water inundation", "inundation", "flood extent", "flood basin",
@@ -451,7 +505,7 @@ LIMIT 100;`;
       provider: "Geoscience Australia",
       geometryType: "LineString",
       scale: "national",
-      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/2018-NSHA/20261108T223144Z/part-00000.parquet",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
       viewName: "ga_seismic_hazard_pga_10pct",
       keywords: [
         "seismic", "earthquake", "pga", "ground motion", "nsha", "hazard contour",
@@ -576,7 +630,7 @@ ${whereClause};`;
       provider: "Australian Bureau of Statistics",
       geometryType: "Polygon",
       scale: "national",
-      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/2025-ABS/20261108T223144Z/part-00000.parquet",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
       viewName: "next_lga_boundaries_asgs2025",
       keywords: [
         "lga", "local government area", "council", "councils", "shire", "municipality",
@@ -617,7 +671,7 @@ LIMIT 50;`;
       provider: "BOM / Severe Weather Track",
       geometryType: "LineString",
       scale: "regional",
-      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet",
+      parquetUri: "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
       viewName: "ga_electricity_substations",
       keywords: [
         "cyclone", "typhoon", "tropical storm", "cyclone track", "wp302026",

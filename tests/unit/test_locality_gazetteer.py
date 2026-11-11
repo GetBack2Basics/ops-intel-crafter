@@ -207,7 +207,7 @@ def test_sql_bbox_extraction_and_extent_resolution():
             locality,
             voltage_kv,
             ST_Transform(geom, 'EPSG:7844', 'EPSG:3112', true) AS geom_3112
-        FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet') s
+        FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet') s
         WHERE _bbox_maxx >= 151.5262 AND _bbox_minx <= 151.6305
           AND _bbox_maxy >= -33.2093 AND _bbox_miny <= -33.1433
       -- Area scope: Lake Munmorah - Mannering Park

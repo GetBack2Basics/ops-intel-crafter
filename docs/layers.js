@@ -1,6 +1,6 @@
 /*
   docs/layers.js
-  AURA-style map interactivity for the Emergency Spatial Workbench:
+  Interactive map layer engine for the Emergency Spatial Workbench:
   - Click-to-identify popups for points, lines and polygons (all visible layers).
   - Layer Control (visibility, opacity, order, zoom, metadata, charts, table).
   - Metadata & 3-Level QA lineage modal (from qa/data/qa_summary.json).
@@ -41,12 +41,12 @@
     { key: "nsw_rfs_major_incidents_live", title: "NSW RFS Major Incidents (Live)", kind: "circle", color: "#dc2626", path: "qa/data/nsw_rfs_major_incidents_live.geojson", theme: "Live Hazard Feeds", scale: "state", radius: 7 },
     { key: "ga_major_power_stations", title: "GA Major Power Stations", kind: "circle", color: "#7c3aed", path: "qa/data/ga_major_power_stations.geojson", theme: "Critical Infrastructure", scale: "national", radius: 5 },
     { key: "ga_seismic_hazard_pga_10pct", title: "NSHA 2018 Seismic PGA Contours", kind: "line", color: "#be185d", path: "qa/data/ga_seismic_hazard_pga_10pct.geojson", theme: "Hazards", scale: "national", dash: true },
-    // ---------- AURA Linked Datasets (Zero Storage Duplication) ----------
-    { key: "national_healthcare_nhsd_v2", title: "AURA: National Hospitals (NHSD)", kind: "circle", color: "#059669", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3", theme: "AURA: Sensitive Receptors", scale: "national", radius: 5 },
-    { key: "national_schools_acara_v2", title: "AURA: National Schools (ACARA)", kind: "circle", color: "#2563eb", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3", theme: "AURA: Sensitive Receptors", scale: "national", radius: 4 },
-    { key: "qld_transmission_grid_v2", title: "AURA: QLD Transmission Grid", kind: "line", color: "#f59e0b", endpoint: "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2", theme: "AURA: Transmission Grid", scale: "state" },
-    { key: "national_cyclone_hazard_tcha_v2", title: "AURA: Tropical Cyclone Hazard (TCHA)", kind: "line", color: "#06b6d4", endpoint: "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/15", theme: "AURA: Cyclone Hazard", scale: "national", dash: true },
-    { key: "nsw_coastal_inundation_hazard_v2", title: "AURA: NSW Coastal Inundation & Surge", kind: "fill", color: "#0284c7", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7", theme: "AURA: Coastal Hazard", scale: "state", opacity: 0.45 },
+    // ---------- AURA Data Library (Authoritative Linked Datasets) ----------
+    { key: "national_healthcare_nhsd_v2", title: "National Hospitals (NSW FOI / NHSD)", kind: "circle", color: "#059669", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3", whereClause: "UPPER(generalname) LIKE '%25HOSPITAL%25'", theme: "AURA Data Library: Sensitive Receptors", scale: "national", radius: 5 },
+    { key: "national_schools_acara_v2", title: "National Schools (NSW FOI / ACARA)", kind: "circle", color: "#2563eb", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3", whereClause: "UPPER(generalname) LIKE '%25SCHOOL%25'", theme: "AURA Data Library: Sensitive Receptors", scale: "national", radius: 4 },
+    { key: "qld_transmission_grid_v2", title: "QLD Transmission Grid", kind: "line", color: "#f59e0b", endpoint: "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2", theme: "AURA Data Library: Transmission Grid", scale: "state" },
+    { key: "national_cyclone_hazard_tcha_v2", title: "Tropical Cyclone Hazard (TCHA)", kind: "fill", color: "#06b6d4", endpoint: "https://services.ga.gov.au/gis/rest/services/Tropical_Cyclone_Hazard_Assessment_2018/MapServer/1", theme: "AURA Data Library: Cyclone Hazard", scale: "national", opacity: 0.35 },
+    { key: "nsw_coastal_inundation_hazard_v2", title: "NSW Coastal Inundation & Surge", kind: "fill", color: "#0284c7", endpoint: "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7", theme: "AURA Data Library: Coastal Hazard", scale: "state", opacity: 0.45 },
     { key: "aoi_focus_mask", title: "Selection Focus Mask (AOI)", kind: "fill", color: "#030712", theme: "AOI & Focus Mask", scale: "local", opacity: 0.80, isSystemLayer: true, paint: { "fill-color": "#030712", "fill-opacity": 0.80 } }
   ];
   const BY_KEY = Object.fromEntries(CATALOG.map(c => [c.key, c]));
@@ -121,7 +121,8 @@
       return Promise.resolve(d);
     }
     const c = BY_KEY[key];
-    const fetchUrl = c.path ? c.path : (c.endpoint.replace(/\/+$/, '') + '/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=2000');
+    const where = c.whereClause || "1%3D1";
+    const fetchUrl = c.path ? c.path : (c.endpoint.replace(/\/+$/, '') + `/query?where=${where}&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=2000`);
     st.loading = fetch(fetchUrl)
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status} for ${fetchUrl}`); return r.json(); })
       .then(data => {

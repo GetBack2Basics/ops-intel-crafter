@@ -262,7 +262,6 @@ def upload_and_sync_all() -> Dict[str, Any]:
         "data/WP302026_TRACK_latest.geojson",
         "data/WP302026_TRACK_latest.kmz",
         "operational-intelligence-crafter.geolibre.json",
-        "aura-siting-crafter.geolibre.json",
     ):
         doc_path = PROJECT_ROOT / "docs" / root_doc
         if doc_path.exists():

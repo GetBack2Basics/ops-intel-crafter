@@ -372,7 +372,7 @@ section[id^="panel-"] { scroll-margin-top: 8rem; }
 }
 .scenario-step-card:hover .scenario-step-btn { background: var(--primary); color: #ffffff; }
 
-/* ---------- AURA-Style Map Toolbar, Layer Control, Popup & Modals ---------- */
+/* ---------- Map Toolbar, Layer Control, Popup & Modals ---------- */
 .map-toolbar-btn {
   display: inline-flex;
   align-items: center;
@@ -462,7 +462,7 @@ section[id^="panel-"] { scroll-margin-top: 8rem; }
   flex-shrink: 0;
 }
 
-/* MapLibre Popup Overrides (AURA Identify Card) */
+/* MapLibre Popup Overrides (Identify Card) */
 .maplibregl-popup {
   max-width: 390px !important;
   z-index: 35;

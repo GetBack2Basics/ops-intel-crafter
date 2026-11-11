@@ -396,7 +396,7 @@ SELECT
     TRY_CAST(voltage_kv AS INT) AS voltage_kv,
     ROUND(TRY_CAST(latitude AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(longitude AS DOUBLE), 4) AS lon
-FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet') s
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet') s
 WHERE 1=1
   ${whereClause}
 ORDER BY voltage_kv DESC NULLS LAST
@@ -418,7 +418,7 @@ SELECT
     ROUND(TRY_CAST(Shape__Area AS DOUBLE), 2) AS area_sqm,
     ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
-FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-Q1/20261108T223144Z/part-00000.parquet')
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet')
 WHERE _bbox_maxx >= ${minX.toFixed(4)} AND _bbox_minx <= ${maxX.toFixed(4)}
   AND _bbox_maxy >= ${minY.toFixed(4)} AND _bbox_miny <= ${maxY.toFixed(4)}
   -- Within generated AOI region
@@ -437,7 +437,7 @@ SELECT
     lga_name,
     ROUND(TRY_CAST(area_sqkm AS DOUBLE), 1) AS area_sqkm,
     state_name
-FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS2025/20261108T223144Z/part-00000.parquet') l
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet') l
 WHERE 1=1
   ${areaFilterSql && !areaFilterSql.startsWith("--") ? areaFilterSql : ""}
 ORDER BY area_sqkm DESC
@@ -453,7 +453,7 @@ SELECT
     title AS incident_title,
     category AS alert_level,
     description AS details
-FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261108T223144Z/part-00000.parquet')
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet')
 WHERE 1=1
   ${areaFilterSql && !areaFilterSql.startsWith("--") ? areaFilterSql : ""}
 ORDER BY title
@@ -476,7 +476,7 @@ SELECT
     ROUND(TRY_CAST(generation_capacity_mw AS DOUBLE), 1) AS capacity_mw,
     ROUND(TRY_CAST(latitude AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(longitude AS DOUBLE), 4) AS lon
-FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261108T223144Z/part-00000.parquet')
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet')
 WHERE 1=1
   AND TRY_CAST(longitude AS DOUBLE) >= ${minX.toFixed(4)} AND TRY_CAST(longitude AS DOUBLE) <= ${maxX.toFixed(4)}
   AND TRY_CAST(latitude AS DOUBLE) >= ${minY.toFixed(4)} AND TRY_CAST(latitude AS DOUBLE) <= ${maxY.toFixed(4)}
@@ -493,7 +493,7 @@ SELECT
     COUNT(*) AS power_station_count,
     ROUND(SUM(TRY_CAST(generation_capacity_mw AS DOUBLE)), 1) AS total_capacity_mw,
     COUNT(DISTINCT primary_fuel_type) AS fuel_types_count
-FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261108T223144Z/part-00000.parquet')
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet')
 WHERE 1=1
   ${areaFilterSql && !areaFilterSql.startsWith("--") ? areaFilterSql : ""}
 GROUP BY COALESCE(state, 'Unknown')
@@ -514,25 +514,47 @@ ORDER BY total_capacity_mw DESC;`;
         }
       }
 
-      return `-- Authoritative Hospital & Healthcare Facilities (NSW FOI)
+      const rawQ = ((document.getElementById("nlInput")?.value || "") + " " + (userParams.options || "")).toLowerCase();
+      let filterSql = `(
+    (LOWER(COALESCE(facility_name, generalname, '')) LIKE '%hospital%'
+     OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%health service%')
+    AND LOWER(COALESCE(facility_name, generalname, '')) NOT LIKE '%bowling%'
+    AND LOWER(COALESCE(facility_name, generalname, '')) NOT LIKE '%aged care%'
+)`;
+      let catTitle = "Authoritative NSW Hospitals & Acute Care";
+      let typeCase = `CASE
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%private hospital%' THEN 'Private Hospital'
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%day hospital%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%day surgery%' THEN 'Day Surgery / Day Hospital'
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%community health%' THEN 'Hospital Community Health'
+        WHEN LOWER(COALESCE(facility_name, generalname, '')) LIKE '%hospital%' THEN 'Public / General Hospital'
+        ELSE 'Hospital & Health Service'
+    END`;
+
+      if (rawQ.includes("aged care") || rawQ.includes("nursing") || rawQ.includes("retirement")) {
+        catTitle = "Aged Care & Residential Facilities";
+        filterSql = `(LOWER(COALESCE(facility_name, generalname, '')) LIKE '%aged care%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%nursing home%' OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%retirement%')`;
+        typeCase = `'Aged Care Facility'`;
+      } else if (rawQ.includes("clinic") || rawQ.includes("medical centre") || rawQ.includes("doctor")) {
+        catTitle = "Medical Centres & Community Health Facilities";
+        filterSql = `(
+    (LOWER(COALESCE(facility_name, generalname, '')) LIKE '%medical%'
+     OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%clinic%'
+     OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%health centre%')
+    AND LOWER(COALESCE(facility_name, generalname, '')) NOT LIKE '%bowling%'
+)`;
+        typeCase = `'Medical Centre / Clinic'`;
+      }
+
+      return `-- Authoritative NSW Features of Interest (${catTitle})
 -- User Area: ${areaText || "Taree, NSW"}
--- Theme: Emergency & Health Facilities (Hospitals, Medical Centres, Clinics)
+-- Source: NSW Spatial Services (DCS) Features of Interest
 SELECT
-    COALESCE(facility_name, generalname, 'Medical Complex') AS facility_name,
-    CASE facility_subtype
-        WHEN 3 THEN 'Major Hospital / Health Facility'
-        WHEN 2 THEN 'Medical Centre / Clinic'
-        ELSE 'Health & Community Complex'
-    END AS facility_type,
+    COALESCE(facility_name, generalname, 'Facility') AS facility_name,
+    ${typeCase} AS facility_type,
     ROUND(TRY_CAST(_bbox_miny AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(_bbox_minx AS DOUBLE), 4) AS lon
-FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261108T223144Z/part-00000.parquet')
-WHERE (
-    LOWER(COALESCE(facility_name, generalname, '')) LIKE '%hospital%'
-    OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%health%'
-    OR LOWER(COALESCE(facility_name, generalname, '')) LIKE '%medical%'
-    OR facility_subtype = 3
-)
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet')
+WHERE ${filterSql}
   ${whereClause}
 ORDER BY facility_type, facility_name
 LIMIT 100;`;
@@ -571,7 +593,7 @@ SELECT
     TRY_CAST(voltage_kv AS INT) AS voltage_kv,
     ROUND(TRY_CAST(latitude AS DOUBLE), 4) AS lat,
     ROUND(TRY_CAST(longitude AS DOUBLE), 4) AS lon
-FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261108T223144Z/part-00000.parquet')
+FROM read_parquet('gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet')
 WHERE state IN ('NSW', 'VIC', 'SA', 'QLD')
 ORDER BY voltage_kv DESC NULLS LAST
 LIMIT 30;`;
@@ -3480,9 +3502,9 @@ LIMIT 50;`;
       },
       {
         badge: "SCALE: OFFLINE",
-        tag: "AURA Field Deployment",
-        title: `Map-in-a-Box (AURA) — ${userParams.area || "Current Query"}`,
-        desc: `Self-contained air-gapped emergency map package for ${userParams.area || "the active query"}. Includes AURA sensitive receptors, infrastructure & hazard vector tiles with zero external dependencies.`,
+        tag: "Emergency Field Deployment",
+        title: `Map-in-a-Box — ${userParams.area || "Current Query"}`,
+        desc: `Self-contained air-gapped emergency map package for ${userParams.area || "the active query"}. Includes sensitive receptors, infrastructure & hazard vector tiles with zero external dependencies.`,
         isOfflinePack: true
       }
     ];
@@ -4090,7 +4112,7 @@ LIMIT 50;`;
   }
 
   // =========================================================================
-  // SECTION: AIR-GAPPED OFFLINE MAP-IN-A-BOX (AURA) & BROWSER PROFILE STORAGE
+  // SECTION: AIR-GAPPED OFFLINE MAP-IN-A-BOX & BROWSER PROFILE STORAGE
   // =========================================================================
 
   function showToast(message, type = "info", duration = 3500) {
@@ -4251,7 +4273,7 @@ LIMIT 50;`;
           <p class="font-bold text-on-surface">No Offline Map Packs Saved in Profile Yet</p>
           <p class="text-xs text-on-surface-variant max-w-md mx-auto">
             You can save air-gapped Map-in-a-Box packages for your current query directly in your browser.
-            They include AURA receptors, infrastructure, and hazard vector data that run 100% offline.
+            They include sensitive receptors from the AURA Data Library, infrastructure, and hazard vector data that run 100% offline.
           </p>
           <button type="button" class="mt-2 action-btn action-btn-primary text-xs py-1.5 px-3.5 inline-flex items-center gap-1.5" onclick="window.OIC_SAVE_CURRENT_PROFILE()">
             <span class="material-symbols-outlined text-[16px]">bookmark_add</span>
@@ -4357,7 +4379,7 @@ LIMIT 50;`;
     const catalog = window.OICLayers.catalog || [];
     const activeKeys = (window.OICLayers.getActiveKeys && window.OICLayers.getActiveKeys()) || [];
 
-    // Always include key AURA layers and active emergency layers
+    // Always include key AURA Data Library layers and active emergency layers
     const targetKeys = new Set([
       ...activeKeys,
       "national_healthcare_nhsd_v2",
@@ -4415,22 +4437,22 @@ LIMIT 50;`;
   // --- Dynamic Air-Gapped Map-in-a-Box Package Builder ---
 
   async function buildCurrentQueryMapInABox(options = {}) {
-    showToast("Building air-gapped Map-in-a-Box from AURA...", "info", 2000);
+    showToast("Building air-gapped Map-in-a-Box...", "info", 2000);
     const bbox = getCurrentQueryBbox();
     const layers = await collectCurrentQueryLayers(bbox);
     const areaName = (userParams.area || "Current Query").replace(/[^\w\s-]/g, "").trim() || "Emergency Query";
-    const title = options.title || `Map-in-a-Box: ${areaName} (AURA Offline Pack)`;
-    const packageId = `aura_map_box_${Date.now()}`;
+    const title = options.title || `Map-in-a-Box: ${areaName} (Emergency Offline Pack)`;
+    const packageId = `oic_map_box_${Date.now()}`;
     const generatedUtc = new Date().toISOString();
 
     const layerMetaList = [];
     let totalFeatures = 0;
     const layerStyles = {
-      national_healthcare_nhsd_v2: { title: "AURA: National Hospitals (NHSD)", kind: "circle", color: "#059669", radius: 5.5, isAura: true },
-      national_schools_acara_v2: { title: "AURA: National Schools (ACARA)", kind: "circle", color: "#2563eb", radius: 4.5, isAura: true },
-      qld_transmission_grid_v2: { title: "AURA: QLD Transmission Grid", kind: "line", color: "#f59e0b", lineWidth: 2, isAura: true },
-      national_cyclone_hazard_tcha_v2: { title: "AURA: Tropical Cyclone Hazard (TCHA)", kind: "line", color: "#06b6d4", lineWidth: 1.8, isAura: true },
-      nsw_coastal_inundation_hazard_v2: { title: "AURA: NSW Coastal Surge & Inundation", kind: "fill", color: "#0284c7", opacity: 0.45, isAura: true },
+      national_healthcare_nhsd_v2: { title: "National Hospitals (NHSD)", kind: "circle", color: "#059669", radius: 5.5, isAura: true },
+      national_schools_acara_v2: { title: "National Schools (ACARA)", kind: "circle", color: "#2563eb", radius: 4.5, isAura: true },
+      qld_transmission_grid_v2: { title: "QLD Transmission Grid", kind: "line", color: "#f59e0b", lineWidth: 2, isAura: true },
+      national_cyclone_hazard_tcha_v2: { title: "Tropical Cyclone Hazard (TCHA)", kind: "line", color: "#06b6d4", lineWidth: 1.8, isAura: true },
+      nsw_coastal_inundation_hazard_v2: { title: "NSW Coastal Surge & Inundation", kind: "fill", color: "#0284c7", opacity: 0.45, isAura: true },
       derived_hunter_1km_population_grid: { title: "1 km² Population Grid (Methods A/B/C)", kind: "fill", color: "#006973" },
       nsw_water_inundation_areas: { title: "NSW Water Inundation Areas", kind: "fill", color: "#38bdf8", opacity: 0.45 },
       ga_electricity_transmission_lines: { title: "GA Electricity Transmission Lines", kind: "line", color: "#eab308", lineWidth: 1.8 },
@@ -4455,7 +4477,7 @@ LIMIT 50;`;
         is_aura: !!def.isAura,
         feature_count_in_bbox: count,
         licence: "CC-BY-4.0",
-        attribution: def.isAura ? "AURA Siting Crafter / Authoritative Agency" : "Australian Spatial Data Directory"
+        attribution: def.isAura ? "AURA Data Library / Authoritative Agency" : "Australian Spatial Data Directory"
       });
     }
 
@@ -4499,7 +4521,7 @@ LIMIT 50;`;
     };
 
     const readme = `========================================================================
-AIR-GAPPED OFFLINE MAP-IN-A-BOX (AURA SITING CRAFTER INTEGRATION)
+AIR-GAPPED OFFLINE MAP-IN-A-BOX (EMERGENCY SPATIAL WORKBENCH)
 Package ID: ${packageId}
 Title:      ${title}
 Area:       ${userParams.area || "Australia"}
@@ -4509,7 +4531,7 @@ Generated:  ${generatedUtc}
 INVARIANTS & AIR-GAPPED DEPLOYMENT:
 - Zero external CDN, script, font, or web tile dependencies.
 - Can be viewed locally in ANY browser (file:// or local web server).
-- Includes AURA sensitive receptors (hospitals, schools, transmission lines)
+- Includes sensitive receptors from the AURA Data Library (hospitals, schools, transmission lines)
   and multi-scale emergency infrastructure vector data.
 - CRS Specifications:
     Display: EPSG:4326 (WGS84 Lon/Lat)
@@ -4564,7 +4586,7 @@ aside {
 .layer-toggle input { margin-right: 8px; accent-color: #00daf3; }
 .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 6px; }
 .badge-tag { font-size: 9.5px; padding: 1px 5px; border-radius: 3px; background: rgba(84,225,240,0.15); color: #54e1f0; font-weight: 700; }
-.badge-aura { background: rgba(16,185,129,0.2); color: #34d399; }
+.badge-data-lib { background: rgba(16,185,129,0.2); color: #34d399; }
 .regime-select, .method-btn {
   width: 100%; padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);
   background: var(--primary-container); color: #fff; font-size: 11.5px; margin-bottom: 5px; cursor: pointer;
@@ -4607,7 +4629,7 @@ th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--bord
 th { color: var(--muted); font-weight: 600; }
 .mono { font-family: monospace; }`;
 
-    const vectorMapJs = `/* Zero-Dependency HTML5 Canvas Vector Map Engine for AURA Map-in-a-Box */
+    const vectorMapJs = `/* Zero-Dependency HTML5 Canvas Vector Map Engine for Map-in-a-Box */
 (function() {
   const pkg = window.OIC_MAP_PACKAGE;
   if (!pkg) return;
@@ -4630,7 +4652,7 @@ th { color: var(--muted); font-weight: 600; }
       visibility[ds.layer_name] = true;
       const lbl = document.createElement('label');
       lbl.className = 'layer-toggle';
-      lbl.innerHTML = '<span><input type="checkbox" data-layer="' + ds.layer_name + '" checked /><span class="swatch" style="background:' + ds.color + '"></span>' + ds.title + '</span><span class="badge-tag ' + (ds.is_aura ? 'badge-aura' : '') + '">' + ds.feature_count_in_bbox + '</span>';
+      lbl.innerHTML = '<span><input type="checkbox" data-layer="' + ds.layer_name + '" checked /><span class="swatch" style="background:' + ds.color + '"></span>' + ds.title + '</span><span class="badge-tag ' + (ds.is_aura ? 'badge-data-lib' : '') + '">' + ds.feature_count_in_bbox + '</span>';
       layerContainer.appendChild(lbl);
     });
   }
@@ -4944,7 +4966,7 @@ th { color: var(--muted); font-weight: 600; }
 <body>
   <aside>
     <div class="brand">
-      <h1>Map-in-a-Box (AURA)</h1>
+      <h1>Map-in-a-Box</h1>
       <p>Package: <span class="mono">${packageId}</span></p>
       <p>Area: <strong>${manifest.query_context.area || "Australia"}</strong></p>
       <p>Generated: <span class="mono">${generatedUtc}</span></p>
@@ -4963,7 +4985,7 @@ th { color: var(--muted); font-weight: 600; }
   <main>
     <header>
       <div style="display:flex;align-items:center;gap:10px;">
-        <span class="badge">AURA Disconnected Field Pack</span>
+        <span class="badge">Disconnected Field Pack</span>
         <h2 style="font-size:14px;font-weight:700;">${manifest.title}</h2>
       </div>
       <div style="font-size:11px;color:#64748b;">
@@ -4997,7 +5019,7 @@ th { color: var(--muted); font-weight: 600; }
           <table style="font-size:10.5px;">
             <thead><tr><th>Theme</th><th>Layer</th><th class="mono">Count</th></tr></thead>
             <tbody>
-              ${manifest.datasets.slice(0, 10).map(d => `<tr><td>${d.is_aura ? '<span style="color:#10b981;font-weight:700;">AURA</span>' : 'NExT'}</td><td>${d.title}</td><td class="mono font-bold">${d.feature_count_in_bbox}</td></tr>`).join("")}
+              ${manifest.datasets.slice(0, 10).map(d => `<tr><td>${d.is_aura ? '<span style="color:#10b981;font-weight:700;">AURA Data Library</span>' : 'NExT'}</td><td>${d.title}</td><td class="mono font-bold">${d.feature_count_in_bbox}</td></tr>`).join("")}
             </tbody>
           </table>
         </div>
@@ -5021,7 +5043,7 @@ th { color: var(--muted); font-weight: 600; }
 <body>
   <aside>
     <div class="brand">
-      <h1>Map-in-a-Box (AURA)</h1>
+      <h1>Map-in-a-Box</h1>
       <p>Package: <span class="mono">${packageId}</span></p>
       <p>Area: <strong>${manifest.query_context.area || "Australia"}</strong></p>
       <p>Generated: <span class="mono">${generatedUtc}</span></p>
@@ -5040,7 +5062,7 @@ th { color: var(--muted); font-weight: 600; }
   <main>
     <header>
       <div style="display:flex;align-items:center;gap:10px;">
-        <span class="badge">AURA Disconnected Field Pack</span>
+        <span class="badge">Disconnected Field Pack</span>
         <h2 style="font-size:14px;font-weight:700;">${manifest.title}</h2>
       </div>
       <div style="font-size:11px;color:#64748b;">
@@ -5074,7 +5096,7 @@ th { color: var(--muted); font-weight: 600; }
           <table style="font-size:10.5px;">
             <thead><tr><th>Theme</th><th>Layer</th><th class="mono">Count</th></tr></thead>
             <tbody>
-              ${manifest.datasets.slice(0, 10).map(d => `<tr><td>${d.is_aura ? '<span style="color:#10b981;font-weight:700;">AURA</span>' : 'NExT'}</td><td>${d.title}</td><td class="mono font-bold">${d.feature_count_in_bbox}</td></tr>`).join("")}
+              ${manifest.datasets.slice(0, 10).map(d => `<tr><td>${d.is_aura ? '<span style="color:#10b981;font-weight:700;">AURA Data Library</span>' : 'NExT'}</td><td>${d.title}</td><td class="mono font-bold">${d.feature_count_in_bbox}</td></tr>`).join("")}
             </tbody>
           </table>
         </div>
@@ -5283,7 +5305,7 @@ th { color: var(--muted); font-weight: 600; }
           </div>
           <p class="text-xs text-on-surface-variant">
             Generates a 100% self-contained, air-gapped emergency map package with HTML5 vector engine,
-            AURA sensitive receptors (hospitals, schools), and infrastructure layers.
+            sensitive receptors from the AURA Data Library (hospitals, schools), and infrastructure layers.
           </p>
         </div>
 
@@ -5379,10 +5401,8 @@ th { color: var(--muted); font-weight: 600; }
     if (modal) modal.classList.remove("open");
   }
 
-  async function downloadGeolibreJson(specType = "operational") {
-    const fileName = specType === "aura"
-      ? "aura-siting-crafter.geolibre.json"
-      : "operational-intelligence-crafter.geolibre.json";
+  async function downloadGeolibreJson() {
+    const fileName = "operational-intelligence-crafter.geolibre.json";
 
     try {
       const resp = await fetch(fileName);
@@ -5407,7 +5427,7 @@ th { color: var(--muted); font-weight: 600; }
     const bbox = getCurrentQueryBbox();
     const dynamicSpec = {
       version: "0.2.0",
-      name: specType === "aura" ? "AURA Siting Crafter — National Model" : "Operational Intelligence Crafter — Emergency Spatial Workbench",
+      name: "Operational Intelligence Crafter — Emergency Spatial Workbench",
       mapView: {
         center: [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2],
         zoom: 9.0,
@@ -5791,7 +5811,7 @@ th { color: var(--muted); font-weight: 600; }
       });
     }
 
-    // Offline Map-in-a-Box (AURA) & Browser Profile Controls
+    // Offline Map-in-a-Box & Browser Profile Controls
     const navOffline = document.getElementById("navOfflineMapPack");
     if (navOffline) {
       navOffline.addEventListener("click", e => {
@@ -5836,12 +5856,7 @@ th { color: var(--muted); font-weight: 600; }
 
     const btnDownloadGeolibre = document.getElementById("btnDownloadGeolibreJson");
     if (btnDownloadGeolibre) {
-      btnDownloadGeolibre.addEventListener("click", () => downloadGeolibreJson("operational"));
-    }
-
-    const btnDownloadAuraGeolibre = document.getElementById("btnDownloadAuraGeolibreJson");
-    if (btnDownloadAuraGeolibre) {
-      btnDownloadAuraGeolibre.addEventListener("click", () => downloadGeolibreJson("aura"));
+      btnDownloadGeolibre.addEventListener("click", () => downloadGeolibreJson());
     }
 
     // Initial render of saved browser profile map packs

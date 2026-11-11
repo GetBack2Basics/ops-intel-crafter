@@ -1,18 +1,19 @@
 {
-  "report_id": "qa-report-20261110T013913Z",
-  "generated_at_utc": "2026-11-10T01:39:13Z",
+  "report_id": "qa-report-20261111T043520Z",
+  "generated_at_utc": "2026-11-11T04:35:20Z",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
-  "total_datasets": 47,
+  "total_datasets": 48,
   "status_counts": {
-    "PASS": 44,
+    "PASS": 9,
     "WARNING": 2,
     "FAIL": 1,
     "NOT TESTED": 0,
-    "NOT APPLICABLE": 0
+    "NOT APPLICABLE": 0,
+    "LINKED": 36
   },
   "coverage_by_scale": {
-    "national": 19,
+    "national": 20,
     "nsw": 9,
     "state": 5,
     "qld": 5,
@@ -22,6 +23,7 @@
     "wa": 2
   },
   "coverage_by_theme": {
+    "NExT Population & Geography": 2,
     "AURA: Water Hydrography": 8,
     "AURA: Commercial Yield": 1,
     "Critical Infrastructure": 3,
@@ -32,7 +34,6 @@
     "AURA: Sensitive Receptors": 2,
     "AURA: Earthquake Hazard": 2,
     "NExT Administrative & Statistical": 1,
-    "NExT Population & Geography": 1,
     "AURA: Biodiversity Constraints": 4,
     "AURA: Coastal Inundation Hazard": 1,
     "AURA: Elevation Lidar Dem": 1,
@@ -50,15 +51,88 @@
   "total_bytes_stored": 175403669,
   "datasets": [
     {
+      "dataset_key": "abs_australia_1km_population_grid",
+      "title": "ABS 2025 — Australian Population Grid 1 km² (National Modeled ERP Grid)",
+      "provider": "Australian Bureau of Statistics",
+      "source_agency": "Australian Bureau of Statistics (ABS)",
+      "category": "periodically_refreshed_authoritative",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "theme": "NExT Population & Geography",
+      "endpoint": "https://www.abs.gov.au/statistics/people/population/regional-population/2024-25/GEOTIFF.zip",
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© Commonwealth of Australia (Australian Bureau of Statistics 2025) — CC-BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-10"
+      },
+      "source_publication_date": "2026-03-26",
+      "source_vintage": "2025-ABS",
+      "retrieval_timestamp_utc": "2026-11-10T02:26:39Z",
+      "original_crs": "EPSG:3577",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "Polygon",
+      "feature_count": 0,
+      "bbox": [
+        95.0,
+        -45.0,
+        168.0,
+        -9.0
+      ],
+      "file_size_bytes": 0,
+      "sha256": null,
+      "gcs_generation": null,
+      "gs_uri": null,
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://www.abs.gov.au/statistics/people/population/regional-population/2024-25/GEOTIFF.zip"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Official ABS modeled 1 km² Estimated Resident Population (ERP) grid based on the National Nested Grid Standard.",
+        "Population counts are disaggregated from SA1 using ABS Address Register and ICP points; modelled proxy, not a direct headcount."
+      ],
+      "refresh_policy": "annual_release"
+    },
+    {
       "dataset_key": "aura_drainage_hand_euclid_m_v1",
       "title": "Height above nearest drainage, straight-line approximation (m)",
       "provider": "aura-siting-crafter-geolibre-app",
       "source_agency": "AURA Siting Crafter (derived from HydroSHEDS project data)",
-      "category": "periodically_refreshed_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Water Hydrography",
       "endpoint": "https://services.ga.gov.au",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -78,18 +152,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.ga.gov.au"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -101,11 +193,12 @@
       "title": "S_drainage experimental drainage hazard score (0..1, uncalibrated)",
       "provider": "aura-siting-crafter-geolibre-app",
       "source_agency": "AURA Siting Crafter (derived from HydroSHEDS project data)",
-      "category": "periodically_refreshed_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Water Hydrography",
       "endpoint": "https://services.ga.gov.au",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -125,18 +218,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.ga.gov.au"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -148,11 +259,12 @@
       "title": "Slope (degrees) derived from HydroSHEDS v1 conditioned DEM",
       "provider": "aura-siting-crafter-geolibre-app",
       "source_agency": "AURA Siting Crafter (derived from HydroSHEDS project data)",
-      "category": "periodically_refreshed_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Water Hydrography",
       "endpoint": "https://services.ga.gov.au",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -172,18 +284,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.ga.gov.au"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -195,11 +325,12 @@
       "title": "Derived stream network mask (flow accumulation threshold)",
       "provider": "aura-siting-crafter-geolibre-app",
       "source_agency": "AURA Siting Crafter (derived from HydroSHEDS project data)",
-      "category": "periodically_refreshed_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Water Hydrography",
       "endpoint": "https://services.ga.gov.au",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -219,18 +350,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.ga.gov.au"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -242,11 +391,12 @@
       "title": "AURA Candidate Siting & Multi-Criteria Ranking Table",
       "provider": "aura-siting-crafter-geolibre-app",
       "source_agency": "AURA Siting Crafter Engine",
-      "category": "periodically_refreshed_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Commercial Yield",
       "endpoint": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/exports_v2/datacenter_candidates_v2.json",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -266,18 +416,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://storage.googleapis.com/aura-siting-crafter-geolibre-app/exports_v2/datacenter_candidates_v2.json"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -1739,11 +1907,12 @@
       "title": "HydroSHEDS v1 Australia Flow Accumulation (3 arc-second)",
       "provider": "hydrosheds.org",
       "source_agency": "HydroSHEDS project (WWF)",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Water Hydrography",
       "endpoint": "https://data.hydrosheds.org/file/hydrosheds-v1-acc/au_acc_3s.zip",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -1763,18 +1932,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://data.hydrosheds.org/file/hydrosheds-v1-acc/au_acc_3s.zip"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -1786,11 +1973,12 @@
       "title": "HydroSHEDS v1 Australia Hydrologically Conditioned DEM (3 arc-second)",
       "provider": "hydrosheds.org",
       "source_agency": "HydroSHEDS project (WWF)",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Water Hydrography",
       "endpoint": "https://data.hydrosheds.org/file/hydrosheds-v1-con/au_con_3s.zip",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -1810,18 +1998,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://data.hydrosheds.org/file/hydrosheds-v1-con/au_con_3s.zip"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -1833,11 +2039,12 @@
       "title": "Geoscape National Cadastre & G-NAF Parcel Fabric",
       "provider": "NationalMap / Geoscape",
       "source_agency": "Geoscape Australia / ICSM",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Cadastre Parcels",
       "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Land_Parcel_Property_Theme/FeatureServer/8",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -1857,18 +2064,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Land_Parcel_Property_Theme/FeatureServer/8"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -1880,11 +2105,12 @@
       "title": "Tropical Cyclone Hazard Assessment (TCHA) & AS/NZS 1170.2 Wind Regions",
       "provider": "NationalMap / Geoscience Australia",
       "source_agency": "Geoscience Australia / BoM",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Cyclone Hazard",
       "endpoint": "https://services.ga.gov.au/gis/rest/services/Tropical_Cyclone_Hazard_Assessment_2018/MapServer/1",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -1904,18 +2130,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.ga.gov.au/gis/rest/services/Tropical_Cyclone_Hazard_Assessment_2018/MapServer/1"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -1927,11 +2171,12 @@
       "title": "Geoscience Australia National Electricity Transmission Grid (>=66kV)",
       "provider": "NationalMap / Geoscience Australia",
       "source_agency": "Geoscience Australia / AEMO",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Transmission Grid",
       "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -1951,18 +2196,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -1974,11 +2237,12 @@
       "title": "National Health Services Directory (NHSD) Hospitals & Health Facilities",
       "provider": "NationalMap / NHSD",
       "source_agency": "Australian Digital Health Agency / Healthdirect",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Sensitive Receptors",
       "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -1998,18 +2262,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -2021,11 +2303,12 @@
       "title": "ACARA National Schools Directory",
       "provider": "NationalMap / ACARA",
       "source_agency": "Australian Curriculum, Assessment and Reporting Authority (ACARA)",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Sensitive Receptors",
       "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -2045,18 +2328,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -2068,11 +2369,12 @@
       "title": "National Seismic Hazard Assessment (NSHA) Ground Motion PGA (National)",
       "provider": "NationalMap / Geoscience Australia",
       "source_agency": "Geoscience Australia",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "national",
       "jurisdiction": "NATIONAL",
       "theme": "AURA: Earthquake Hazard",
       "endpoint": "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/0",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -2092,18 +2394,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/0"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -2847,11 +3167,12 @@
       "title": "Biodiversity Values Map (Biodiversity Conservation Act 2016)",
       "provider": "NSW SEED Portal",
       "source_agency": "NSW DCCEEW / Biodiversity Conservation Trust",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "nsw",
       "jurisdiction": "NSW",
       "theme": "AURA: Biodiversity Constraints",
       "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/9?f=json",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -2871,18 +3192,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/9?f=json"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -2894,11 +3233,12 @@
       "title": "NSW Coastal Inundation, Storm Surge and Tidal Extent",
       "provider": "NSW SEED Portal",
       "source_agency": "NSW DCCEEW Coastal Branch",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "nsw",
       "jurisdiction": "NSW",
       "theme": "AURA: Coastal Inundation Hazard",
       "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7?f=json",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -2918,18 +3258,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7?f=json"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -2941,11 +3299,12 @@
       "title": "ELVIS NSW 1m High-Resolution LiDAR Digital Elevation Model & Contours",
       "provider": "ELVIS Elevation - Foundation Spatial Data",
       "source_agency": "Geoscience Australia / NSW Spatial Services (ELVIS)",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "nsw",
       "jurisdiction": "NSW",
       "theme": "AURA: Elevation Lidar Dem",
       "endpoint": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/nsw_elvis_lidar_laz_pointcloud_v2/cloud.js",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -2965,18 +3324,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/nsw_elvis_lidar_laz_pointcloud_v2/cloud.js"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -2988,11 +3365,12 @@
       "title": "ELVIS NSW 1m High-Resolution Digital Surface Model (Canopy & Structure DSM)",
       "provider": "ELVIS Elevation - Foundation Spatial Data",
       "source_agency": "Geoscience Australia / NSW Spatial Services (ELVIS)",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "nsw",
       "jurisdiction": "NSW",
       "theme": "AURA: Elevation Lidar Dsm",
       "endpoint": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/lake_macquarie_elvis.copc.laz",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -3012,18 +3390,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/lake_macquarie_elvis.copc.laz"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -3035,11 +3431,12 @@
       "title": "ELVIS NSW 0.5m/1m Topographic Elevation Contours Fabric",
       "provider": "ELVIS Elevation - Foundation Spatial Data",
       "source_agency": "Geoscience Australia / NSW Spatial Services (ELVIS)",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "nsw",
       "jurisdiction": "NSW",
       "theme": "AURA: Elevation Lidar Contours",
       "endpoint": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/nsw_elvis_lidar_laz_pointcloud_v2/cloud.js",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -3059,18 +3456,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/nsw_elvis_lidar_laz_pointcloud_v2/cloud.js"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -3082,11 +3497,12 @@
       "title": "ELVIS NSW Classified 3D LiDAR Point Cloud (.LAZ / ASPRS Ground, Canopy & Structures)",
       "provider": "ELVIS Elevation - Foundation Spatial Data",
       "source_agency": "Geoscience Australia / NSW Spatial Services (ELVIS)",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "nsw",
       "jurisdiction": "NSW",
       "theme": "AURA: Elevation Lidar Pointcloud",
       "endpoint": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/lake_macquarie_elvis.copc.laz",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -3106,18 +3522,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/lake_macquarie_elvis.copc.laz"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -3649,11 +4083,12 @@
       "title": "NSW Slope Instability and Landslide Hazard Susceptibility",
       "provider": "NSW MinView / SEED Portal",
       "source_agency": "Geological Survey of NSW / DPHI",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "nsw",
       "jurisdiction": "NSW",
       "theme": "AURA: Landslide Hazard",
       "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Land_Parcel_Property_Theme/FeatureServer/7?f=json",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -3673,18 +4108,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Land_Parcel_Property_Theme/FeatureServer/7?f=json"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -4095,11 +4548,12 @@
       "title": "National Seismic Hazard Assessment (NSHA) Ground Motion PGA (NSW)",
       "provider": "NationalMap / Geoscience Australia",
       "source_agency": "Geoscience Australia",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "nsw",
       "jurisdiction": "NSW",
       "theme": "AURA: Earthquake Hazard",
       "endpoint": "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/0",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -4119,18 +4573,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/0"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -4456,11 +4928,12 @@
       "title": "High-Voltage Transmission Network and Terminal Substations (>=132kV)",
       "provider": "NSW Spatial Services / NationalMap",
       "source_agency": "Transgrid / Geoscience Australia / AEMO",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "nsw",
       "jurisdiction": "NSW",
       "theme": "AURA: Transmission Grid",
       "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/6?f=json",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -4480,18 +4953,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/6?f=json"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -4940,11 +5431,12 @@
       "title": "Tropical Cyclone Hazard Assessment (TCHA) & AS/NZS 1170.2 Wind Regions",
       "provider": "NationalMap / Geoscience Australia",
       "source_agency": "Geoscience Australia / BoM",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "qld",
       "jurisdiction": "QLD",
       "theme": "AURA: Cyclone Hazard",
       "endpoint": "https://services.ga.gov.au/gis/rest/services/Tropical_Cyclone_Hazard_Assessment_2018/MapServer/1",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -4964,18 +5456,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.ga.gov.au/gis/rest/services/Tropical_Cyclone_Hazard_Assessment_2018/MapServer/1"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -4987,11 +5497,12 @@
       "title": "Queensland State Planning Policy (SPP) Landslide Hazard Overlays",
       "provider": "QSpatial / QLD Globe",
       "source_agency": "Queensland Department of Resources",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "qld",
       "jurisdiction": "QLD",
       "theme": "AURA: Landslide Hazard",
       "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/GeoscientificInformation/SoilsAndLandResource/MapServer/51",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5011,18 +5522,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://spatial-gis.information.qld.gov.au/arcgis/rest/services/GeoscientificInformation/SoilsAndLandResource/MapServer/51"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5034,11 +5563,12 @@
       "title": "Regulated Vegetation Management Map (Vegetation Management Act 1999)",
       "provider": "QSpatial / Queensland Globe",
       "source_agency": "Department of Environment, Science and Innovation (DESI)",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "qld",
       "jurisdiction": "QLD",
       "theme": "AURA: Biodiversity Constraints",
       "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/Biota/VegetationManagement/MapServer/103",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5058,18 +5588,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://spatial-gis.information.qld.gov.au/arcgis/rest/services/Biota/VegetationManagement/MapServer/103"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5081,11 +5629,12 @@
       "title": "Powerlink & Energex High-Voltage Transmission Grid (>=110kV)",
       "provider": "QSpatial / Queensland Globe",
       "source_agency": "Powerlink Queensland / Department of Energy and Climate",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "qld",
       "jurisdiction": "QLD",
       "theme": "AURA: Transmission Grid",
       "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5105,18 +5654,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5128,11 +5695,12 @@
       "title": "Queensland Waterways for Waterway Barrier Works & Riparian Networks",
       "provider": "QSpatial / Queensland Globe",
       "source_agency": "Department of Agriculture and Fisheries (DAF) / RDMW",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "qld",
       "jurisdiction": "QLD",
       "theme": "AURA: Water Hydrography",
       "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/InlandWaters/WaterCoursesAndBodies/MapServer/33",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5152,18 +5720,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://spatial-gis.information.qld.gov.au/arcgis/rest/services/InlandWaters/WaterCoursesAndBodies/MapServer/33"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5175,11 +5761,12 @@
       "title": "ElectraNet & SA Power Networks High-Voltage Grid (>=132kV)",
       "provider": "LocationSA / Data.SA",
       "source_agency": "ElectraNet / Department for Energy and Mining",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "sa",
       "jurisdiction": "SA",
       "theme": "AURA: Transmission Grid",
       "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5199,18 +5786,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5222,11 +5827,12 @@
       "title": "TasNetworks High-Voltage Transmission Network (>=110kV)",
       "provider": "LISTdata / Land Information System Tasmania",
       "source_agency": "TasNetworks / Department of State Growth",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "tas",
       "jurisdiction": "TAS",
       "theme": "AURA: Transmission Grid",
       "endpoint": "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/Infrastructure/MapServer/4",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5246,18 +5852,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.thelist.tas.gov.au/arcgis/rest/services/Public/Infrastructure/MapServer/4"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5269,11 +5893,12 @@
       "title": "Vicmap Hydrography Watercourses and Water Bodies",
       "provider": "Data.Vic / Vicmap Spatial Platform",
       "source_agency": "DEECA / Vicmap",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "vic",
       "jurisdiction": "VIC",
       "theme": "AURA: Water Hydrography",
       "endpoint": "https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities",
+      "wfs_type_name": "open-data-platform:vmlite_hy_watercourse",
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5293,18 +5918,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5316,11 +5959,12 @@
       "title": "Victorian Geotechnical Slope Stability and Landslide Hazard Overlay",
       "provider": "Data.Vic / Vicmap Spatial Platform",
       "source_agency": "Geological Survey of Victoria / DEECA",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "vic",
       "jurisdiction": "VIC",
       "theme": "AURA: Landslide Hazard",
       "endpoint": "https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities",
+      "wfs_type_name": "open-data-platform:shalld100_polygon",
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5340,18 +5984,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5363,11 +6025,12 @@
       "title": "Native Vegetation Information Management (NVIM) & Habitat Quality",
       "provider": "Data.Vic / Vicmap Spatial Platform",
       "source_agency": "Department of Energy, Environment and Climate Action (DEECA)",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "vic",
       "jurisdiction": "VIC",
       "theme": "AURA: Biodiversity Constraints",
       "endpoint": "https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities",
+      "wfs_type_name": "open-data-platform:sveg100",
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5387,18 +6050,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5410,11 +6091,12 @@
       "title": "Vicmap Planning Schemes (VPP Standardised Zones)",
       "provider": "Data.Vic / Vicmap Spatial Platform",
       "source_agency": "Department of Transport and Planning (DTP)",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "vic",
       "jurisdiction": "VIC",
       "theme": "AURA: Cadastre Parcels",
       "endpoint": "https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities",
+      "wfs_type_name": "open-data-platform:plan_zone",
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5434,18 +6116,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5457,11 +6157,12 @@
       "title": "Victorian High-Voltage Transmission Network (>=66kV)",
       "provider": "Data.Vic / Vicmap Spatial Platform",
       "source_agency": "VicGrid / AusNet Services / AEMO",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "vic",
       "jurisdiction": "VIC",
       "theme": "AURA: Transmission Grid",
       "endpoint": "https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities",
+      "wfs_type_name": "open-data-platform:rez_2026",
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5481,18 +6182,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5504,11 +6223,12 @@
       "title": "DBCA Threatened Ecological Communities (TEC) & Priority Flora/Fauna",
       "provider": "Data WA / SLIP Platform",
       "source_agency": "Department of Biodiversity, Conservation and Attractions (DBCA)",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "wa",
       "jurisdiction": "WA",
       "theme": "AURA: Biodiversity Constraints",
       "endpoint": "https://services.slip.wa.gov.au/public/rest/services/SLIP_Public_Services/Environment/MapServer/23",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5528,18 +6248,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.slip.wa.gov.au/public/rest/services/SLIP_Public_Services/Environment/MapServer/23"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
@@ -5551,11 +6289,12 @@
       "title": "Western Power SWIS & Horizon Power Transmission Network (>=66kV)",
       "provider": "Data WA / SLIP Platform",
       "source_agency": "Western Power / EnergyPolicy WA",
-      "category": "static_authoritative",
+      "category": "external_linked_library",
       "scale": "wa",
       "jurisdiction": "WA",
       "theme": "AURA: Transmission Grid",
       "endpoint": "https://services.slip.wa.gov.au/public/rest/services/SLIP_Public_Services/Infrastructure_and_Utilities/MapServer/75",
+      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": null,
@@ -5575,18 +6314,36 @@
       "sha256": null,
       "gcs_generation": null,
       "gs_uri": null,
-      "overall_qa_status": "PASS",
+      "overall_qa_status": "LINKED",
       "level1_source_contract": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "PASS",
+        "checks": [
+          {
+            "name": "Linked Authority Check",
+            "status": "PASS",
+            "details": "External endpoint: https://services.slip.wa.gov.au/public/rest/services/SLIP_Public_Services/Infrastructure_and_Utilities/MapServer/75"
+          }
+        ]
       },
       "level2_stored_artifact": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Stored GeoParquet",
+            "status": "NOT_APPLICABLE",
+            "details": "Direct external service connection (zero storage duplication)"
+          }
+        ]
       },
       "level3_reconciliation": {
-        "status": "NOT TESTED",
-        "checks": []
+        "status": "NOT_APPLICABLE",
+        "checks": [
+          {
+            "name": "Feature Reconciliation",
+            "status": "NOT_APPLICABLE",
+            "details": "External authoritative dataset"
+          }
+        ]
       },
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."

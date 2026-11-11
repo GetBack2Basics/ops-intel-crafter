@@ -21,6 +21,9 @@ def upload_web_assets():
         ("geolibre_catalog_engine.js", "application/javascript; charset=utf-8"),
         ("index.html", "text/html; charset=utf-8"),
         ("style.css", "text/css; charset=utf-8"),
+        ("operational-intelligence-crafter.geolibre.json", "application/json; charset=utf-8"),
+        ("qa/index.html", "text/html; charset=utf-8"),
+        ("qa/inspect.html", "text/html; charset=utf-8"),
         ("data/WP302026_TRACK_latest.kmz", "application/vnd.google-earth.kmz"),
         ("data/WP302026_TRACK_latest.geojson", "application/geo+json; charset=utf-8"),
         ("data/WP302026_CYCLONE_ZONES.geojson", "application/geo+json; charset=utf-8"),
@@ -55,7 +58,15 @@ def upload_web_assets():
                 ct = "text/html; charset=utf-8" if p.suffix == ".html" else "application/json" if p.suffix == ".json" else "text/css" if p.suffix == ".css" else "application/javascript" if p.suffix == ".js" else "text/plain"
                 files_to_upload.append((rel, ct))
 
-    FORCE_UPLOAD = {"app.js", "duckdb_wasm.js", "layers.js", "geolibre_catalog_engine.js", "index.html", "style.css"}
+    FORCE_UPLOAD = {"app.js", "duckdb_wasm.js", "layers.js", "geolibre_catalog_engine.js", "index.html", "style.css", "qa/index.html", "qa/inspect.html", "operational-intelligence-crafter.geolibre.json"}
+
+    # Cleanup obsolete files from bucket
+    obsolete_blobs = ["aura-siting-crafter.geolibre.json"]
+    for obs in obsolete_blobs:
+        obs_blob = bucket.blob(obs)
+        if obs_blob.exists():
+            obs_blob.delete()
+            print(f"[CLEANUP] Deleted obsolete gs://{BUCKET_NAME}/{obs}")
 
     for rel_path, content_type in files_to_upload:
         file_path = DOCS_DIR / rel_path

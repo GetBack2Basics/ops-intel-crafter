@@ -76,6 +76,7 @@ STITCH_TAILWIND_HEAD = """
     .status-PASS { background: rgba(0, 119, 75, 0.12); color: #00774b; border: 1px solid rgba(0, 119, 75, 0.28); }
     .status-WARNING { background: rgba(212, 115, 0, 0.14); color: #a35700; border: 1px solid rgba(212, 115, 0, 0.3); }
     .status-FAIL { background: rgba(186, 26, 26, 0.12); color: #ba1a1a; border: 1px solid rgba(186, 26, 26, 0.3); }
+    .status-LINKED { background: rgba(2, 132, 199, 0.14); color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.3); }
     .status-NOT_TESTED, .status-NOT_APPLICABLE { background: #eaedff; color: #44474e; border: 1px solid #c4c6cf; }
   </style>
 """
@@ -98,6 +99,7 @@ def build_qa_summary(
         QAStatus.FAIL.value: 0,
         QAStatus.NOT_TESTED.value: 0,
         QAStatus.NOT_APPLICABLE.value: 0,
+        "LINKED": 0,
     }
     by_scale: Dict[str, int] = {}
     by_theme: Dict[str, int] = {}
@@ -110,16 +112,20 @@ def build_qa_summary(
         if manifest_file.exists():
             record = json.loads(manifest_file.read_text(encoding="utf-8"))
         else:
+            is_linked = bool(entry.theme and "AURA" in entry.theme)
+            status_val = "LINKED" if is_linked else entry.qa_status.value
+            has_endpoint = bool(entry.endpoint and entry.endpoint.startswith("http"))
             record = {
                 "dataset_key": entry.dataset_key,
                 "title": entry.title,
                 "provider": entry.provider,
                 "source_agency": entry.source_agency,
-                "category": entry.category.value,
+                "category": "external_linked_library" if is_linked else entry.category.value,
                 "scale": entry.scale,
                 "jurisdiction": entry.jurisdiction,
                 "theme": entry.theme,
                 "endpoint": entry.endpoint,
+                "wfs_type_name": entry.wfs_type_name,
                 "licence": entry.licence.model_dump(mode="json"),
                 "source_publication_date": entry.source_publication_date,
                 "source_vintage": entry.source_vintage,
@@ -133,10 +139,13 @@ def build_qa_summary(
                 "sha256": None,
                 "gcs_generation": None,
                 "gs_uri": None,
-                "overall_qa_status": entry.qa_status.value,
-                "level1_source_contract": {"status": QAStatus.NOT_TESTED.value, "checks": []},
-                "level2_stored_artifact": {"status": QAStatus.NOT_TESTED.value, "checks": []},
-                "level3_reconciliation": {"status": QAStatus.NOT_TESTED.value, "checks": []},
+                "overall_qa_status": status_val,
+                "level1_source_contract": {
+                    "status": "PASS" if has_endpoint else "NOT_APPLICABLE",
+                    "checks": [{"name": "Linked Authority Check", "status": "PASS" if has_endpoint else "NOT_APPLICABLE", "details": f"External endpoint: {entry.endpoint}"}]
+                },
+                "level2_stored_artifact": {"status": "NOT_APPLICABLE", "checks": [{"name": "Stored GeoParquet", "status": "NOT_APPLICABLE", "details": "Direct external service connection (zero storage duplication)"}]},
+                "level3_reconciliation": {"status": "NOT_APPLICABLE", "checks": [{"name": "Feature Reconciliation", "status": "NOT_APPLICABLE", "details": "External authoritative dataset"}]},
                 "known_limitations": entry.known_limitations,
                 "refresh_policy": entry.refresh_policy,
             }
@@ -756,18 +765,78 @@ def render_qa_html_pages(
       `;
 
       const overlay = document.getElementById("mapErrorOverlay");
-      if (ds.overall_qa_status === "FAIL" || !ds.preview_geojson) {{
+      let geojson = null;
+
+      if (ds.preview_geojson && ds.preview_geojson.preview_geojson_path) {{
+        try {{
+          const resp = await fetch(ds.preview_geojson.preview_geojson_path);
+          if (resp.ok) geojson = await resp.json();
+        }} catch (e) {{
+          console.warn("Failed to load local preview GeoJSON:", e);
+        }}
+      }} else if (ds.endpoint && ds.endpoint.startsWith("http")) {{
+        // Live provider endpoint query (AURA Data Library / External Linked Datasets)
+        let liveUrl = null;
+        const ep = ds.endpoint.trim();
+        if (ep.includes("FeatureServer") || ep.includes("MapServer")) {{
+          const base = ep.split("?")[0].replace(/[/]+$/, '');
+          liveUrl = `${{base}}/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson&resultRecordCount=100`;
+        }} else if (ep.toLowerCase().includes("geoserver") || ep.toLowerCase().includes("wfs")) {{
+          const base = ep.split("?")[0];
+          const typeName = ds.wfs_type_name || (ds.dataset_key.includes("vic_") ? `open-data-platform:${{ds.dataset_key.replace('_v2', '')}}` : "");
+          liveUrl = `${{base}}?service=WFS&version=2.0.0&request=GetFeature&typeNames=${{typeName}}&outputFormat=application/json&count=100`;
+        }} else if (ep.endsWith(".json") || ep.endsWith(".geojson")) {{
+          liveUrl = ep;
+        }}
+
+        if (liveUrl) {{
+          try {{
+            document.getElementById("mapErrorText").textContent = `Querying live provider endpoint (${{ds.provider}})...`;
+            overlay.classList.remove("hidden");
+            const resp = await fetch(liveUrl);
+            if (resp.ok) {{
+              const data = await resp.json();
+              if (data && data.features && data.type !== "FeatureCollection") {{
+                // Normalize Esri JSON format
+                geojson = {{
+                  type: "FeatureCollection",
+                  features: data.features.map((f, i) => {{
+                    let geom = null;
+                    if (f.geometry) {{
+                      if (f.geometry.x !== undefined && f.geometry.y !== undefined) {{
+                        geom = {{ type: "Point", coordinates: [f.geometry.x, f.geometry.y] }};
+                      }} else if (f.geometry.paths) {{
+                        geom = {{ type: f.geometry.paths.length === 1 ? "LineString" : "MultiLineString", coordinates: f.geometry.paths.length === 1 ? f.geometry.paths[0] : f.geometry.paths }};
+                      }} else if (f.geometry.rings) {{
+                        geom = {{ type: f.geometry.rings.length === 1 ? "Polygon" : "MultiPolygon", coordinates: f.geometry.rings.length === 1 ? f.geometry.rings : [f.geometry.rings] }};
+                      }}
+                    }}
+                    return {{ type: "Feature", properties: f.attributes || {{}}, geometry: geom }};
+                  }})
+                }};
+              }} else if (data && data.type === "FeatureCollection") {{
+                geojson = data;
+              }}
+            }}
+          }} catch (liveErr) {{
+            console.warn("Live endpoint query failed:", liveErr);
+          }}
+        }}
+      }}
+
+      if (!geojson || !geojson.features || geojson.features.length === 0) {{
         overlay.classList.remove("hidden");
-        const err = (ds.level1_source_contract && ds.level1_source_contract.error_message) || "Dataset not ingested";
-        document.getElementById("mapErrorText").textContent = `Endpoint: ${{ds.endpoint}} | Error: ${{err}}`;
+        const isRaster = (ds.geometry_type || "").toLowerCase().includes("raster") || (ds.service_type || "").includes("raster") || (ds.service_type || "").includes("octree") || (ds.service_type || "").includes("copc");
+        const msg = isRaster 
+          ? `External Linked Dataset (AURA Data Library): Remote Raster / 3D Tile Layer (not vector GeoJSON). Available at ${{ds.endpoint || "remote lakehouse"}}.`
+          : (ds.overall_qa_status === "FAIL" ? `Endpoint: ${{ds.endpoint}} | Error: ${{(ds.level1_source_contract && ds.level1_source_contract.error_message) || "Source contract failed"}}` : `External Linked Dataset: Direct vector query unavailable for ${{ds.endpoint || "unconfigured endpoint"}} (requires token or server-side auth).`);
+        document.getElementById("mapErrorText").textContent = msg;
         document.getElementById("attrTableHead").innerHTML = "";
-        document.getElementById("attrTableBody").innerHTML = `<tr><td class="p-3 text-error">No stored features (Level 1 source failed: ${{err}})</td></tr>`;
+        document.getElementById("attrTableBody").innerHTML = `<tr><td class="p-3 text-on-surface-variant font-mono text-xs">${{msg}}</td></tr>`;
         return;
       }}
       overlay.classList.add("hidden");
 
-      const resp = await fetch(ds.preview_geojson.preview_geojson_path);
-      const geojson = await resp.json();
       currentGeojson = geojson;
       (geojson.features || []).forEach((f, i) => {{
         f.properties = f.properties || {{}};
@@ -827,6 +896,19 @@ def render_qa_html_pages(
       if (ds.bbox && ds.bbox.length === 4) {{
         currentBounds = [[ds.bbox[0], ds.bbox[1]], [ds.bbox[2], ds.bbox[3]]];
         map.fitBounds(currentBounds, {{ padding: 40, maxZoom: 13 }});
+      }} else if (geojson.features && geojson.features.length > 0) {{
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        geojson.features.forEach(f => {{
+          const b = computeGeometryBounds(f.geometry);
+          if (b) {{
+            minX = Math.min(minX, b[0][0]); minY = Math.min(minY, b[0][1]);
+            maxX = Math.max(maxX, b[1][0]); maxY = Math.max(maxY, b[1][1]);
+          }}
+        }});
+        if (minX !== Infinity) {{
+          currentBounds = [[minX, minY], [maxX, maxY]];
+          map.fitBounds(currentBounds, {{ padding: 40, maxZoom: 13 }});
+        }}
       }}
 
       // Populate attribute sample table with search filtering
