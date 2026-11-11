@@ -303,11 +303,11 @@
               placeholder="Select a preset below or enter a spatial query (e.g. Substations within 5km of flood zones in Maitland)..." />
           </div>
           <div class="relative w-full md:w-72 flex-shrink-0" id="aoiInputWrapper">
-            <i data-lucide="map-pin" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-sky-600 z-10 pointer-events-none"></i>
+            <i data-lucide="map-pin"
+              class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-sky-600 z-10 pointer-events-none"></i>
             <input id="aoiInput"
               class="w-full bg-slate-50 border border-slate-300 rounded-lg pl-10 pr-4 py-2.5 text-xs text-slate-800 font-medium focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:outline-none transition"
-              type="text"
-              autocomplete="off"
+              type="text" autocomplete="off"
               placeholder="Target Area / AOI (e.g. Maitland, Lower Hunter, Sydney, 151.4,-32.9,151.8,-32.6)..." />
             <div id="aoiAutocompleteDropdown"
               class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto text-xs divide-y divide-slate-100">
@@ -517,7 +517,9 @@
 
           <!-- Parameter Summary Side Cards (4 cols) -->
           <div class="lg:col-span-4 flex flex-col gap-3 justify-between">
-            <div id="targetAreaCard" class="p-3.5 rounded-lg border border-slate-200 bg-slate-50/70 hover:border-sky-400 hover:bg-sky-50/40 transition cursor-pointer" title="Click to change target area or define custom AOI">
+            <div id="targetAreaCard"
+              class="p-3.5 rounded-lg border border-slate-200 bg-slate-50/70 hover:border-sky-400 hover:bg-sky-50/40 transition cursor-pointer"
+              title="Click to change target area or define custom AOI">
               <div class="flex items-center justify-between text-xs mb-1">
                 <span class="font-bold text-slate-700 flex items-center gap-1.5">
                   <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-600"></i>
@@ -529,7 +531,8 @@
                 </span>
               </div>
               <div id="ctxScaleVal" class="text-xs font-semibold text-slate-900 truncate">—</div>
-              <div id="ctxScaleSub" class="text-[11px] text-slate-500 mt-0.5 font-mono">No target area specified yet</div>
+              <div id="ctxScaleSub" class="text-[11px] text-slate-500 mt-0.5 font-mono">No target area specified yet
+              </div>
             </div>
 
             <div class="p-3.5 rounded-lg border border-slate-200 bg-slate-50/70">
