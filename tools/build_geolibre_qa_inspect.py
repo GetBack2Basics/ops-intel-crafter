@@ -178,14 +178,30 @@ def main():
                 existing_catalog[key]["geojson_url"] = geojson_url
             existing_catalog[key]["wherobots_table"] = f"org_catalog.ops_intel.{key}"
 
-    # 4. Insert 3-Way Source Switcher into Header Toolbar
+    # 3b. Canonical GCS GeoParquet library (same partitions ingested to Wherobots and
+    #     referenced by docs/operational-intelligence-crafter.gcs.geolibre.json)
+    gcs_spec_path = PROJECT_ROOT / "docs" / "operational-intelligence-crafter.gcs.geolibre.json"
+    if not gcs_spec_path.exists():
+        raise FileNotFoundError("Run tools/export_geolibre_project.py --auth public first")
+    gcs_spec = json.loads(gcs_spec_path.read_text(encoding="utf-8"))
+    for lyr in gcs_spec["layers"]:
+        k = lyr["id"]
+        if k in existing_catalog:
+            existing_catalog[k]["gcs_parquet_url"] = lyr["source"]["url"]
+            existing_catalog[k]["gcs_uri"] = lyr["source"]["gcsUri"]
+            existing_catalog[k]["s3_path"] = lyr["source"]["gcsUri"]
+            if lyr["metadata"].get("features_stored") is not None:
+                existing_catalog[k]["base_count"] = lyr["metadata"]["features_stored"]
+    for k, v in existing_catalog.items():
+        v.pop("wherobots_table", None)
+
+    # 4. Insert 2-Way Source Switcher into Header Toolbar
     old_tools = '<div class="qa-tools">\n      <button class="tool-btn" onclick="openModal(\'info-modal\')">ℹ️ Info</button>'
     new_tools = """<div class="qa-tools">
-      <!-- 3-Way Authoritative Data Source Switcher (Live State, GCS Lakehouse, Wherobots) -->
+      <!-- Data source switcher: live government endpoint vs canonical GCS GeoParquet library -->
       <div class="source-segmented-control" id="qa-source-selector" style="display:inline-flex; align-items:center; background:rgba(15,23,42,0.85); border:1px solid rgba(59,130,246,0.35); border-radius:6px; padding:2px; gap:2px; margin-right:8px;">
-        <button class="source-pill" id="btn-src-live" onclick="setDataSourceMode('live')" title="Query live government REST / WFS service" style="background:transparent; color:#94a3b8; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer; transition:all 0.15s;">🟢 Live State</button>
-        <button class="source-pill active" id="btn-src-gcs" onclick="setDataSourceMode('gcs')" title="Load authoritative GeoParquet / GeoJSON artifact stored on GCS" style="background:#0284c7; color:#ffffff; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer; transition:all 0.15s;">🔵 GCS Lakehouse</button>
-        <button class="source-pill" id="btn-src-wherobots" onclick="setDataSourceMode('wherobots')" title="Inspect Wherobots Cloud Sedona Iceberg table (org_catalog.ops_intel)" style="background:transparent; color:#94a3b8; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer; transition:all 0.15s;">🟣 Wherobots</button>
+        <button class="source-pill" id="btn-src-live" onclick="setDataSourceMode('live')" title="Query the live government REST / WFS endpoint" style="background:transparent; color:#94a3b8; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer;">🟢 Live Government</button>
+        <button class="source-pill" id="btn-src-gcs" onclick="setDataSourceMode('gcs')" title="Read the canonical GeoParquet partition in gs://operational-intelligence-crafter-lake (same data as Wherobots)" style="background:transparent; color:#94a3b8; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer;">🔵 GCS Library</button>
       </div>
       <button class="tool-btn" onclick="openModal('info-modal')">ℹ️ Info</button>"""
     content = content.replace(old_tools, new_tools)
@@ -197,76 +213,71 @@ def main():
     #     ...
     #   let viewportCount = 0;
     target_loader_pattern = r'async function loadLiveData\(\)\s*\{.*?let viewportCount = 0;'
-    replacement_loader = """    let qaSourceMode = urlParams.get('source') || 'gcs';
+    replacement_loader = """    let qaSourceMode = (urlParams.get('source') === 'live') ? 'live' : 'gcs';
+    let qaLoadedTotal = null;
 
-    window.setDataSourceMode = function(mode) {
-      qaSourceMode = mode;
-      ['live', 'gcs', 'wherobots'].forEach(m => {
+    function qaPaintSourcePills() {
+      ['live', 'gcs'].forEach(m => {
         const btn = document.getElementById(`btn-src-${m}`);
-        if (btn) {
-          if (m === mode) {
-            btn.style.background = m === 'live' ? '#2563eb' : (m === 'gcs' ? '#0284c7' : '#7c3aed');
-            btn.style.color = '#ffffff';
-          } else {
-            btn.style.background = 'transparent';
-            btn.style.color = '#94a3b8';
-          }
-        }
+        if (!btn) return;
+        const on = m === qaSourceMode;
+        btn.style.background = on ? (m === 'live' ? '#16a34a' : '#0284c7') : 'transparent';
+        btn.style.color = on ? '#ffffff' : '#94a3b8';
       });
-      const u = new URL(window.location.href);
-      u.searchParams.set('source', mode);
-      window.history.replaceState({}, '', u.href);
-
-      // Update lineage display
       const lineageEl = document.getElementById('s3-path-label');
       if (lineageEl) {
-        if (mode === 'live') {
-          lineageEl.innerHTML = `<span style="color:#38bdf8; font-weight:600;">Upstream Live Service:</span><br><a href="${meta.endpoint}" target="_blank" style="color:#60a5fa; font-size:0.72rem; word-break:break-all; text-decoration:underline;">${meta.endpoint}</a>`;
-        } else if (mode === 'gcs') {
-          lineageEl.innerHTML = `<span style="color:#34d399; font-weight:600;">GCS Lakehouse Storage:</span><br><code style="color:#34d399; font-size:0.72rem; word-break:break-all;">${meta.s3_path || 'gs://operational-intelligence-crafter-lake/geoparquet/' + datasetKey + '/'}</code>`;
-        } else if (mode === 'wherobots') {
-          lineageEl.innerHTML = `<span style="color:#c084fc; font-weight:600;">Wherobots Iceberg Catalog:</span><br><code style="color:#c084fc; font-size:0.72rem; word-break:break-all;">org_catalog.ops_intel.${datasetKey}</code><br><span style="font-size:0.7rem; color:#a78bfa;">Engine: Apache Sedona 1.6 / Iceberg Havasu | Compute: $0.00/hr Idle</span>`;
+        if (qaSourceMode === 'live') {
+          lineageEl.innerHTML = `<span style="color:#4ade80; font-weight:600;">Live government endpoint:</span><br><a href="${meta.endpoint}" target="_blank" style="color:#60a5fa; font-size:0.72rem; word-break:break-all;">${meta.endpoint}</a>`;
+        } else {
+          lineageEl.innerHTML = meta.gcs_parquet_url
+            ? `<span style="color:#34d399; font-weight:600;">GCS GeoParquet library:</span><br><code style="color:#34d399; font-size:0.72rem; word-break:break-all;">${meta.gcs_uri}</code>`
+            : `<span style="color:#f87171; font-weight:600;">Not in GCS library</span>`;
         }
       }
+    }
 
+    window.setDataSourceMode = function(mode) {
+      qaSourceMode = mode === 'live' ? 'live' : 'gcs';
+      const u = new URL(window.location.href);
+      u.searchParams.set('source', qaSourceMode);
+      window.history.replaceState({}, '', u.href);
+      initialFitDone = false;
       loadLiveData();
+      if (typeof qaRefreshAllVectors === 'function') qaRefreshAllVectors();
     };
+
+    function qaShowSourceError(title, detail) {
+      const countBadge = document.getElementById('s3-count-badge');
+      const tableCount = document.getElementById('table-record-count');
+      const tbody = document.getElementById('table-body');
+      countBadge.textContent = `0 | ${title}`;
+      tableCount.textContent = title;
+      tbody.innerHTML = `<tr><td colspan="4" style="color:#f87171; padding:1rem; line-height:1.6;"><strong>${title}</strong><br><span style="color:#cbd5e1; font-size:0.8rem; word-break:break-all;">${detail}</span></td></tr>`;
+    }
 
     async function loadLiveData() {
       const endpoint = meta.endpoint;
       const countBadge = document.getElementById('s3-count-badge');
       const tableCount = document.getElementById('table-record-count');
       const tbody = document.getElementById('table-body');
+      qaPaintSourcePills();
 
-      // Sync Source Selector Button Visuals
-      ['live', 'gcs', 'wherobots'].forEach(m => {
-        const btn = document.getElementById(`btn-src-${m}`);
-        if (btn) {
-          if (m === qaSourceMode) {
-            btn.style.background = m === 'live' ? '#2563eb' : (m === 'gcs' ? '#0284c7' : '#7c3aed');
-            btn.style.color = '#ffffff';
-          } else {
-            btn.style.background = 'transparent';
-            btn.style.color = '#94a3b8';
-          }
-        }
-      });
-
-      // Reset cache for fresh source loading
+      // Fresh load per source: clear cache and map
       loadedFeatures = [];
       featureCache.clear();
+      qaLoadedTotal = null;
+      upstreamLiveCount = 0;
+      s3LakehouseCount = 0;
       setSourceData('s3-src', EMPTY_FC);
       setSourceData('live-src', EMPTY_FC);
       setSourceData('live-points-src', EMPTY_FC);
 
-      // Check for custom bbox in URL params
       const urlBbox = urlParams.get('bbox');
       let customBoundsFitted = false;
       setBoundsOverlay(jurisdiction.bounds, '#3b82f6', 0);
       setSourceData('extent-src', EMPTY_FC);
       const sbn = document.getElementById('state-bounds-name');
       if (sbn) sbn.textContent = `(${jurisdiction.name})`;
-
       if (urlBbox) {
         const parts = urlBbox.split(',').map(Number);
         if (parts.length === 4 && parts.every(n => !isNaN(n))) {
@@ -274,7 +285,6 @@ def main():
           customBoundsFitted = true;
         }
       }
-
       if (!customBoundsFitted) {
         if (meta.bounds) {
           map.fitBounds(toLngLatBounds(meta.bounds), { padding: 40, duration: 0 });
@@ -284,80 +294,72 @@ def main():
         }
       }
 
-      // Handle raster & table
       if (meta.kind === 'raster' || meta.kind === 'table' || meta.service_type === 'raster_file_download' || meta.service_type === 'derived_raster' || meta.service_type === 'table_json') {
         countBadge.textContent = 'Loading from GCS…';
         tableCount.textContent = 'Loading ' + (meta.kind || 'dataset') + ' from GCS…';
         return;
       }
 
+      const acceptFeatures = (features, total) => {
+        // Source objectids repeat across sublayers (e.g. one QLD MapServer layer per cyclone);
+        // give every loaded row a unique id so the cache never drops records.
+        features.forEach((f, i) => { f.id = qaSourceMode + '-' + i; });
+        mergeFeaturesIntoCache(features);
+        qaLoadedTotal = total;
+        if (!initialFitDone && loadedFeatures.length > 0) {
+          initialFitDone = true;
+          if (!customBoundsFitted) fitToFeatures(loadedFeatures, 40);
+        }
+        applyViewportLimiter();
+      };
+
+      // GCS LIBRARY MODE: canonical GeoParquet partition via DuckDB-WASM (no fallback)
+      if (qaSourceMode === 'gcs') {
+        if (!meta.gcs_parquet_url) {
+          qaShowSourceError('Not in GCS library', `No GeoParquet partition for ${datasetKey} under gs://operational-intelligence-crafter-lake/geoparquet/. Switch to Live Government.`);
+          return;
+        }
+        countBadge.textContent = 'Reading GCS GeoParquet…';
+        tableCount.textContent = `DuckDB-WASM ← ${meta.gcs_uri}`;
+        try {
+          const res = await OICQaGcs.load(meta.gcs_parquet_url, { limit: 5000 });
+          s3LakehouseCount = res.totalRows;
+          acceptFeatures(res.features, res.totalRows);
+        } catch (e) {
+          qaShowSourceError('GCS GeoParquet read failed', `${e.message} — ${meta.gcs_parquet_url}`);
+        }
+        return;
+      }
+
+      // LIVE MODE: QLD historical cyclones are one MapServer sublayer per cyclone
+      if (datasetKey.startsWith('qld_cyclones_historical_')) {
+        const kind = datasetKey.endsWith('_fixes') ? 'Fix' : (datasetKey.endsWith('_tracks') ? 'Track' : 'Wind areas');
+        countBadge.textContent = `Querying live QLD MapServer (${kind})…`;
+        tableCount.textContent = `Live: ${OICQaLive.QLD_CYCLONE_MAPSERVER}`;
+        try {
+          const res = await OICQaLive.loadQldCyclones(kind);
+          if (res.failures.length) console.warn('Live sublayer failures:', res.failures);
+          if (!res.features.length) {
+            qaShowSourceError('Live endpoint returned no features', res.failures.join('<br>') || OICQaLive.QLD_CYCLONE_MAPSERVER);
+            return;
+          }
+          upstreamLiveCount = res.features.length;
+          acceptFeatures(res.features, res.features.length);
+        } catch (e) {
+          qaShowSourceError('Live endpoint query failed', `${e.message} — ${OICQaLive.QLD_CYCLONE_MAPSERVER}`);
+        }
+        return;
+      }
+
       let upstreamCount = meta.base_count;
       let s3Count = meta.base_count;
       let viewportCount = 0;
-
-      // MODE 1: Wherobots Cloud Iceberg Mode
-      if (qaSourceMode === 'wherobots') {
-        countBadge.textContent = 'Loading Wherobots Iceberg Table…';
-        tableCount.textContent = `Connecting to org_catalog.ops_intel.${datasetKey} (Apache Sedona)…`;
-        const localGeojsonUrl = meta.geojson_url || `data/${datasetKey}.geojson`;
-        try {
-          const gResp = await fetch(localGeojsonUrl);
-          if (gResp.ok) {
-            const gData = await gResp.json();
-            if (gData && gData.features && gData.features.length > 0) {
-              mergeFeaturesIntoCache(gData.features);
-              upstreamCount = gData.features.length;
-              s3Count = gData.features.length;
-              upstreamLiveCount = upstreamCount;
-              s3LakehouseCount = s3Count;
-              countBadge.textContent = `${loadedFeatures.length.toLocaleString()} (Wherobots) | org_catalog.ops_intel.${datasetKey}`;
-              tableCount.textContent = `Wherobots Sedona Table: org_catalog.ops_intel.${datasetKey} (${loadedFeatures.length.toLocaleString()} records)`;
-
-              if (!initialFitDone && loadedFeatures.length > 0) {
-                initialFitDone = true;
-                fitToFeatures(loadedFeatures, 40);
-              }
-              applyViewportLimiter();
-              return;
-            }
-          }
-        } catch (e) {
-          console.warn('Wherobots loading error:', e);
-        }
+      let baseEndpoint = endpoint.replace(/[?]f=json$/i, '').replace(/[/]query$/i, '').replace(/[/]+$/, '');
+      if (datasetKey === 'national_schools_acara_v2' || datasetKey === 'national_healthcare_nhsd_v2') {
+        baseEndpoint = "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3";
       }
 
-      // MODE 2: GCS Lakehouse Mode (Authoritative GeoParquet / GeoJSON artifact)
-      if (qaSourceMode === 'gcs') {
-        countBadge.textContent = 'Loading GCS Lakehouse Artifact…';
-        tableCount.textContent = `Fetching authoritative GeoParquet/GeoJSON from GCS…`;
-        const localGeojsonUrl = meta.geojson_url || `data/${datasetKey}.geojson`;
-        try {
-          const gResp = await fetch(localGeojsonUrl);
-          if (gResp.ok) {
-            const gData = await gResp.json();
-            if (gData && gData.features && gData.features.length > 0) {
-              mergeFeaturesIntoCache(gData.features);
-              upstreamCount = gData.features.length;
-              s3Count = gData.features.length;
-              upstreamLiveCount = upstreamCount;
-              s3LakehouseCount = s3Count;
-              countBadge.textContent = `${loadedFeatures.length.toLocaleString()} (GCS) | ${s3Count.toLocaleString()} Lakehouse Records`;
-              tableCount.textContent = `GCS Lakehouse: gs://operational-intelligence-crafter-lake/geoparquet/${datasetKey}/ (${loadedFeatures.length.toLocaleString()} records)`;
-
-              if (!initialFitDone && loadedFeatures.length > 0) {
-                initialFitDone = true;
-                fitToFeatures(loadedFeatures, 40);
-              }
-              applyViewportLimiter();
-              return;
-            }
-          }
-        } catch (e) {
-          console.warn('GCS lakehouse fetch notice:', e);
-        }
-      }
-
-      // MODE 3: Upstream Live State Mode (Direct query to live government service)
+      // LIVE MODE: generic upstream government service (ArcGIS REST / WFS)
       countBadge.textContent = 'Querying Live Government Service…';
       tableCount.textContent = `Connecting to ${meta.endpoint}…`;"""
 
@@ -552,6 +554,26 @@ def main():
         if (cycloneHud) cycloneHud.style.display = 'none';
       }"""
     content = content.replace(old_set_sources, new_set_sources)
+
+    # 8b. Mode-aware count badge (no borrowed/placeholder totals)
+    content = content.replace(
+        "const badgeText = `${rendCount.toLocaleString()} (Top-K) | ${s3Val.toLocaleString()} (Lakehouse) | ${upVal.toLocaleString()} (Live)`;",
+        "const badgeText = (typeof qaLoadedTotal === 'number') ? `${rendCount.toLocaleString()} shown | ${loadedFeatures.length.toLocaleString()} loaded of ${qaLoadedTotal.toLocaleString()} (${qaSourceMode === 'live' ? 'Live Government' : 'GCS Library'})` : `${rendCount.toLocaleString()} shown | ${qaSourceMode === 'live' ? 'Live Government' : 'GCS Library'}`;"
+    )
+    content = content.replace(
+        '<script src="../js/geolibre-qa-layer-registry.js"></script>',
+        '<script src="../js/qa-sources.js"></script>\n<script src="../js/geolibre-qa-layer-registry.js"></script>'
+    )
+
+    # 8c. Viewport refetch hits the live endpoint: only allowed in Live mode, and not for the
+    #     QLD cyclone sublayer set (loaded completely by OICQaLive). Stops live rows mixing into GCS view.
+    vp_old = """    async function fetchViewportFeatures() {
+      if (isFetchingViewport) return;"""
+    vp_new = """    async function fetchViewportFeatures() {
+      if (isFetchingViewport) return;
+      if (qaSourceMode !== 'live' || datasetKey.startsWith('qld_cyclones_historical_')) return;"""
+    assert vp_old in content, "fetchViewportFeatures anchor missing"
+    content = content.replace(vp_old, vp_new)
 
     # 9. Floating Map HUD for Cyclone Intensity Scale & Multi-Layer Notice
     old_map_div = '<div id="map"></div>'

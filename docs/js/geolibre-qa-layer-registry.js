@@ -440,10 +440,6 @@ function qaVectorQueryUrl(rec) {
 
 async function qaAddVector(rec) {
   const ep = rec.entry.endpoint || '';
-  if (qaVectorQueryUrl(rec) === null) {
-    throw new Error(`Overlay mode supports ArcGIS REST endpoints and WFS endpoints with a typeName. ` +
-      `Open it as the primary dataset instead. Endpoint: ${ep}`);
-  }
   const srcId = `qa-src-${rec.key}`;
   map.addSource(srcId, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   rec.sourceIds.push(srcId);
@@ -463,34 +459,39 @@ async function qaAddVector(rec) {
 
 async function qaRefreshVector(rec) {
   if (!rec.visible || !map.getSource(`qa-src-${rec.key}`)) return;
-  let url = qaVectorQueryUrl(rec);
-  rec.url = url;
+  const mode = (typeof qaSourceMode !== 'undefined') ? qaSourceMode : 'gcs';
+  let feats = [], total = null, more = false;
+  rec.url = '';
   try {
-    let r = null;
-    const preferLakehouse = (typeof qaSourceMode !== 'undefined' && qaSourceMode !== 'live');
-    if (preferLakehouse && rec.entry.geojson_url) {
-      try {
-        r = await fetch(rec.entry.geojson_url);
-        if (r && r.ok) url = rec.entry.geojson_url;
-      } catch (_) {}
-    }
-    if (!r || !r.ok) {
-      if (url) {
-        try {
-          r = await fetch(url);
-        } catch (err) {
-          console.warn(`Upstream query notice for ${rec.key}:`, err);
-        }
+    if (mode === 'gcs') {
+      if (!rec.entry.gcs_parquet_url) throw new Error('Not in GCS library (no GeoParquet partition)');
+      rec.url = rec.entry.gcs_parquet_url;
+      if (!(rec._cache && rec._cache.mode === 'gcs')) {
+        const res = await OICQaGcs.load(rec.entry.gcs_parquet_url, { limit: 5000 });
+        rec._cache = { mode: 'gcs', feats: res.features, total: res.totalRows };
       }
+      feats = rec._cache.feats; total = rec._cache.total;
+    } else if (rec.key.startsWith('qld_cyclones_historical_')) {
+      const kind = rec.key.endsWith('_fixes') ? 'Fix' : (rec.key.endsWith('_tracks') ? 'Track' : 'Wind areas');
+      rec.url = OICQaLive.QLD_CYCLONE_MAPSERVER;
+      if (!(rec._cache && rec._cache.mode === 'live')) {
+        const res = await OICQaLive.loadQldCyclones(kind);
+        if (!res.features.length) throw new Error(res.failures.join('; ') || 'live endpoint returned no features');
+        rec._cache = { mode: 'live', feats: res.features, total: res.features.length };
+      }
+      feats = rec._cache.feats; total = rec._cache.total;
+    } else {
+      const url = qaVectorQueryUrl(rec);
+      if (!url) throw new Error(`No live query adapter for endpoint ${rec.entry.endpoint || '(none)'}`);
+      rec.url = url;
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const fc = await r.json();
+      if (!fc || !Array.isArray(fc.features)) throw new Error('response is not GeoJSON');
+      feats = fc.features;
+      more = Boolean(fc.exceededTransferLimit || (fc.properties && fc.properties.exceededTransferLimit));
     }
-    if ((!r || !r.ok) && rec.entry.geojson_url) {
-      url = rec.entry.geojson_url;
-      r = await fetch(url);
-    }
-    if (!r || !r.ok) throw new Error(`HTTP ${r ? r.status : 'fetch failed'}`);
-    const fc = await r.json();
-    if (!fc || !Array.isArray(fc.features)) throw new Error('response is not GeoJSON');
-    const feats = fc.features.filter(f => f && f.geometry);
+    feats = feats.filter(f => f && f.geometry);
     let rendered = feats;
     if (typeof GeoLibreLayerLimiter !== 'undefined' && GeoLibreLayerLimiter.optimizeFeatureCollection) {
       const b = map.getBounds();
@@ -501,11 +502,13 @@ async function qaRefreshVector(rec) {
     }
     rec.features = rendered;
     map.getSource(`qa-src-${rec.key}`).setData({ type: 'FeatureCollection', features: rendered });
-    const more = fc.exceededTransferLimit || (fc.properties && fc.properties.exceededTransferLimit);
     rec.error = null;
-    rec.status = `${rendered.length.toLocaleString()} shown of ${feats.length.toLocaleString()}${more ? '+' : ''} in view`;
+    const src = mode === 'gcs' ? 'GCS' : 'Live';
+    rec.status = `${src}: ${rendered.length.toLocaleString()} shown of ${feats.length.toLocaleString()}${more ? '+' : ''}${total !== null && total !== feats.length ? ` (${total.toLocaleString()} total)` : ''}`;
   } catch (e) {
-    rec.error = `${e.message} — ${rec.url || rec.entry.geojson_url || 'endpoint'}`;
+    map.getSource(`qa-src-${rec.key}`).setData({ type: 'FeatureCollection', features: [] });
+    rec.features = [];
+    rec.error = `${e.message}${rec.url ? ' — ' + rec.url : ''}`;
     rec.status = 'Error';
   }
   renderLayerCard(rec);
@@ -513,7 +516,7 @@ async function qaRefreshVector(rec) {
 }
 
 function qaRefreshAllVectors() {
-  qaState.registry.forEach(rec => { if (rec.kind === 'vector' && rec.visible && rec.url !== undefined) qaRefreshVector(rec); });
+  qaState.registry.forEach(rec => { if (rec.kind === 'vector' && rec.visible) qaRefreshVector(rec); });
 }
 
 /* ---------------- Point clouds (footprint + 3D viewer link) ---------------- */

@@ -804,11 +804,10 @@
     </div>
     
     <div class="qa-tools">
-      <!-- 3-Way Authoritative Data Source Switcher (Live State, GCS Lakehouse, Wherobots) -->
+      <!-- Data source switcher: live government endpoint vs canonical GCS GeoParquet library -->
       <div class="source-segmented-control" id="qa-source-selector" style="display:inline-flex; align-items:center; background:rgba(15,23,42,0.85); border:1px solid rgba(59,130,246,0.35); border-radius:6px; padding:2px; gap:2px; margin-right:8px;">
-        <button class="source-pill" id="btn-src-live" onclick="setDataSourceMode('live')" title="Query live government REST / WFS service" style="background:transparent; color:#94a3b8; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer; transition:all 0.15s;">🟢 Live State</button>
-        <button class="source-pill active" id="btn-src-gcs" onclick="setDataSourceMode('gcs')" title="Load authoritative GeoParquet / GeoJSON artifact stored on GCS" style="background:#0284c7; color:#ffffff; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer; transition:all 0.15s;">🔵 GCS Lakehouse</button>
-        <button class="source-pill" id="btn-src-wherobots" onclick="setDataSourceMode('wherobots')" title="Inspect Wherobots Cloud Sedona Iceberg table (org_catalog.ops_intel)" style="background:transparent; color:#94a3b8; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer; transition:all 0.15s;">🟣 Wherobots</button>
+        <button class="source-pill" id="btn-src-live" onclick="setDataSourceMode('live')" title="Query the live government REST / WFS endpoint" style="background:transparent; color:#94a3b8; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer;">🟢 Live Government</button>
+        <button class="source-pill" id="btn-src-gcs" onclick="setDataSourceMode('gcs')" title="Read the canonical GeoParquet partition in gs://operational-intelligence-crafter-lake (same data as Wherobots)" style="background:transparent; color:#94a3b8; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer;">🔵 GCS Library</button>
       </div>
       <button class="tool-btn" onclick="openModal('info-modal')">ℹ️ Info</button>
       <button class="tool-btn active" id="btn-toggle-table" onclick="toggleAttrDock()">📋 Table</button>
@@ -1151,21 +1150,21 @@
     "type": "multipolygon",
     "base_count": 3357016,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.national_cadastre_gnaf_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "national_cyclone_hazard_tcha_v2": {
     "name": "Tropical Cyclone Hazard Assessment (TCHA) & AS/NZS 1170.2 Wind Regions",
     "state": "national",
     "kind": "vector",
     "endpoint": "https://services.ga.gov.au/gis/rest/services/Tropical_Cyclone_Hazard_Assessment_2018/MapServer/1",
-    "s3_path": "s3://wherobots-user-storage/aura_siting/national_cyclone_hazard_tcha_v2.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/national_cyclone_hazard_tcha_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "polygon",
     "base_count": 9,
     "hash": "ef0090b06033a9c1",
     "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.national_cyclone_hazard_tcha_v2"
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_cyclone_hazard_tcha_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/national_cyclone_hazard_tcha_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
   },
   "national_electricity_grid_v2": {
     "name": "Geoscience Australia National Electricity Transmission Grid (>=66kV)",
@@ -1177,34 +1176,35 @@
     "type": "linestring",
     "base_count": 3147,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.national_electricity_grid_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "national_healthcare_nhsd_v2": {
     "name": "National Health Services Directory (NHSD) Hospitals & Health Facilities",
     "state": "national",
     "kind": "vector",
     "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3",
-    "s3_path": "s3://wherobots-user-storage/aura_siting/national_healthcare_nhsd_v2.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/national_healthcare_nhsd_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
     "service_type": "arcgis_featureserver",
     "type": "point",
-    "base_count": 76629,
+    "base_count": 297,
     "hash": "ef0090b06033a9c1",
     "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.national_healthcare_nhsd_v2"
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_healthcare_nhsd_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/national_healthcare_nhsd_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
   },
   "national_schools_acara_v2": {
     "name": "ACARA National Schools Directory",
     "state": "national",
     "kind": "vector",
     "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3",
-    "s3_path": "s3://wherobots-user-storage/aura_siting/national_schools_acara_v2.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/national_schools_acara_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
     "service_type": "arcgis_featureserver",
     "type": "point",
-    "base_count": 76629,
+    "base_count": 3578,
     "hash": "ef0090b06033a9c1",
     "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.national_schools_acara_v2"
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_schools_acara_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/national_schools_acara_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
   },
   "national_seismic_hazard_nsha_v2": {
     "name": "National Seismic Hazard Assessment (NSHA) Ground Motion PGA (National)",
@@ -1216,8 +1216,7 @@
     "type": "polygon",
     "base_count": 9,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.national_seismic_hazard_nsha_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "nsw_bionet_bv_map_v2": {
     "name": "Biodiversity Values Map (Biodiversity Conservation Act 2016)",
@@ -1229,21 +1228,21 @@
     "type": "multipolygon",
     "base_count": 53824,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.nsw_bionet_bv_map_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "nsw_coastal_inundation_hazard_v2": {
     "name": "NSW Coastal Inundation, Storm Surge and Tidal Extent",
     "state": "nsw",
     "kind": "vector",
     "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7?f=json",
-    "s3_path": "s3://wherobots-user-storage/aura_siting/nsw_coastal_inundation_hazard_v2.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_coastal_inundation_hazard_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
     "service_type": "arcgis_featureserver",
     "type": "multipolygon",
     "base_count": 880,
     "hash": "ef0090b06033a9c1",
     "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.nsw_coastal_inundation_hazard_v2"
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_coastal_inundation_hazard_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_coastal_inundation_hazard_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
   },
   "nsw_elvis_lidar_1m_dem_v2": {
     "name": "ELVIS NSW 1m High-Resolution LiDAR Digital Elevation Model & Contours",
@@ -1269,8 +1268,7 @@
     "center": [
       -33.01396,
       151.62576
-    ],
-    "wherobots_table": "org_catalog.ops_intel.nsw_elvis_lidar_1m_dem_v2"
+    ]
   },
   "nsw_elvis_lidar_1m_dsm_v2": {
     "name": "ELVIS NSW 1m High-Resolution Digital Surface Model (Canopy & Structure DSM)",
@@ -1296,8 +1294,7 @@
     "center": [
       -33.01396,
       151.62576
-    ],
-    "wherobots_table": "org_catalog.ops_intel.nsw_elvis_lidar_1m_dsm_v2"
+    ]
   },
   "nsw_elvis_lidar_contours_v2": {
     "name": "ELVIS NSW 0.5m/1m Topographic Elevation Contours Fabric",
@@ -1323,8 +1320,7 @@
     "center": [
       -33.01396,
       151.62576
-    ],
-    "wherobots_table": "org_catalog.ops_intel.nsw_elvis_lidar_contours_v2"
+    ]
   },
   "nsw_elvis_lidar_laz_pointcloud_v2": {
     "name": "ELVIS NSW Classified 3D LiDAR Point Cloud (.LAZ / ASPRS Ground, Canopy & Structures)",
@@ -1350,8 +1346,7 @@
     "center": [
       -33.01396,
       151.62576
-    ],
-    "wherobots_table": "org_catalog.ops_intel.nsw_elvis_lidar_laz_pointcloud_v2"
+    ]
   },
   "nsw_landslide_susceptibility_v2": {
     "name": "NSW Slope Instability and Landslide Hazard Susceptibility",
@@ -1363,8 +1358,7 @@
     "type": "multipolygon",
     "base_count": 4722,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.nsw_landslide_susceptibility_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "nsw_national_seismic_hazard_v2": {
     "name": "National Seismic Hazard Assessment (NSHA) Ground Motion PGA (NSW)",
@@ -1376,21 +1370,21 @@
     "type": "polygon",
     "base_count": 9,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.nsw_national_seismic_hazard_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "nsw_transmission_grid_v2": {
     "name": "High-Voltage Transmission Network and Terminal Substations (>=132kV)",
     "state": "nsw",
     "kind": "vector",
     "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/6?f=json",
-    "s3_path": "s3://wherobots-user-storage/aura_siting/nsw_transmission_grid_v2.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
     "service_type": "arcgis_featureserver",
     "type": "linestring",
     "base_count": 6575,
     "hash": "ef0090b06033a9c1",
     "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.nsw_transmission_grid_v2"
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet"
   },
   "qld_cyclone_hazard_tcha_v2": {
     "name": "Tropical Cyclone Hazard Assessment (TCHA) & AS/NZS 1170.2 Wind Regions",
@@ -1402,8 +1396,7 @@
     "type": "polygon",
     "base_count": 9,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.qld_cyclone_hazard_tcha_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "qld_landslide_susceptibility_v2": {
     "name": "Queensland State Planning Policy (SPP) Landslide Hazard Overlays",
@@ -1415,8 +1408,7 @@
     "type": "multipolygon",
     "base_count": 132621,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.qld_landslide_susceptibility_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "qld_regulated_vegetation_vma_v2": {
     "name": "Regulated Vegetation Management Map (Vegetation Management Act 1999)",
@@ -1428,8 +1420,7 @@
     "type": "multipolygon",
     "base_count": 107291,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.qld_regulated_vegetation_vma_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "qld_transmission_grid_v2": {
     "name": "Powerlink & Energex High-Voltage Transmission Grid (>=110kV)",
@@ -1441,8 +1432,7 @@
     "type": "linestring",
     "base_count": 3147,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.qld_transmission_grid_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "qld_waterway_barriers_hydro_v2": {
     "name": "Queensland Waterways for Waterway Barrier Works & Riparian Networks",
@@ -1454,8 +1444,7 @@
     "type": "linestring",
     "base_count": 4050422,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.qld_waterway_barriers_hydro_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "sa_transmission_grid_electranet_v2": {
     "name": "ElectraNet & SA Power Networks High-Voltage Grid (>=132kV)",
@@ -1467,8 +1456,7 @@
     "type": "linestring",
     "base_count": 225,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.sa_transmission_grid_electranet_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "tas_transmission_grid_tasnetworks_v2": {
     "name": "TasNetworks High-Voltage Transmission Network (>=110kV)",
@@ -1480,8 +1468,7 @@
     "type": "linestring",
     "base_count": 89895,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.tas_transmission_grid_tasnetworks_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "vic_hydro_watercourses_v2": {
     "name": "Vicmap Hydrography Watercourses and Water Bodies",
@@ -1493,8 +1480,7 @@
     "type": "linestring",
     "base_count": 8720,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.vic_hydro_watercourses_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "vic_landslide_slope_stability_v2": {
     "name": "Victorian Geotechnical Slope Stability and Landslide Hazard Overlay",
@@ -1506,8 +1492,7 @@
     "type": "multipolygon",
     "base_count": 4610,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.vic_landslide_slope_stability_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "vic_native_veg_nvim_v2": {
     "name": "Native Vegetation Information Management (NVIM) & Habitat Quality",
@@ -1519,8 +1504,7 @@
     "type": "multipolygon",
     "base_count": 12450,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.vic_native_veg_nvim_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "vic_planning_scheme_zones_v2": {
     "name": "Vicmap Planning Schemes (VPP Standardised Zones)",
@@ -1532,8 +1516,7 @@
     "type": "multipolygon",
     "base_count": 5120,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.vic_planning_scheme_zones_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "vic_transmission_grid_vicgrid_v2": {
     "name": "Victorian High-Voltage Transmission Network (>=66kV)",
@@ -1545,8 +1528,7 @@
     "type": "linestring",
     "base_count": 3250,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.vic_transmission_grid_vicgrid_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "wa_dbca_threatened_ecological_communities_v2": {
     "name": "DBCA Threatened Ecological Communities (TEC) & Priority Flora/Fauna",
@@ -1558,21 +1540,21 @@
     "type": "multipolygon",
     "base_count": 124471,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.wa_dbca_threatened_ecological_communities_v2"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "wa_transmission_grid_v2": {
     "name": "Western Power SWIS & Horizon Power Transmission Network (>=66kV)",
     "state": "wa",
     "kind": "vector",
     "endpoint": "https://services.slip.wa.gov.au/public/rest/services/SLIP_Public_Services/Infrastructure_and_Utilities/MapServer/75",
-    "s3_path": "s3://wherobots-user-storage/aura_siting/wa_transmission_grid_v2.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/wa_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "linestring",
     "base_count": 26132,
     "hash": "ef0090b06033a9c1",
     "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.wa_transmission_grid_v2"
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/wa_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/wa_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet"
   },
   "hydrosheds_au_acc_3s_v1": {
     "name": "HydroSHEDS v1 Australia Flow Accumulation (3 arc-second)",
@@ -1584,8 +1566,7 @@
     "type": "raster",
     "base_count": 1008000,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.hydrosheds_au_acc_3s_v1"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "hydrosheds_au_con_3s_v1": {
     "name": "HydroSHEDS v1 Australia Hydrologically Conditioned DEM (3 arc-second)",
@@ -1597,8 +1578,7 @@
     "type": "raster",
     "base_count": 1008000,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.hydrosheds_au_con_3s_v1"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "aura_drainage_slope_deg_v1": {
     "name": "Slope (degrees) derived from HydroSHEDS v1 conditioned DEM",
@@ -1610,8 +1590,7 @@
     "type": "raster",
     "base_count": 1008000,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.aura_drainage_slope_deg_v1"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "aura_drainage_hand_euclid_m_v1": {
     "name": "Height above nearest drainage, straight-line approximation (m)",
@@ -1623,8 +1602,7 @@
     "type": "raster",
     "base_count": 1008000,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.aura_drainage_hand_euclid_m_v1"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "aura_drainage_streams_mask_v1": {
     "name": "Derived stream network mask (flow accumulation threshold)",
@@ -1636,8 +1614,7 @@
     "type": "raster",
     "base_count": 1008000,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.aura_drainage_streams_mask_v1"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "aura_drainage_s_drainage_v1": {
     "name": "S_drainage experimental drainage hazard score (0..1, uncalibrated)",
@@ -1649,119 +1626,126 @@
     "type": "raster",
     "base_count": 1008000,
     "hash": "ef0090b06033a9c1",
-    "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.aura_drainage_s_drainage_v1"
+    "sync_date": "2026-09-08 12:00 UTC"
   },
   "datacenter_candidates_v2": {
     "name": "AURA Candidate Siting & Multi-Criteria Ranking Table",
     "state": "national",
     "kind": "table",
     "endpoint": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/exports_v2/datacenter_candidates_v2.json",
-    "s3_path": "gs://aura-siting-crafter-geolibre-app/exports_v2/datacenter_candidates_v2.json",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/datacenter_candidates_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
     "service_type": "table_json",
     "type": "none",
-    "base_count": 25,
+    "base_count": 17,
     "hash": "ef0090b06033a9c1",
     "sync_date": "2026-09-08 12:00 UTC",
-    "wherobots_table": "org_catalog.ops_intel.datacenter_candidates_v2"
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/datacenter_candidates_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/datacenter_candidates_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
   },
   "abs_australia_1km_population_grid": {
     "name": "ABS 2025 — Australian Population Grid 1 km² (National Modeled ERP Grid)",
     "state": "national",
     "kind": "vector",
     "endpoint": "https://www.abs.gov.au/statistics/people/population/regional-population/2024-25/GEOTIFF.zip",
-    "s3_path": "data/lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
     "service_type": "file_download",
     "type": "point",
-    "base_count": 47065,
+    "base_count": 286827,
     "hash": "authoritative_lake_hash",
     "sync_date": "2026-11-10T02:26:39Z",
-    "wherobots_table": "org_catalog.ops_intel.abs_australia_1km_population_grid",
-    "geojson_url": "data/abs_australia_1km_population_grid.geojson"
+    "geojson_url": "data/abs_australia_1km_population_grid.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet"
   },
   "ga_electricity_substations": {
     "name": "National Electricity Infrastructure — Power Substations",
     "state": "national",
     "kind": "vector",
     "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/0",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "point",
     "base_count": 1866,
     "hash": "d9bf2909c6fb6a3665f2755276341214608a89413d0bbea53f814092797daee7",
     "sync_date": "2026-11-09T07:30:13Z",
-    "wherobots_table": "org_catalog.ops_intel.ga_electricity_substations",
-    "geojson_url": "data/ga_electricity_substations.geojson"
+    "geojson_url": "data/ga_electricity_substations.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet"
   },
   "ga_electricity_transmission_lines": {
     "name": "National Electricity Infrastructure — High-Voltage Transmission Lines",
     "state": "national",
     "kind": "vector",
     "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "linestring",
     "base_count": 3147,
     "hash": "6f3be3b0108767a0fb60de38041cd8fecb8212b1fcaabeb32a554fabc95d4763",
     "sync_date": "2026-11-09T07:30:16Z",
-    "wherobots_table": "org_catalog.ops_intel.ga_electricity_transmission_lines",
-    "geojson_url": "data/ga_electricity_transmission_lines.geojson"
+    "geojson_url": "data/ga_electricity_transmission_lines.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet"
   },
   "ga_major_power_stations": {
     "name": "National Electricity Infrastructure — Major Power Stations",
     "state": "national",
     "kind": "vector",
     "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/1",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "point",
     "base_count": 430,
     "hash": "4ceb334b09a13e3d5dc4a063f930a5cc097b4b5882873476ac041e052fcc27bd",
     "sync_date": "2026-11-09T07:30:26Z",
-    "wherobots_table": "org_catalog.ops_intel.ga_major_power_stations",
-    "geojson_url": "data/ga_major_power_stations.geojson"
+    "geojson_url": "data/ga_major_power_stations.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet"
   },
   "ga_seismic_hazard_pga_10pct": {
     "name": "National Seismic Hazard Assessment 2018 — PGA Contours (10% in 50 Years)",
     "state": "national",
     "kind": "vector",
     "endpoint": "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/15",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "linestring",
     "base_count": 100,
     "hash": "66f9bda36bfd1b75314aecbecc71cfa329c363e6dae8b59be9c239afea4a6269",
     "sync_date": "2026-11-09T07:30:27Z",
-    "wherobots_table": "org_catalog.ops_intel.ga_seismic_hazard_pga_10pct",
-    "geojson_url": "data/ga_seismic_hazard_pga_10pct.geojson"
+    "geojson_url": "data/ga_seismic_hazard_pga_10pct.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet"
   },
   "next_lga_boundaries_asgs2025": {
     "name": "ABS ASGS Edition 3 (2025) — Local Government Areas (NExT Administrative Baseline)",
     "state": "national",
     "kind": "vector",
     "endpoint": "https://geo.abs.gov.au/arcgis/rest/services/ASGS2025/LGA/MapServer/0",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "polygon",
     "base_count": 567,
     "hash": "274ea5e2af3265ce33e02f0ec6cc6f7bc575628bd9b484cc2622ab3240133c3f",
     "sync_date": "2026-11-09T07:30:27Z",
-    "wherobots_table": "org_catalog.ops_intel.next_lga_boundaries_asgs2025",
-    "geojson_url": "data/next_lga_boundaries_asgs2025.geojson"
+    "geojson_url": "data/next_lga_boundaries_asgs2025.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet"
   },
   "next_sa2_boundaries_asgs2021": {
     "name": "ABS ASGS 2021 — Statistical Areas Level 2 (SA2 Population & Vulnerability Baseline)",
     "state": "sa",
     "kind": "vector",
     "endpoint": "https://geo.abs.gov.au/arcgis/rest/services/ASGS2021/SA2/MapServer/0",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "polygon",
     "base_count": 2473,
     "hash": "a762acf90baf181b525c6264c28e52b0e413ec514bf6fa5fb6318e66686bd912",
     "sync_date": "2026-11-09T07:30:56Z",
-    "wherobots_table": "org_catalog.ops_intel.next_sa2_boundaries_asgs2021",
-    "geojson_url": "data/next_sa2_boundaries_asgs2021.geojson"
+    "geojson_url": "data/next_sa2_boundaries_asgs2021.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet"
   },
   "nsw_emergency_management_restricted": {
     "name": "NSW Spatial Services — Emergency Management Restricted Service (Failed Source Contract Test)",
@@ -1773,106 +1757,112 @@
     "type": "point",
     "base_count": 100,
     "hash": "authoritative_lake_hash",
-    "sync_date": "2026-11-09T07:31:28Z",
-    "wherobots_table": "org_catalog.ops_intel.nsw_emergency_management_restricted"
+    "sync_date": "2026-11-09T07:31:28Z"
   },
   "nsw_foi_building_complexes": {
     "name": "NSW Features of Interest — Emergency, Health, Education & Community Facilities",
     "state": "nsw",
     "kind": "vector",
     "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
     "service_type": "arcgis_featureserver",
     "type": "point",
     "base_count": 76629,
     "hash": "db491ca198de72a70c2c6b24f859d7e13100262257b414d2052f5cc85b94c7cc",
     "sync_date": "2026-11-09T07:31:28Z",
-    "wherobots_table": "org_catalog.ops_intel.nsw_foi_building_complexes",
-    "geojson_url": "data/nsw_foi_building_complexes.geojson"
+    "geojson_url": "data/nsw_foi_building_complexes.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet"
   },
   "nsw_lga_boundaries": {
     "name": "NSW Spatial Services — Local Government Area Boundaries",
     "state": "nsw",
     "kind": "vector",
     "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Administrative_Boundaries_Theme/FeatureServer/8",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
     "service_type": "arcgis_featureserver",
     "type": "polygon",
     "base_count": 132,
     "hash": "ea89196886922a2d95645bcd434b680364af0d9ad15c66117b39ab926c3ba13a",
     "sync_date": "2026-11-09T07:32:49Z",
-    "wherobots_table": "org_catalog.ops_intel.nsw_lga_boundaries",
-    "geojson_url": "data/nsw_lga_boundaries.geojson"
+    "geojson_url": "data/nsw_lga_boundaries.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet"
   },
   "nsw_rfs_major_incidents_live": {
     "name": "NSW Rural Fire Service — Current Major Bushfire & Emergency Incidents Feed",
     "state": "nsw",
     "kind": "vector",
     "endpoint": "https://www.rfs.nsw.gov.au/feeds/majorIncidents.json",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
     "service_type": "geojson_feed",
     "type": "polygon",
     "base_count": 20,
     "hash": "7ef111c64bc3a12df8880016d7ccb37585bcbccefc25d78b379931a646efbf12",
     "sync_date": "2026-11-09T07:33:10Z",
-    "wherobots_table": "org_catalog.ops_intel.nsw_rfs_major_incidents_live",
-    "geojson_url": "data/nsw_rfs_major_incidents_live.geojson"
+    "geojson_url": "data/nsw_rfs_major_incidents_live.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet"
   },
   "nsw_water_inundation_areas": {
     "name": "NSW Spatial Services — Fuzzy Extent Water & Flood Inundation Areas",
     "state": "nsw",
     "kind": "vector",
     "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
     "service_type": "arcgis_featureserver",
     "type": "polygon",
     "base_count": 880,
     "hash": "b7d64b861b816c46a3db85467310677af1e00b016b5293f6b9d8504c993ecc4a",
     "sync_date": "2026-11-09T07:33:10Z",
-    "wherobots_table": "org_catalog.ops_intel.nsw_water_inundation_areas",
-    "geojson_url": "data/nsw_water_inundation_areas.geojson"
+    "geojson_url": "data/nsw_water_inundation_areas.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet"
   },
   "qld_cyclones_historical_fixes": {
     "name": "Queensland Historical Tropical Cyclone Fixes & Observations",
     "state": "qld",
     "kind": "vector",
     "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "point",
     "base_count": 260,
     "hash": "authoritative_lake_hash",
     "sync_date": "2026-11-13 05:29 UTC",
-    "wherobots_table": "org_catalog.ops_intel.qld_cyclones_historical_fixes",
-    "geojson_url": "data/qld_cyclones_historical_fixes.geojson"
+    "geojson_url": "data/qld_cyclones_historical_fixes.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
   },
   "qld_cyclones_historical_tracks": {
     "name": "Queensland Historical Tropical Cyclone Tracks",
     "state": "qld",
     "kind": "vector",
     "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "linestring",
     "base_count": 23,
     "hash": "authoritative_lake_hash",
     "sync_date": "2026-11-13 05:29 UTC",
-    "wherobots_table": "org_catalog.ops_intel.qld_cyclones_historical_tracks",
-    "geojson_url": "data/qld_cyclones_historical_tracks.geojson"
+    "geojson_url": "data/qld_cyclones_historical_tracks.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
   },
   "qld_cyclones_historical_wind_areas": {
     "name": "Queensland Historical Tropical Cyclone Wind Swaths & Hazard Areas",
     "state": "qld",
     "kind": "vector",
     "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
-    "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "polygon",
     "base_count": 900,
     "hash": "authoritative_lake_hash",
     "sync_date": "2026-11-13 05:29 UTC",
-    "wherobots_table": "org_catalog.ops_intel.qld_cyclones_historical_wind_areas",
-    "geojson_url": "data/qld_cyclones_historical_wind_areas.geojson"
+    "geojson_url": "data/qld_cyclones_historical_wind_areas.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
   }
 };
 
@@ -2346,76 +2336,71 @@
       updateHudBadge(stats.renderedCount, stats.totalInViewport, stats.isCapped, stats.executionTimeMs);
     }
 
-        let qaSourceMode = urlParams.get('source') || 'gcs';
+        let qaSourceMode = (urlParams.get('source') === 'live') ? 'live' : 'gcs';
+    let qaLoadedTotal = null;
 
-    window.setDataSourceMode = function(mode) {
-      qaSourceMode = mode;
-      ['live', 'gcs', 'wherobots'].forEach(m => {
+    function qaPaintSourcePills() {
+      ['live', 'gcs'].forEach(m => {
         const btn = document.getElementById(`btn-src-${m}`);
-        if (btn) {
-          if (m === mode) {
-            btn.style.background = m === 'live' ? '#2563eb' : (m === 'gcs' ? '#0284c7' : '#7c3aed');
-            btn.style.color = '#ffffff';
-          } else {
-            btn.style.background = 'transparent';
-            btn.style.color = '#94a3b8';
-          }
-        }
+        if (!btn) return;
+        const on = m === qaSourceMode;
+        btn.style.background = on ? (m === 'live' ? '#16a34a' : '#0284c7') : 'transparent';
+        btn.style.color = on ? '#ffffff' : '#94a3b8';
       });
-      const u = new URL(window.location.href);
-      u.searchParams.set('source', mode);
-      window.history.replaceState({}, '', u.href);
-
-      // Update lineage display
       const lineageEl = document.getElementById('s3-path-label');
       if (lineageEl) {
-        if (mode === 'live') {
-          lineageEl.innerHTML = `<span style="color:#38bdf8; font-weight:600;">Upstream Live Service:</span><br><a href="${meta.endpoint}" target="_blank" style="color:#60a5fa; font-size:0.72rem; word-break:break-all; text-decoration:underline;">${meta.endpoint}</a>`;
-        } else if (mode === 'gcs') {
-          lineageEl.innerHTML = `<span style="color:#34d399; font-weight:600;">GCS Lakehouse Storage:</span><br><code style="color:#34d399; font-size:0.72rem; word-break:break-all;">${meta.s3_path || 'gs://operational-intelligence-crafter-lake/geoparquet/' + datasetKey + '/'}</code>`;
-        } else if (mode === 'wherobots') {
-          lineageEl.innerHTML = `<span style="color:#c084fc; font-weight:600;">Wherobots Iceberg Catalog:</span><br><code style="color:#c084fc; font-size:0.72rem; word-break:break-all;">org_catalog.ops_intel.${datasetKey}</code><br><span style="font-size:0.7rem; color:#a78bfa;">Engine: Apache Sedona 1.6 / Iceberg Havasu | Compute: $0.00/hr Idle</span>`;
+        if (qaSourceMode === 'live') {
+          lineageEl.innerHTML = `<span style="color:#4ade80; font-weight:600;">Live government endpoint:</span><br><a href="${meta.endpoint}" target="_blank" style="color:#60a5fa; font-size:0.72rem; word-break:break-all;">${meta.endpoint}</a>`;
+        } else {
+          lineageEl.innerHTML = meta.gcs_parquet_url
+            ? `<span style="color:#34d399; font-weight:600;">GCS GeoParquet library:</span><br><code style="color:#34d399; font-size:0.72rem; word-break:break-all;">${meta.gcs_uri}</code>`
+            : `<span style="color:#f87171; font-weight:600;">Not in GCS library</span>`;
         }
       }
+    }
 
+    window.setDataSourceMode = function(mode) {
+      qaSourceMode = mode === 'live' ? 'live' : 'gcs';
+      const u = new URL(window.location.href);
+      u.searchParams.set('source', qaSourceMode);
+      window.history.replaceState({}, '', u.href);
+      initialFitDone = false;
       loadLiveData();
+      if (typeof qaRefreshAllVectors === 'function') qaRefreshAllVectors();
     };
+
+    function qaShowSourceError(title, detail) {
+      const countBadge = document.getElementById('s3-count-badge');
+      const tableCount = document.getElementById('table-record-count');
+      const tbody = document.getElementById('table-body');
+      countBadge.textContent = `0 | ${title}`;
+      tableCount.textContent = title;
+      tbody.innerHTML = `<tr><td colspan="4" style="color:#f87171; padding:1rem; line-height:1.6;"><strong>${title}</strong><br><span style="color:#cbd5e1; font-size:0.8rem; word-break:break-all;">${detail}</span></td></tr>`;
+    }
 
     async function loadLiveData() {
       const endpoint = meta.endpoint;
       const countBadge = document.getElementById('s3-count-badge');
       const tableCount = document.getElementById('table-record-count');
       const tbody = document.getElementById('table-body');
+      qaPaintSourcePills();
 
-      // Sync Source Selector Button Visuals
-      ['live', 'gcs', 'wherobots'].forEach(m => {
-        const btn = document.getElementById(`btn-src-${m}`);
-        if (btn) {
-          if (m === qaSourceMode) {
-            btn.style.background = m === 'live' ? '#2563eb' : (m === 'gcs' ? '#0284c7' : '#7c3aed');
-            btn.style.color = '#ffffff';
-          } else {
-            btn.style.background = 'transparent';
-            btn.style.color = '#94a3b8';
-          }
-        }
-      });
-
-      // Reset cache for fresh source loading
+      // Fresh load per source: clear cache and map
       loadedFeatures = [];
       featureCache.clear();
+      qaLoadedTotal = null;
+      upstreamLiveCount = 0;
+      s3LakehouseCount = 0;
       setSourceData('s3-src', EMPTY_FC);
       setSourceData('live-src', EMPTY_FC);
       setSourceData('live-points-src', EMPTY_FC);
 
-      // Check for custom bbox in URL params
       const urlBbox = urlParams.get('bbox');
       let customBoundsFitted = false;
       setBoundsOverlay(jurisdiction.bounds, '#3b82f6', 0);
       setSourceData('extent-src', EMPTY_FC);
       const sbn = document.getElementById('state-bounds-name');
       if (sbn) sbn.textContent = `(${jurisdiction.name})`;
-
       if (urlBbox) {
         const parts = urlBbox.split(',').map(Number);
         if (parts.length === 4 && parts.every(n => !isNaN(n))) {
@@ -2423,7 +2408,6 @@
           customBoundsFitted = true;
         }
       }
-
       if (!customBoundsFitted) {
         if (meta.bounds) {
           map.fitBounds(toLngLatBounds(meta.bounds), { padding: 40, duration: 0 });
@@ -2433,80 +2417,72 @@
         }
       }
 
-      // Handle raster & table
       if (meta.kind === 'raster' || meta.kind === 'table' || meta.service_type === 'raster_file_download' || meta.service_type === 'derived_raster' || meta.service_type === 'table_json') {
         countBadge.textContent = 'Loading from GCS…';
         tableCount.textContent = 'Loading ' + (meta.kind || 'dataset') + ' from GCS…';
         return;
       }
 
+      const acceptFeatures = (features, total) => {
+        // Source objectids repeat across sublayers (e.g. one QLD MapServer layer per cyclone);
+        // give every loaded row a unique id so the cache never drops records.
+        features.forEach((f, i) => { f.id = qaSourceMode + '-' + i; });
+        mergeFeaturesIntoCache(features);
+        qaLoadedTotal = total;
+        if (!initialFitDone && loadedFeatures.length > 0) {
+          initialFitDone = true;
+          if (!customBoundsFitted) fitToFeatures(loadedFeatures, 40);
+        }
+        applyViewportLimiter();
+      };
+
+      // GCS LIBRARY MODE: canonical GeoParquet partition via DuckDB-WASM (no fallback)
+      if (qaSourceMode === 'gcs') {
+        if (!meta.gcs_parquet_url) {
+          qaShowSourceError('Not in GCS library', `No GeoParquet partition for ${datasetKey} under gs://operational-intelligence-crafter-lake/geoparquet/. Switch to Live Government.`);
+          return;
+        }
+        countBadge.textContent = 'Reading GCS GeoParquet…';
+        tableCount.textContent = `DuckDB-WASM ← ${meta.gcs_uri}`;
+        try {
+          const res = await OICQaGcs.load(meta.gcs_parquet_url, { limit: 5000 });
+          s3LakehouseCount = res.totalRows;
+          acceptFeatures(res.features, res.totalRows);
+        } catch (e) {
+          qaShowSourceError('GCS GeoParquet read failed', `${e.message} — ${meta.gcs_parquet_url}`);
+        }
+        return;
+      }
+
+      // LIVE MODE: QLD historical cyclones are one MapServer sublayer per cyclone
+      if (datasetKey.startsWith('qld_cyclones_historical_')) {
+        const kind = datasetKey.endsWith('_fixes') ? 'Fix' : (datasetKey.endsWith('_tracks') ? 'Track' : 'Wind areas');
+        countBadge.textContent = `Querying live QLD MapServer (${kind})…`;
+        tableCount.textContent = `Live: ${OICQaLive.QLD_CYCLONE_MAPSERVER}`;
+        try {
+          const res = await OICQaLive.loadQldCyclones(kind);
+          if (res.failures.length) console.warn('Live sublayer failures:', res.failures);
+          if (!res.features.length) {
+            qaShowSourceError('Live endpoint returned no features', res.failures.join('<br>') || OICQaLive.QLD_CYCLONE_MAPSERVER);
+            return;
+          }
+          upstreamLiveCount = res.features.length;
+          acceptFeatures(res.features, res.features.length);
+        } catch (e) {
+          qaShowSourceError('Live endpoint query failed', `${e.message} — ${OICQaLive.QLD_CYCLONE_MAPSERVER}`);
+        }
+        return;
+      }
+
       let upstreamCount = meta.base_count;
       let s3Count = meta.base_count;
       let viewportCount = 0;
-
-      // MODE 1: Wherobots Cloud Iceberg Mode
-      if (qaSourceMode === 'wherobots') {
-        countBadge.textContent = 'Loading Wherobots Iceberg Table…';
-        tableCount.textContent = `Connecting to org_catalog.ops_intel.${datasetKey} (Apache Sedona)…`;
-        const localGeojsonUrl = meta.geojson_url || `data/${datasetKey}.geojson`;
-        try {
-          const gResp = await fetch(localGeojsonUrl);
-          if (gResp.ok) {
-            const gData = await gResp.json();
-            if (gData && gData.features && gData.features.length > 0) {
-              mergeFeaturesIntoCache(gData.features);
-              upstreamCount = gData.features.length;
-              s3Count = gData.features.length;
-              upstreamLiveCount = upstreamCount;
-              s3LakehouseCount = s3Count;
-              countBadge.textContent = `${loadedFeatures.length.toLocaleString()} (Wherobots) | org_catalog.ops_intel.${datasetKey}`;
-              tableCount.textContent = `Wherobots Sedona Table: org_catalog.ops_intel.${datasetKey} (${loadedFeatures.length.toLocaleString()} records)`;
-
-              if (!initialFitDone && loadedFeatures.length > 0) {
-                initialFitDone = true;
-                fitToFeatures(loadedFeatures, 40);
-              }
-              applyViewportLimiter();
-              return;
-            }
-          }
-        } catch (e) {
-          console.warn('Wherobots loading error:', e);
-        }
+      let baseEndpoint = endpoint.replace(/[?]f=json$/i, '').replace(/[/]query$/i, '').replace(/[/]+$/, '');
+      if (datasetKey === 'national_schools_acara_v2' || datasetKey === 'national_healthcare_nhsd_v2') {
+        baseEndpoint = "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3";
       }
 
-      // MODE 2: GCS Lakehouse Mode (Authoritative GeoParquet / GeoJSON artifact)
-      if (qaSourceMode === 'gcs') {
-        countBadge.textContent = 'Loading GCS Lakehouse Artifact…';
-        tableCount.textContent = `Fetching authoritative GeoParquet/GeoJSON from GCS…`;
-        const localGeojsonUrl = meta.geojson_url || `data/${datasetKey}.geojson`;
-        try {
-          const gResp = await fetch(localGeojsonUrl);
-          if (gResp.ok) {
-            const gData = await gResp.json();
-            if (gData && gData.features && gData.features.length > 0) {
-              mergeFeaturesIntoCache(gData.features);
-              upstreamCount = gData.features.length;
-              s3Count = gData.features.length;
-              upstreamLiveCount = upstreamCount;
-              s3LakehouseCount = s3Count;
-              countBadge.textContent = `${loadedFeatures.length.toLocaleString()} (GCS) | ${s3Count.toLocaleString()} Lakehouse Records`;
-              tableCount.textContent = `GCS Lakehouse: gs://operational-intelligence-crafter-lake/geoparquet/${datasetKey}/ (${loadedFeatures.length.toLocaleString()} records)`;
-
-              if (!initialFitDone && loadedFeatures.length > 0) {
-                initialFitDone = true;
-                fitToFeatures(loadedFeatures, 40);
-              }
-              applyViewportLimiter();
-              return;
-            }
-          }
-        } catch (e) {
-          console.warn('GCS lakehouse fetch notice:', e);
-        }
-      }
-
-      // MODE 3: Upstream Live State Mode (Direct query to live government service)
+      // LIVE MODE: generic upstream government service (ArcGIS REST / WFS)
       countBadge.textContent = 'Querying Live Government Service…';
       tableCount.textContent = `Connecting to ${meta.endpoint}…`;
 
@@ -2848,7 +2824,7 @@
       const rendCount = stats ? stats.renderedCount : features.length;
       const execTime = stats && typeof stats.executionTimeMs === 'number' ? `${stats.executionTimeMs}ms` : '<1ms';
 
-      const badgeText = `${rendCount.toLocaleString()} (Top-K) | ${s3Val.toLocaleString()} (Lakehouse) | ${upVal.toLocaleString()} (Live)`;
+      const badgeText = (typeof qaLoadedTotal === 'number') ? `${rendCount.toLocaleString()} shown | ${loadedFeatures.length.toLocaleString()} loaded of ${qaLoadedTotal.toLocaleString()} (${qaSourceMode === 'live' ? 'Live Government' : 'GCS Library'})` : `${rendCount.toLocaleString()} shown | ${qaSourceMode === 'live' ? 'Live Government' : 'GCS Library'}`;
       document.getElementById('s3-count-badge').textContent = badgeText;
       document.getElementById('s3-count-badge').title = "Rendered Top-K in Viewport : S3 Lakehouse Records : Upstream Live Records";
 
@@ -2868,6 +2844,7 @@
     // Dynamic Viewport Feature Retrieval (Issue #3292 RFC)
     async function fetchViewportFeatures() {
       if (isFetchingViewport) return;
+      if (qaSourceMode !== 'live' || datasetKey.startsWith('qld_cyclones_historical_')) return;
       const endpoint = meta.endpoint;
       if (meta.service_type === 's3_laz' || meta.service_type === 's3_geoparquet' || endpoint.endsWith('.zip') || endpoint.endsWith('.parquet')) {
         return;
@@ -3012,6 +2989,7 @@
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     function closeModalOnBackdrop(e, id) { if (e.target.id === id) closeModal(id); }
   </script>
-  <script src="../js/geolibre-qa-layer-registry.js"></script>
+  <script src="../js/qa-sources.js"></script>
+<script src="../js/geolibre-qa-layer-registry.js"></script>
 </body>
 </html>
