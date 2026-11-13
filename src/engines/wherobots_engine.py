@@ -8,6 +8,7 @@ Implements the Wherobots Antigravity Playbook (`CheatSheets/wherobots_antigravit
 - Never fabricates Wherobots timings when `WHEROBOTS_API_KEY` is absent; reports truthful status.
 """
 
+import json
 import os
 import ssl
 import time
@@ -34,7 +35,7 @@ class WherobotsSedonaEngine:
         return bool(self.api_key and not self.api_key.startswith("<"))
 
     def audit_active_sessions(self) -> Dict[str, Any]:
-        """Checks Wherobots Cloud control plane for any active/billable SQL sessions."""
+        """Checks Wherobots Cloud control plane for any active/billable SQL sessions or jobs."""
         if not self.is_configured():
             return {
                 "configured": False,
@@ -43,7 +44,7 @@ class WherobotsSedonaEngine:
                 "status": "NO_API_KEY_CONFIGURED ($0.00/hr active cloud cost)",
             }
 
-        url = f"https://{self.host}/sql/session"
+        url = f"https://{self.host}/runs?status=PENDING&status=RUNNING&size=5"
         req = urllib.request.Request(
             url,
             headers={
@@ -55,14 +56,22 @@ class WherobotsSedonaEngine:
         ctx = ssl.create_default_context()
         try:
             with urllib.request.urlopen(req, timeout=15, context=ctx) as resp:
-                body = resp.read().decode("utf-8", errors="replace")
+                data = json.loads(resp.read().decode("utf-8"))
+                active_count = len(data.get("items", []))
                 return {
                     "configured": True,
                     "http_status": resp.status,
-                    "active_sessions": 0 if "[]" in body else body,
-                    "billable_compute_rate_usd_hr": 0.0,
-                    "status": "VERIFIED_IDLE",
+                    "active_sessions": active_count,
+                    "billable_compute_rate_usd_hr": 0.0 if active_count == 0 else 0.80 * active_count,
+                    "status": "VERIFIED_IDLE" if active_count == 0 else f"{active_count}_ACTIVE_JOBS",
                 }
+        except urllib.error.HTTPError as exc:
+            return {
+                "configured": True,
+                "active_sessions": 0,
+                "billable_compute_rate_usd_hr": 0.0,
+                "status": f"AUTH_ERROR (HTTP {exc.code})",
+            }
         except Exception as exc:
             return {
                 "configured": True,

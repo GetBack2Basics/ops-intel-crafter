@@ -598,6 +598,162 @@
       "qa_status": "PASS",
       "latest_snapshot_path": "data/lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
       "latest_retrieval_utc": "2026-11-10T02:26:39Z"
+    },
+    "qld_cyclones_historical_tracks": {
+      "dataset_key": "qld_cyclones_historical_tracks",
+      "title": "Queensland Historical Tropical Cyclone Tracks",
+      "category": "static_authoritative",
+      "theme": "Emergency Management & Natural Hazards",
+      "scale": "state",
+      "jurisdiction": "QLD",
+      "provider": "Queensland Government (DESI)",
+      "source_agency": "State of Queensland (Department of Environment, Science and Innovation)",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 State of Queensland (DESI) \u2014 Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-13"
+      },
+      "source_publication_date": "2026-04-01",
+      "source_vintage": "QLD-HISTORICAL",
+      "refresh_policy": "annual_snapshot",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:4326",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "LineString",
+      "primary_key": "objectid",
+      "required_fields": [
+        "dist_name",
+        "dist_id",
+        "track_type"
+      ],
+      "schema_mapping": {
+        "name": "dist_name",
+        "cyclone_id": "dist_id",
+        "type": "track_type"
+      },
+      "known_limitations": [
+        "Covers 22 historical tropical cyclones impacting Queensland waters and coastline from 2006 to 2026."
+      ],
+      "operational_suitability": "Suitable for historical hazard overlay, track trajectory analysis, and emergency planning.",
+      "default_bbox": [
+        119.6,
+        -28.3,
+        165.0,
+        -7.4
+      ],
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-13T05:29:10Z"
+    },
+    "qld_cyclones_historical_fixes": {
+      "dataset_key": "qld_cyclones_historical_fixes",
+      "title": "Queensland Historical Tropical Cyclone Fixes & Observations",
+      "category": "static_authoritative",
+      "theme": "Emergency Management & Natural Hazards",
+      "scale": "state",
+      "jurisdiction": "QLD",
+      "provider": "Queensland Government (DESI)",
+      "source_agency": "State of Queensland (Department of Environment, Science and Innovation)",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 State of Queensland (DESI) \u2014 Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-13"
+      },
+      "source_publication_date": "2026-04-01",
+      "source_vintage": "QLD-HISTORICAL",
+      "refresh_policy": "annual_snapshot",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:4326",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Point",
+      "primary_key": "objectid",
+      "required_fields": [
+        "dist_name",
+        "category",
+        "symbol"
+      ],
+      "schema_mapping": {
+        "name": "dist_name",
+        "cyclone_category": "category",
+        "symbol": "symbol"
+      },
+      "known_limitations": [
+        "Point observations along cyclone trajectories with intensity category."
+      ],
+      "operational_suitability": "Suitable for cyclone intensity progression and landfall timing analysis.",
+      "default_bbox": [
+        119.6,
+        -28.3,
+        165.0,
+        -7.4
+      ],
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-13T05:29:10Z"
+    },
+    "qld_cyclones_historical_wind_areas": {
+      "dataset_key": "qld_cyclones_historical_wind_areas",
+      "title": "Queensland Historical Tropical Cyclone Wind Swaths & Hazard Areas",
+      "category": "static_authoritative",
+      "theme": "Emergency Management & Natural Hazards",
+      "scale": "state",
+      "jurisdiction": "QLD",
+      "provider": "Queensland Government (DESI)",
+      "source_agency": "State of Queensland (Department of Environment, Science and Innovation)",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "\u00a9 State of Queensland (DESI) \u2014 Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-13"
+      },
+      "source_publication_date": "2026-04-01",
+      "source_vintage": "QLD-HISTORICAL",
+      "refresh_policy": "annual_snapshot",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:4326",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "MultiPolygon",
+      "primary_key": "objectid",
+      "required_fields": [
+        "dist_name",
+        "wind_type",
+        "marine_type"
+      ],
+      "schema_mapping": {
+        "name": "dist_name",
+        "wind_type": "wind_type",
+        "marine_type": "marine_type"
+      },
+      "known_limitations": [
+        "Wind hazard polygons representing gale, storm, and hurricane force wind swaths."
+      ],
+      "operational_suitability": "Suitable for wind damage exposure estimation and multi-hazard buffer intersections.",
+      "default_bbox": [
+        119.6,
+        -28.3,
+        165.0,
+        -7.4
+      ],
+      "qa_status": "PASS",
+      "latest_snapshot_path": "data/lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-13T05:29:10Z"
     }
   }
 }

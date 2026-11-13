@@ -23,6 +23,7 @@ pydantic>=2.6.0
 google-cloud-storage>=2.16.0
 gcsfs>=2024.2.0
 wherobots-python-dbapi>=0.28.0
+wherobots-python-sdk>=0.8.0
 
 # Testing & Quality Gates
 pytest>=8.0.0

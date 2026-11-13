@@ -1,5 +1,5 @@
 {
-  "files_scanned": 53,
+  "files_scanned": 58,
   "secret_leaks_detected": 0,
   "mock_violations_detected": 0,
   "secret_hits": [],
@@ -129,6 +129,7 @@
       "typing"
     ],
     "src/engines/wherobots_engine.py": [
+      "json",
       "os",
       "ssl",
       "time",
@@ -240,6 +241,7 @@
       "src.catalogue.manifest_loader",
       "src.ingestion.gcs_storage",
       "src.ingestion.telemetry",
+      "tools.build_geolibre_qa_inspect",
       "typing"
     ],
     "src/validation/reconciliation.py": [
@@ -289,6 +291,13 @@
       "src.ingestion.source_connectors.geojson_connector",
       "src.ingestion.source_connectors.wfs_connector"
     ],
+    "tools/build_geolibre_qa_inspect.py": [
+      "json",
+      "pathlib",
+      "re",
+      "src.catalogue.dataset_registry",
+      "sys"
+    ],
     "tools/build_geolibre_spec.py": [
       "json",
       "pathlib"
@@ -332,6 +341,24 @@
       "sys",
       "typing"
     ],
+    "tools/harvest_qld_cyclone_history.py": [
+      "dotenv",
+      "geopandas",
+      "google.cloud",
+      "json",
+      "os",
+      "pandas",
+      "pathlib",
+      "re",
+      "requests",
+      "src.engines.wherobots_engine",
+      "sys",
+      "time",
+      "typing",
+      "urllib.request",
+      "wherobots",
+      "wherobots.db"
+    ],
     "tools/ingest_dataset.py": [
       "argparse",
       "pathlib",
@@ -340,6 +367,25 @@
       "src.ingestion.snapshot_ingest",
       "src.validation.qa_report",
       "sys"
+    ],
+    "tools/ingest_linked_layers_to_wherobots.py": [
+      "argparse",
+      "dotenv",
+      "geopandas",
+      "google.cloud",
+      "json",
+      "os",
+      "pandas",
+      "pathlib",
+      "pyarrow",
+      "pyarrow.parquet",
+      "requests",
+      "src.engines.wherobots_engine",
+      "sys",
+      "time",
+      "typing",
+      "urllib.request",
+      "wherobots"
     ],
     "tools/ingest_national_population_grid.py": [
       "PIL",
@@ -397,6 +443,31 @@
     "tools/update_layers_gazetteer.py": [
       "json",
       "pathlib"
+    ],
+    "tools/upload_to_wherobots.py": [
+      "argparse",
+      "dotenv",
+      "json",
+      "os",
+      "pathlib",
+      "src.engines.wherobots_engine",
+      "sys",
+      "time",
+      "typing",
+      "urllib.error",
+      "urllib.request",
+      "wherobots"
+    ],
+    "tools/wherobots_batch_ingest.py": [
+      "json",
+      "os",
+      "pyarrow",
+      "pyarrow.parquet",
+      "pyspark.sql",
+      "sedona.spark",
+      "sys",
+      "time",
+      "urllib.request"
     ]
   }
 }

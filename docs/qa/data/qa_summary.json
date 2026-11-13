@@ -1,6 +1,6 @@
 {
-  "report_id": "qa-report-20261111T043520Z",
-  "generated_at_utc": "2026-11-11T04:35:20Z",
+  "report_id": "qa-report-20261111T215548Z",
+  "generated_at_utc": "2026-11-11T21:55:48Z",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
   "total_datasets": 48,
@@ -52,7 +52,7 @@
   "datasets": [
     {
       "dataset_key": "abs_australia_1km_population_grid",
-      "title": "ABS 2025 — Australian Population Grid 1 km² (National Modeled ERP Grid)",
+      "title": "ABS 2025 \u2014 Australian Population Grid 1 km\u00b2 (National Modeled ERP Grid)",
       "provider": "Australian Bureau of Statistics",
       "source_agency": "Australian Bureau of Statistics (ABS)",
       "category": "periodically_refreshed_authoritative",
@@ -64,7 +64,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© Commonwealth of Australia (Australian Bureau of Statistics 2025) — CC-BY 4.0",
+        "attribution": "\u00a9 Commonwealth of Australia (Australian Bureau of Statistics 2025) \u2014 CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-10"
       },
@@ -117,10 +117,14 @@
         ]
       },
       "known_limitations": [
-        "Official ABS modeled 1 km² Estimated Resident Population (ERP) grid based on the National Nested Grid Standard.",
+        "Official ABS modeled 1 km\u00b2 Estimated Resident Population (ERP) grid based on the National Nested Grid Standard.",
         "Population counts are disaggregated from SA1 using ABS Address Register and ICP points; modelled proxy, not a direct headcount."
       ],
-      "refresh_policy": "annual_release"
+      "refresh_policy": "annual_release",
+      "gcs_https_url": "data/lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "\u2014"
     },
     {
       "dataset_key": "aura_drainage_hand_euclid_m_v1",
@@ -186,7 +190,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/aura_drainage_hand_euclid_m_v1/hand_euclid_m.tif",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "aura_drainage_s_drainage_v1",
@@ -252,7 +260,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/aura_drainage_s_drainage_v1/s_drainage.tif",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "aura_drainage_slope_deg_v1",
@@ -318,7 +330,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/aura_drainage_slope_deg_v1/slope_deg.tif",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "aura_drainage_streams_mask_v1",
@@ -384,7 +400,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/aura_drainage_streams_mask_v1/streams_mask.tif",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "datacenter_candidates_v2",
@@ -450,11 +470,15 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/exports_v2/datacenter_candidates_v2.json",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "ga_electricity_substations",
-      "title": "National Electricity Infrastructure — Power Substations",
+      "title": "National Electricity Infrastructure \u2014 Power Substations",
       "provider": "Geoscience Australia",
       "source_agency": "Commonwealth of Australia (Geoscience Australia)",
       "category": "static_authoritative",
@@ -465,7 +489,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© Commonwealth of Australia (Geoscience Australia) — Creative Commons Attribution 4.0 International",
+        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) \u2014 Creative Commons Attribution 4.0 International",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -827,11 +851,15 @@
         "bytes_downloaded": 1435910,
         "bytes_written": 323389,
         "notes": []
-      }
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
+      "source_count": 1866,
+      "stored_count": 1866,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "ga_electricity_transmission_lines",
-      "title": "National Electricity Infrastructure — High-Voltage Transmission Lines",
+      "title": "National Electricity Infrastructure \u2014 High-Voltage Transmission Lines",
       "provider": "Geoscience Australia",
       "source_agency": "Commonwealth of Australia (Geoscience Australia)",
       "category": "static_authoritative",
@@ -842,7 +870,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© Commonwealth of Australia (Geoscience Australia) — Creative Commons Attribution 4.0 International",
+        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) \u2014 Creative Commons Attribution 4.0 International",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -1202,11 +1230,15 @@
         "bytes_downloaded": 17514400,
         "bytes_written": 6374729,
         "notes": []
-      }
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
+      "source_count": 3147,
+      "stored_count": 3147,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "ga_major_power_stations",
-      "title": "National Electricity Infrastructure — Major Power Stations",
+      "title": "National Electricity Infrastructure \u2014 Major Power Stations",
       "provider": "Geoscience Australia",
       "source_agency": "Commonwealth of Australia (Geoscience Australia)",
       "category": "static_authoritative",
@@ -1217,7 +1249,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© Commonwealth of Australia (Geoscience Australia) — Creative Commons Attribution 4.0 International",
+        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) \u2014 Creative Commons Attribution 4.0 International",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -1619,11 +1651,15 @@
         "bytes_downloaded": 399741,
         "bytes_written": 108601,
         "notes": []
-      }
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
+      "source_count": 430,
+      "stored_count": 430,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "ga_seismic_hazard_pga_10pct",
-      "title": "National Seismic Hazard Assessment 2018 — PGA Contours (10% in 50 Years)",
+      "title": "National Seismic Hazard Assessment 2018 \u2014 PGA Contours (10% in 50 Years)",
       "provider": "Geoscience Australia",
       "source_agency": "Commonwealth of Australia (Geoscience Australia)",
       "category": "static_authoritative",
@@ -1634,7 +1670,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© Commonwealth of Australia (Geoscience Australia) NSHA 2018 — CC-BY 4.0",
+        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) NSHA 2018 \u2014 CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -1900,7 +1936,11 @@
         "bytes_downloaded": 658178,
         "bytes_written": 224737,
         "notes": []
-      }
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
+      "source_count": 100,
+      "stored_count": 100,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "hydrosheds_au_acc_3s_v1",
@@ -1966,7 +2006,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/hydrosheds_au_acc_3s_v1/au_acc_3s.tif",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "hydrosheds_au_con_3s_v1",
@@ -2032,7 +2076,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/hydrosheds_au_con_3s_v1/au_con_3s.tif",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "national_cadastre_gnaf_v2",
@@ -2098,7 +2146,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=national_cadastre_gnaf_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "national_cyclone_hazard_tcha_v2",
@@ -2164,7 +2216,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=national_cyclone_hazard_tcha_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "national_electricity_grid_v2",
@@ -2230,7 +2286,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=national_electricity_grid_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "national_healthcare_nhsd_v2",
@@ -2296,7 +2356,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=national_healthcare_nhsd_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "national_schools_acara_v2",
@@ -2362,7 +2426,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=national_schools_acara_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "national_seismic_hazard_nsha_v2",
@@ -2428,11 +2496,15 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=national_seismic_hazard_nsha_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "next_lga_boundaries_asgs2025",
-      "title": "ABS ASGS Edition 3 (2025) — Local Government Areas (NExT Administrative Baseline)",
+      "title": "ABS ASGS Edition 3 (2025) \u2014 Local Government Areas (NExT Administrative Baseline)",
       "provider": "Australian Bureau of Statistics",
       "source_agency": "Australian Bureau of Statistics (ABS)",
       "category": "periodically_refreshed_authoritative",
@@ -2443,7 +2515,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© Australian Bureau of Statistics (ASGS 2025) — CC-BY 4.0",
+        "attribution": "\u00a9 Australian Bureau of Statistics (ASGS 2025) \u2014 CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -2767,11 +2839,15 @@
         "bytes_downloaded": 140356267,
         "bytes_written": 53870639,
         "notes": []
-      }
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
+      "source_count": 567,
+      "stored_count": 567,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "next_sa2_boundaries_asgs2021",
-      "title": "ABS ASGS 2021 — Statistical Areas Level 2 (SA2 Population & Vulnerability Baseline)",
+      "title": "ABS ASGS 2021 \u2014 Statistical Areas Level 2 (SA2 Population & Vulnerability Baseline)",
       "provider": "Australian Bureau of Statistics",
       "source_agency": "Australian Bureau of Statistics (ABS)",
       "category": "periodically_refreshed_authoritative",
@@ -2782,7 +2858,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© Australian Bureau of Statistics (ASGS 2021) — CC-BY 4.0",
+        "attribution": "\u00a9 Australian Bureau of Statistics (ASGS 2021) \u2014 CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -3160,7 +3236,11 @@
         "bytes_downloaded": 181084984,
         "bytes_written": 69056426,
         "notes": []
-      }
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
+      "source_count": 2473,
+      "stored_count": 2473,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "nsw_bionet_bv_map_v2",
@@ -3226,7 +3306,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=nsw_bionet_bv_map_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "nsw_coastal_inundation_hazard_v2",
@@ -3292,7 +3376,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=nsw_coastal_inundation_hazard_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "nsw_elvis_lidar_1m_dem_v2",
@@ -3358,7 +3446,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/nsw_elvis_lidar_laz_pointcloud_v2/cloud.js",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "nsw_elvis_lidar_1m_dsm_v2",
@@ -3424,7 +3516,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/lake_macquarie_elvis.copc.laz",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "nsw_elvis_lidar_contours_v2",
@@ -3490,7 +3586,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/nsw_elvis_lidar_laz_pointcloud_v2/cloud.js",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "nsw_elvis_lidar_laz_pointcloud_v2",
@@ -3556,21 +3656,25 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/lake_macquarie_elvis.copc.laz",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "nsw_emergency_management_restricted",
-      "title": "NSW Spatial Services — Emergency Management Restricted Service (Failed Source Contract Test)",
+      "title": "NSW Spatial Services \u2014 Emergency Management Restricted Service (Failed Source Contract Test)",
       "category": "live_operational_feed",
       "scale": "state",
       "jurisdiction": "NSW",
       "provider": "NSW Spatial Services (DCS)",
-      "source_agency": "NSW Department of Customer Service — Spatial Services",
+      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
       "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Emergency_Management_Category/FeatureServer/0",
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© State of New South Wales (Spatial Services, DCS)",
+        "attribution": "\u00a9 State of New South Wales (Spatial Services, DCS)",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -3647,13 +3751,17 @@
         "bytes_downloaded": 0,
         "bytes_written": 0,
         "notes": []
-      }
+      },
+      "gcs_https_url": null,
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "\u2014"
     },
     {
       "dataset_key": "nsw_foi_building_complexes",
-      "title": "NSW Features of Interest — Emergency, Health, Education & Community Facilities",
+      "title": "NSW Features of Interest \u2014 Emergency, Health, Education & Community Facilities",
       "provider": "NSW Spatial Services (DCS)",
-      "source_agency": "NSW Department of Customer Service — Spatial Services",
+      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
       "category": "periodically_refreshed_authoritative",
       "scale": "state",
       "jurisdiction": "NSW",
@@ -3662,7 +3770,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© State of New South Wales (Spatial Services, DCS) — CC-BY 4.0",
+        "attribution": "\u00a9 State of New South Wales (Spatial Services, DCS) \u2014 CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -4076,7 +4184,11 @@
         "bytes_downloaded": 60961356,
         "bytes_written": 11977228,
         "notes": []
-      }
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
+      "source_count": 76629,
+      "stored_count": 76629,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "nsw_landslide_susceptibility_v2",
@@ -4142,13 +4254,17 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=nsw_landslide_susceptibility_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "nsw_lga_boundaries",
-      "title": "NSW Spatial Services — Local Government Area Boundaries",
+      "title": "NSW Spatial Services \u2014 Local Government Area Boundaries",
       "provider": "NSW Spatial Services (DCS)",
-      "source_agency": "NSW Department of Customer Service — Spatial Services",
+      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
       "category": "periodically_refreshed_authoritative",
       "scale": "state",
       "jurisdiction": "NSW",
@@ -4157,7 +4273,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© State of New South Wales (Spatial Services, a business unit of the Department of Customer Service NSW) — CC-BY 4.0",
+        "attribution": "\u00a9 State of New South Wales (Spatial Services, a business unit of the Department of Customer Service NSW) \u2014 CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -4541,7 +4657,11 @@
         "bytes_downloaded": 69812396,
         "bytes_written": 26510856,
         "notes": []
-      }
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
+      "source_count": 132,
+      "stored_count": 132,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "nsw_national_seismic_hazard_v2",
@@ -4607,11 +4727,15 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=nsw_national_seismic_hazard_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "nsw_rfs_major_incidents_live",
-      "title": "NSW Rural Fire Service — Current Major Bushfire & Emergency Incidents Feed",
+      "title": "NSW Rural Fire Service \u2014 Current Major Bushfire & Emergency Incidents Feed",
       "provider": "NSW Rural Fire Service (RFS)",
       "source_agency": "NSW Rural Fire Service",
       "category": "live_operational_feed",
@@ -4622,7 +4746,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© State of New South Wales (NSW Rural Fire Service) — CC-BY 4.0",
+        "attribution": "\u00a9 State of New South Wales (NSW Rural Fire Service) \u2014 CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -4660,7 +4784,7 @@
         "level_name": "Source Contract",
         "status": "PASS",
         "endpoint": "https://www.rfs.nsw.gov.au/feeds/majorIncidents.json",
-        "layer_name": "NSW Rural Fire Service — Current Major Bushfire & Emergency Incidents Feed",
+        "layer_name": "NSW Rural Fire Service \u2014 Current Major Bushfire & Emergency Incidents Feed",
         "http_status": 200,
         "content_type": "application/json",
         "latency_ms": 275.55,
@@ -4921,7 +5045,11 @@
         "bytes_downloaded": 23319,
         "bytes_written": 25113,
         "notes": []
-      }
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
+      "source_count": 20,
+      "stored_count": 20,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "nsw_transmission_grid_v2",
@@ -4987,13 +5115,17 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=nsw_transmission_grid_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "nsw_water_inundation_areas",
-      "title": "NSW Spatial Services — Fuzzy Extent Water & Flood Inundation Areas",
+      "title": "NSW Spatial Services \u2014 Fuzzy Extent Water & Flood Inundation Areas",
       "provider": "NSW Spatial Services (DCS)",
-      "source_agency": "NSW Department of Customer Service — Spatial Services",
+      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
       "category": "periodically_refreshed_authoritative",
       "scale": "state",
       "jurisdiction": "NSW",
@@ -5002,7 +5134,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "© State of New South Wales (Spatial Services, DCS) — CC-BY 4.0",
+        "attribution": "\u00a9 State of New South Wales (Spatial Services, DCS) \u2014 CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -5424,7 +5556,11 @@
         "bytes_downloaded": 20795039,
         "bytes_written": 6931951,
         "notes": []
-      }
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
+      "source_count": 880,
+      "stored_count": 880,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "qld_cyclone_hazard_tcha_v2",
@@ -5490,7 +5626,89 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=qld_cyclone_hazard_tcha_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
+    },
+    {
+      "dataset_key": "qld_cyclones_historical_fixes",
+      "title": "Queensland Historical Tropical Cyclone Fixes & Observations",
+      "theme": "Emergency Management & Natural Hazards",
+      "scale": "state",
+      "jurisdiction": "QLD",
+      "source_agency": "State of Queensland (DESI)",
+      "source_vintage": "QLD-HISTORICAL",
+      "stored_feature_count": 260,
+      "feature_count": 260,
+      "overall_status": "PASS",
+      "level1_source_contract": {
+        "status": "PASS",
+        "source_feature_count": 260
+      },
+      "level2_geoparquet_artifact": {
+        "status": "PASS",
+        "stored_feature_count": 260
+      },
+      "level3_reconciliation": {
+        "status": "PASS",
+        "reconciliation_ratio": 1.0
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+    },
+    {
+      "dataset_key": "qld_cyclones_historical_tracks",
+      "title": "Queensland Historical Tropical Cyclone Tracks",
+      "theme": "Emergency Management & Natural Hazards",
+      "scale": "state",
+      "jurisdiction": "QLD",
+      "source_agency": "State of Queensland (DESI)",
+      "source_vintage": "QLD-HISTORICAL",
+      "stored_feature_count": 23,
+      "feature_count": 23,
+      "overall_status": "PASS",
+      "level1_source_contract": {
+        "status": "PASS",
+        "source_feature_count": 23
+      },
+      "level2_geoparquet_artifact": {
+        "status": "PASS",
+        "stored_feature_count": 23
+      },
+      "level3_reconciliation": {
+        "status": "PASS",
+        "reconciliation_ratio": 1.0
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+    },
+    {
+      "dataset_key": "qld_cyclones_historical_wind_areas",
+      "title": "Queensland Historical Tropical Cyclone Wind Swaths & Hazard Areas",
+      "theme": "Emergency Management & Natural Hazards",
+      "scale": "state",
+      "jurisdiction": "QLD",
+      "source_agency": "State of Queensland (DESI)",
+      "source_vintage": "QLD-HISTORICAL",
+      "stored_feature_count": 900,
+      "feature_count": 900,
+      "overall_status": "PASS",
+      "level1_source_contract": {
+        "status": "PASS",
+        "source_feature_count": 900
+      },
+      "level2_geoparquet_artifact": {
+        "status": "PASS",
+        "stored_feature_count": 900
+      },
+      "level3_reconciliation": {
+        "status": "PASS",
+        "reconciliation_ratio": 1.0
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
     },
     {
       "dataset_key": "qld_landslide_susceptibility_v2",
@@ -5556,7 +5774,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=qld_landslide_susceptibility_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "qld_regulated_vegetation_vma_v2",
@@ -5622,7 +5844,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=qld_regulated_vegetation_vma_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "qld_transmission_grid_v2",
@@ -5688,7 +5914,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=qld_transmission_grid_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "qld_waterway_barriers_hydro_v2",
@@ -5754,7 +5984,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=qld_waterway_barriers_hydro_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "sa_transmission_grid_electranet_v2",
@@ -5820,7 +6054,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=sa_transmission_grid_electranet_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "tas_transmission_grid_tasnetworks_v2",
@@ -5886,7 +6124,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=tas_transmission_grid_tasnetworks_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "vic_hydro_watercourses_v2",
@@ -5952,7 +6194,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=vic_hydro_watercourses_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "vic_landslide_slope_stability_v2",
@@ -6018,7 +6264,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=vic_landslide_slope_stability_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "vic_native_veg_nvim_v2",
@@ -6084,7 +6334,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=vic_native_veg_nvim_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "vic_planning_scheme_zones_v2",
@@ -6150,7 +6404,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=vic_planning_scheme_zones_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "vic_transmission_grid_vicgrid_v2",
@@ -6216,7 +6474,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=vic_transmission_grid_vicgrid_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "wa_dbca_threatened_ecological_communities_v2",
@@ -6282,7 +6544,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=wa_dbca_threatened_ecological_communities_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     },
     {
       "dataset_key": "wa_transmission_grid_v2",
@@ -6348,7 +6614,11 @@
       "known_limitations": [
         "Linked directly from AURA Siting Crafter v2 catalogue."
       ],
-      "refresh_policy": "on_demand_link"
+      "refresh_policy": "on_demand_link",
+      "gcs_https_url": "https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset=wa_transmission_grid_v2",
+      "source_count": null,
+      "stored_count": 0,
+      "sync_status": "Linked"
     }
   ]
 }

@@ -42,6 +42,13 @@ def load_aura_datasets(aura_manifest_path: Optional[Path] = None) -> Dict[str, D
         schema_map = {str(canon): str(src) for canon, src in raw_map.items()}
         req_fields = [str(f) for f in schema_map.values()]
 
+        gcs_loc = (v.get("locations") or {}).get("gcs") or {}
+        gcs_uri = gcs_loc.get("https_url") or gcs_loc.get("uri")
+        if not gcs_uri and str(v.get("endpoint", "")).startswith("https://storage.googleapis.com"):
+            gcs_uri = v.get("endpoint")
+        if not gcs_uri and v.get("derived"):
+            gcs_uri = f"https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset={k}"
+
         entry = DatasetEntry(
             dataset_key=k,
             title=v.get("dataset_name", k),
@@ -72,6 +79,7 @@ def load_aura_datasets(aura_manifest_path: Optional[Path] = None) -> Dict[str, D
             operational_suitability="Suitable for multi-hazard emergency planning and critical asset exposure.",
             default_bbox=None,
             qa_status=QAStatus.PASS,
+            latest_snapshot_path=gcs_uri,
         )
         entries[k] = entry
 

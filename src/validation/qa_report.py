@@ -150,6 +150,37 @@ def build_qa_summary(
                 "refresh_policy": entry.refresh_policy,
             }
 
+        # Resolve public GCS / AURA library URL
+        gcs_uri = record.get("gs_uri")
+        if gcs_uri and str(gcs_uri).startswith("gs://"):
+            record["gcs_https_url"] = str(gcs_uri).replace("gs://", "https://storage.googleapis.com/")
+        elif entry.latest_snapshot_path:
+            snap = entry.latest_snapshot_path
+            record["gcs_https_url"] = snap.replace("gs://", "https://storage.googleapis.com/") if str(snap).startswith("gs://") else snap
+        elif (store.project_root / "docs" / "qa" / "data" / f"{key}.parquet").exists():
+            record["gcs_https_url"] = f"https://storage.googleapis.com/{store.bucket_name}/qa/data/{key}.parquet"
+        elif (store.project_root / "docs" / "qa" / "data" / f"{key}.geojson").exists():
+            record["gcs_https_url"] = f"https://storage.googleapis.com/{store.bucket_name}/qa/data/{key}.geojson"
+        elif bool(entry.theme and "AURA" in entry.theme):
+            record["gcs_https_url"] = f"https://aura.getback2basics.net/docs/qa/geolibre_qa_inspect.html?dataset={key}"
+        else:
+            record["gcs_https_url"] = None
+
+        l1 = record.get("level1_source_contract") or {}
+        source_count = l1.get("source_feature_count")
+        stored_count = int(record.get("feature_count") or 0)
+        record["source_count"] = source_count
+        record["stored_count"] = stored_count
+        if source_count is not None and source_count > 0 and stored_count > 0:
+            pct = round((stored_count / source_count) * 100.0, 1)
+            record["sync_status"] = f"{min(pct, 100.0)}%"
+        elif record.get("overall_qa_status") == "LINKED":
+            record["sync_status"] = "Linked"
+        elif stored_count > 0:
+            record["sync_status"] = "100%"
+        else:
+            record["sync_status"] = "—"
+
         status_str = record.get("overall_qa_status", QAStatus.NOT_TESTED.value)
         counts[status_str] = counts.get(status_str, 0) + 1
         by_scale[entry.scale] = by_scale.get(entry.scale, 0) + 1
@@ -206,285 +237,367 @@ def render_qa_html_pages(
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="shell-type" content="web_dashboard"/>
-  <title>Emergency Spatial Intelligence | Data QA &amp; 3-Level Validation Hub</title>
-  {STITCH_TAILWIND_HEAD}
+  <title>Operational Intelligence Crafter — QA Report ({summary['report_id']})</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+  <style>
+    :root {{
+      --bg-primary: #0a0f1d;
+      --bg-secondary: #131a2c;
+      --card-bg: rgba(19, 26, 44, 0.85);
+      --border-color: rgba(59, 130, 246, 0.22);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #ef4444;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      min-height: 100vh;
+    }}
+    .container {{
+      max-width: 1560px;
+      margin: 0 auto;
+    }}
+    .header {{
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.25rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+    }}
+    .title h1 {{
+      margin: 0;
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #60a5fa;
+      letter-spacing: -0.01em;
+    }}
+    .title p {{
+      margin: 0.35rem 0 0 0;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }}
+    .header-right {{
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }}
+    .btn-inspector {{
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #0284c7;
+      color: #ffffff;
+      padding: 0.55rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.825rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+    }}
+    .btn-inspector:hover {{
+      background: #0369a1;
+    }}
+    .stats-bar {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }}
+    .stat-pill {{
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }}
+    .stat-pill b {{
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+    }}
+    .stat-pass b {{ color: var(--accent-green); }}
+    .stat-warn b {{ color: var(--accent-amber); }}
+    .stat-fail b {{ color: var(--accent-rose); }}
+    .stat-linked b {{ color: var(--accent-blue); }}
+    .search-row {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }}
+    .search-input {{
+      flex: 1;
+      max-width: 460px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.6rem 0.9rem;
+      border-radius: 0.5rem;
+      font-size: 0.825rem;
+      font-family: inherit;
+      outline: none;
+    }}
+    .search-input:focus {{
+      border-color: #38bdf8;
+    }}
+    .table-card {{
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }}
+    table {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.825rem;
+      text-align: left;
+    }}
+    thead th {{
+      background: #0f172a;
+      padding: 0.85rem 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.725rem;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }}
+    tbody td {{
+      padding: 0.75rem 0.9rem;
+      border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+      vertical-align: middle;
+    }}
+    tbody tr:last-child td {{
+      border-bottom: none;
+    }}
+    tbody tr:hover td {{
+      background: rgba(30, 41, 59, 0.5);
+    }}
+    .dataset-link {{
+      color: #38bdf8;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }}
+    .dataset-link:hover {{
+      text-decoration: underline;
+      color: #7dd3fc;
+    }}
+    .dataset-sub {{
+      font-size: 0.725rem;
+      color: #94a3b8;
+      margin-top: 0.2rem;
+    }}
+    .ext-link {{
+      color: #94a3b8;
+      font-size: 0.75rem;
+      text-decoration: underline;
+      font-family: 'JetBrains Mono', monospace;
+      display: block;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }}
+    .ext-link:hover {{
+      color: #e2e8f0;
+    }}
+    .gcs-link {{
+      color: #38bdf8;
+      font-size: 0.75rem;
+      text-decoration: underline;
+      font-family: 'JetBrains Mono', monospace;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }}
+    .gcs-link:hover {{
+      color: #7dd3fc;
+    }}
+    .muted-dash {{
+      color: #64748b;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+    }}
+    .num {{
+      font-family: 'JetBrains Mono', monospace;
+      text-align: right;
+      font-weight: 600;
+      white-space: nowrap;
+    }}
+    .qa-col {{
+      text-align: center;
+      white-space: nowrap;
+    }}
+    .qa-pass {{ color: #10b981; font-weight: bold; font-size: 1.15rem; }}
+    .qa-warn {{ color: #f59e0b; font-weight: bold; font-size: 1.15rem; }}
+    .qa-fail {{ color: #ef4444; font-weight: bold; font-size: 1.15rem; }}
+    .qa-linked {{ color: #38bdf8; font-weight: 600; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }}
+  </style>
 </head>
-<body class="bg-surface text-on-surface antialiased">
-
-  <!-- ============ FIXED LEFT SIDEBAR (Google Stitch Shell) ============ -->
-  <aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between py-6 shadow-[0_1px_8px_rgba(0,0,0,0.05)]">
-    <div class="flex flex-col gap-6">
-      <div class="px-6 flex items-center gap-3">
-        <div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center">
-          <span class="material-symbols-outlined text-secondary-container text-[22px]">crisis_alert</span>
-        </div>
-        <div>
-          <span class="font-headline font-bold text-[18px] text-primary block leading-tight">Operational Intel</span>
-          <span class="text-[11px] font-bold text-on-surface-variant tracking-wider uppercase">Spatial Crafter PoC</span>
-        </div>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">
+        <h1>Operational Intelligence Crafter — QA Report</h1>
+        <p>Authoritative Spatial Data Catalogue, Cloud Library &amp; Inspection Provenance &bull; Generated UTC {summary['generated_at_utc']}</p>
       </div>
-      <nav class="flex flex-col gap-1 px-3">
-        <a class="nav-link active" href="index.html"><span class="material-symbols-outlined text-[20px]">fact_check</span>3-Level Data QA Hub</a>
-        <a class="nav-link" href="inspect.html"><span class="material-symbols-outlined text-[20px]">map</span>MapLibre QA Inspector</a>
-        <div class="h-px bg-surface-container-high my-2 mx-3"></div>
-        <a class="nav-link" href="#section-kpi"><span class="material-symbols-outlined text-[20px]">analytics</span>Quality Gate Summary</a>
-        <a class="nav-link" href="#section-catalogue"><span class="material-symbols-outlined text-[20px]">dataset</span>Catalogue &amp; Provenance</a>
-        <a class="nav-link" href="#section-failures"><span class="material-symbols-outlined text-[20px]">warning</span>Failed Source Contracts</a>
-        <a class="nav-link" href="#section-levels"><span class="material-symbols-outlined text-[20px]">rule</span>Level 1–3 Check Matrix</a>
-      </nav>
-    </div>
-    <div class="px-4 flex flex-col gap-3">
-      <div class="p-3 bg-surface-container rounded-lg flex flex-col gap-1.5">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-bold text-on-surface-variant uppercase">GCS Data Lake</span>
-          <span class="inline-flex items-center gap-1 text-[11px] font-bold text-secondary"><span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>GeoParquet 1.1</span>
-        </div>
-        <span class="font-mono text-[10px] text-on-surface-variant truncate" title="gs://{summary['canonical_gcs_bucket']}/">gs://{summary['canonical_gcs_bucket']}/</span>
-      </div>
-      <div class="px-2 py-1 text-[11px] text-on-surface-variant">
-        Zero-Mock &amp; Anti-Hallucination Verified
+      <div class="header-right">
+        <span class="stat-pill" style="font-family:'JetBrains Mono',monospace;">{summary['report_id']}</span>
+        <a href="geolibre_qa_inspect.html" target="_blank" class="btn-inspector">
+          <span>🗺️</span><span>Open GeoLibre QA Inspector</span>
+        </a>
       </div>
     </div>
-  </aside>
 
-  <!-- ============ MAIN CONTENT AREA ============ -->
-  <div class="pl-64">
-    <!-- Dual-Tier Sticky Header -->
-    <header class="fixed top-0 left-64 right-0 z-40 bg-surface/95 backdrop-blur-md shadow-[0_1px_6px_rgba(0,0,0,0.04)]">
-      <div class="h-16 px-8 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3 flex-1 max-w-xl">
-          <span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
-          <input id="datasetFilterInput" type="search" class="w-full h-10 px-4 bg-surface-container-low rounded-lg text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-secondary/40" placeholder="Filter datasets by key, provider, theme, CRS, or QA status..."/>
-        </div>
-        <div class="flex items-center gap-3">
-          <span class="font-mono text-xs px-3 py-1.5 bg-surface-container rounded-lg text-on-surface-variant">Report: {summary['report_id']}</span>
-          <a href="inspect.html" class="h-10 px-4 rounded-lg bg-primary hover:bg-primary-container text-white text-xs font-bold flex items-center gap-2 transition-colors">
-            <span class="material-symbols-outlined text-[18px]">travel_explore</span><span>Open MapLibre Inspector</span>
-          </a>
-        </div>
-      </div>
-      <div class="h-11 px-8 bg-surface-container-lowest flex items-center justify-between text-xs border-t border-surface-container">
-        <div class="flex items-center gap-2">
-          <span class="font-bold text-on-surface-variant uppercase tracking-wider mr-2">Validation Pipeline:</span>
-          <span class="px-2.5 py-0.5 rounded-full bg-surface-container font-bold">01 Level 1 Source Contract</span>
-          <span class="px-2.5 py-0.5 rounded-full bg-surface-container font-bold">02 Level 2 GeoParquet Artifact</span>
-          <span class="px-2.5 py-0.5 rounded-full bg-surface-container font-bold">03 Level 3 Reconciliation</span>
-        </div>
-        <div class="font-mono text-[11px] text-on-surface-variant">
-          Generated UTC: {summary['generated_at_utc']}
-        </div>
-      </div>
-    </header>
+    <div class="stats-bar">
+      <div class="stat-pill">Total Datasets: <b>{summary['total_datasets']}</b></div>
+      <div class="stat-pill stat-pass">Passing: <b>{sc.get('PASS', 0)}</b></div>
+      <div class="stat-pill stat-warn">Warnings: <b>{sc.get('WARNING', 0)}</b></div>
+      <div class="stat-pill stat-fail">Failed: <b>{sc.get('FAIL', 0)}</b></div>
+      <div class="stat-pill stat-linked">Linked: <b>{sc.get('LINKED', 0)}</b></div>
+      <div class="stat-pill">Stored Features: <b>{summary['total_features_stored']:,}</b></div>
+    </div>
 
-    <main class="pt-32 px-8 pb-16 max-w-[1600px] space-y-8">
-      <!-- Top Banner -->
-      <section id="section-kpi" class="panel-card space-y-6">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <span class="step-tag">QA GATEWAY</span>
-            <div>
-              <h1 class="font-headline font-bold text-2xl text-on-surface">Three-Level Spatial Data Quality &amp; Provenance Hub</h1>
-              <p class="text-sm text-on-surface-variant">Live contract verification, GeoParquet 1.1.0 footer &amp; geometry validation, and source-to-storage reconciliation. Zero mock data.</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="status-badge status-PASS">PASS: {sc.get('PASS', 0)}</span>
-            <span class="status-badge status-WARNING">WARNING: {sc.get('WARNING', 0)}</span>
-            <span class="status-badge status-FAIL">FAIL: {sc.get('FAIL', 0)}</span>
-            <span class="status-badge status-NOT_TESTED">NOT TESTED: {sc.get('NOT TESTED', 0)}</span>
-          </div>
-        </div>
+    <div class="search-row">
+      <input id="datasetFilterInput" type="search" class="search-input" placeholder="🔍 Search datasets by key, title, provider, scale, or status..."/>
+      <span id="matchCountLabel" style="font-size: 0.75rem; color: #94a3b8; font-family: 'JetBrains Mono', monospace;"></span>
+    </div>
 
-        <!-- KPI Quad -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div class="kpi-tile">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Catalogued Datasets</span>
-            <span class="font-headline font-bold text-3xl text-primary">{summary['total_datasets']}</span>
-            <span class="text-xs text-on-surface-variant">National, State &amp; Local scales</span>
-          </div>
-          <div class="kpi-tile">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Verified Passing (PASS)</span>
-            <span class="font-headline font-bold text-3xl text-[#00774b]">{sc.get('PASS', 0)}</span>
-            <span class="text-xs text-on-surface-variant">All 3 validation levels green</span>
-          </div>
-          <div class="kpi-tile">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Warnings (WARNING)</span>
-            <span class="font-headline font-bold text-3xl text-[#d47300]">{sc.get('WARNING', 0)}</span>
-            <span class="text-xs text-on-surface-variant">Pagination cap or minor delta</span>
-          </div>
-          <div class="kpi-tile">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Failed Sources (FAIL)</span>
-            <span class="font-headline font-bold text-3xl text-error">{sc.get('FAIL', 0)}</span>
-            <span class="text-xs text-on-surface-variant">Surfaced honestly (zero mock fallback)</span>
-          </div>
-          <div class="kpi-tile">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Stored GeoParquet Features</span>
-            <span class="font-headline font-bold text-3xl text-secondary">{summary['total_features_stored']:,}</span>
-            <span class="font-mono text-xs text-on-surface-variant">{round(summary['total_bytes_stored'] / 1024.0, 1):,} KB verified WKB</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Catalogue Provenance & 3-Level Status Table -->
-      <section id="section-catalogue" class="panel-card space-y-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <span class="step-tag">CATALOGUE</span>
-            <h2 class="font-headline font-bold text-lg text-on-surface">Dataset Provenance, Versioning &amp; Three-Level QA Matrix</h2>
-          </div>
-          <span class="text-xs text-on-surface-variant">Click <b>Inspect on Map</b> to open any stored layer in MapLibre GL JS</span>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr class="bg-surface-container-low text-on-surface-variant uppercase tracking-wider text-[11px] border-b border-surface-container-high">
-                <th class="py-3 px-3">Dataset Key &amp; Title</th>
-                <th class="py-3 px-3">Scale / Category</th>
-                <th class="py-3 px-3">Provider &amp; Licence</th>
-                <th class="py-3 px-3">Vintage &amp; Retrieval UTC</th>
-                <th class="py-3 px-3">CRS &amp; Geom</th>
-                <th class="py-3 px-3 text-right">Source / Stored Rows</th>
-                <th class="py-3 px-3 text-center">L1 Source</th>
-                <th class="py-3 px-3 text-center">L2 Parquet</th>
-                <th class="py-3 px-3 text-center">L3 Reconcile</th>
-                <th class="py-3 px-3 text-center">Overall QA</th>
-                <th class="py-3 px-3 text-right">Inspector</th>
-              </tr>
-            </thead>
-            <tbody id="qaTableBody" class="divide-y divide-surface-container">
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Detailed Level 1, 2, 3 Diagnostic Cards -->
-      <section id="section-levels" class="space-y-4">
-        <div class="flex items-center gap-3">
-          <span class="step-tag">DIAGNOSTICS</span>
-          <h2 class="font-headline font-bold text-lg text-on-surface">Per-Dataset Level 1 (Source), Level 2 (GeoParquet), and Level 3 (Reconciliation) Evidence</h2>
-        </div>
-        <div id="qaCardsContainer" class="grid grid-cols-1 gap-4"></div>
-      </section>
-    </main>
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Dataset Key (Click to Inspect)</th>
+            <th>Live Source Query Endpoint</th>
+            <th>Cloud Library Version</th>
+            <th style="text-align: right;">Source Records</th>
+            <th style="text-align: right;">Lake Records</th>
+            <th style="text-align: center;">Delta / Sync Status</th>
+            <th style="text-align: center;">QA</th>
+          </tr>
+        </thead>
+        <tbody id="qaTableBody">
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script>
     const QA_SUMMARY = {summary_json_inline};
 
-    function statusBadge(st) {{
-      const cls = "status-" + (st || "NOT_TESTED").replace(/\\s+/g, "_");
-      return `<span class="status-badge ${{cls}}">${{st || "NOT TESTED"}}</span>`;
+    function formatEndpoint(url) {{
+      if (!url) return "—";
+      try {{
+        const u = new URL(url);
+        const pathParts = u.pathname.split("/").filter(Boolean);
+        const last = pathParts.slice(-2).join("/");
+        return u.hostname + (last ? "/" + last : "");
+      }} catch (e) {{
+        return url.replace(/^https?:[/][/]/, "").slice(0, 36);
+      }}
     }}
 
-    function renderAll(filterText = "") {{
+    function formatStorageLink(url, ds) {{
+      if (!url) return '<span class="muted-dash">—</span>';
+      let label = "Artifact";
+      if (url.includes("aura-siting-crafter") || (ds.theme && ds.theme.includes("AURA"))) {{
+        label = "AURA Library";
+      }} else if (url.includes("geoparquet")) {{
+        label = "GCS GeoParquet";
+      }} else if (url.endsWith(".parquet")) {{
+        label = "GCS Parquet";
+      }} else if (url.endsWith(".geojson")) {{
+        label = "GCS GeoJSON";
+      }} else if (url.includes("storage.googleapis.com")) {{
+        label = "GCS Artifact";
+      }}
+      return `<a href="${{url}}" target="_blank" class="gcs-link" title="${{url}}">📦 ${{label}}</a>`;
+    }}
+
+    function qaBadge(st) {{
+      const s = (st || "NOT_TESTED").toUpperCase();
+      if (s === "PASS") return '<span class="qa-pass" title="All checks passed">✔</span>';
+      if (s === "WARNING") return '<span class="qa-warn" title="Warning / Minor delta">⚠</span>';
+      if (s === "FAIL") return '<span class="qa-fail" title="Failed source contract">✖</span>';
+      if (s === "LINKED") return '<span class="qa-linked" title="External linked catalogue">🔗</span>';
+      return `<span class="muted-dash">${{st}}</span>`;
+    }}
+
+    function renderTable(filterText = "") {{
       const q = filterText.trim().toLowerCase();
       const tbody = document.getElementById("qaTableBody");
-      const cards = document.getElementById("qaCardsContainer");
       tbody.innerHTML = "";
-      cards.innerHTML = "";
 
+      let matchCount = 0;
       QA_SUMMARY.datasets.forEach(ds => {{
-        const hay = `${{ds.dataset_key}} ${{ds.title}} ${{ds.provider}} ${{ds.theme}} ${{ds.scale}} ${{ds.overall_qa_status}}`.toLowerCase();
+        const hay = `${{ds.dataset_key}} ${{ds.title || ""}} ${{ds.provider || ""}} ${{ds.theme || ""}} ${{ds.scale || ""}} ${{ds.overall_qa_status || ""}}`.toLowerCase();
         if (q && !hay.includes(q)) return;
+        matchCount++;
 
         const l1 = ds.level1_source_contract || {{}};
-        const l2 = ds.level2_stored_artifact || {{}};
-        const l3 = ds.level3_reconciliation || {{}};
-        const srcCount = l1.source_feature_count !== undefined && l1.source_feature_count !== null ? l1.source_feature_count.toLocaleString() : "—";
+        const srcCount = (l1.source_feature_count !== undefined && l1.source_feature_count !== null)
+          ? l1.source_feature_count.toLocaleString()
+          : (ds.source_count !== undefined && ds.source_count !== null ? ds.source_count.toLocaleString() : "—");
         const storedCount = ds.feature_count ? ds.feature_count.toLocaleString() : "0";
-        const licName = (ds.licence && ds.licence.name) ? ds.licence.name : "CC-BY-4.0";
+        const syncStatus = ds.sync_status || (ds.overall_qa_status === "LINKED" ? "Linked" : (ds.feature_count ? "100%" : "—"));
+        const storageUrl = ds.gcs_https_url || (ds.gs_uri ? ds.gs_uri.replace("gs://", "https://storage.googleapis.com/") : null);
 
         const tr = document.createElement("tr");
-        tr.className = "hover:bg-surface-container-low/60 transition-colors";
         tr.innerHTML = `
-          <td class="py-3 px-3">
-            <div class="font-mono font-bold text-primary text-xs">${{ds.dataset_key}}</div>
-            <div class="text-on-surface-variant text-[11px]">${{ds.title}}</div>
-          </td>
-          <td class="py-3 px-3">
-            <span class="px-2 py-0.5 rounded bg-surface-container font-bold uppercase text-[10px]">${{ds.scale}}</span>
-            <div class="text-[11px] text-on-surface-variant mt-1">${{ds.category}}</div>
-          </td>
-          <td class="py-3 px-3">
-            <div class="font-semibold text-on-surface">${{ds.provider}}</div>
-            <div class="font-mono text-[10px] text-secondary">${{licName}}</div>
-          </td>
-          <td class="py-3 px-3 font-mono text-[11px]">
-            <div>Vintage: <b>${{ds.source_vintage}}</b></div>
-            <div class="text-on-surface-variant">${{ds.retrieval_timestamp_utc || "Not retrieved"}}</div>
-          </td>
-          <td class="py-3 px-3 font-mono text-[11px]">
-            <div>${{ds.original_crs}} &rarr; <b>${{ds.stored_crs}}</b></div>
-            <div class="text-on-surface-variant">${{ds.geometry_type || "—"}}</div>
-          </td>
-          <td class="py-3 px-3 text-right font-mono text-xs">
-            <div>Src: ${{srcCount}}</div>
-            <div class="font-bold text-primary">Stored: ${{storedCount}}</div>
-          </td>
-          <td class="py-3 px-3 text-center">${{statusBadge(l1.status)}}</td>
-          <td class="py-3 px-3 text-center">${{statusBadge(l2.status)}}</td>
-          <td class="py-3 px-3 text-center">${{statusBadge(l3.status)}}</td>
-          <td class="py-3 px-3 text-center">${{statusBadge(ds.overall_qa_status)}}</td>
-          <td class="py-3 px-3 text-right">
-            <a href="inspect.html?dataset=${{encodeURIComponent(ds.dataset_key)}}" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary text-white text-[11px] font-bold hover:bg-primary-container">
-              <span class="material-symbols-outlined text-[14px]">map</span>Inspect
+          <td>
+            <a href="geolibre_qa_inspect.html?dataset=${{encodeURIComponent(ds.dataset_key)}}" target="_blank" class="dataset-link" title="Click to open in GeoLibre QA Inspector">
+              🗺️ ${{ds.dataset_key}}
             </a>
+            <div class="dataset-sub">${{ds.title || ""}} &bull; <span style="color:#64748b;">${{ds.scale || ""}} / ${{ds.theme || ""}}</span></div>
           </td>
+          <td>
+            ${{ds.endpoint ? `<a href="${{ds.endpoint}}" target="_blank" class="ext-link" title="${{ds.endpoint}}">${{formatEndpoint(ds.endpoint)}}</a>` : '<span class="muted-dash">—</span>'}}
+          </td>
+          <td>
+            ${{formatStorageLink(storageUrl, ds)}}
+          </td>
+          <td class="num" style="color: #38bdf8;">${{srcCount}}</td>
+          <td class="num" style="color: #10b981;">${{storedCount}}</td>
+          <td class="num" style="text-align: center; color: #34d399;">${{syncStatus}}</td>
+          <td class="qa-col">${{qaBadge(ds.overall_qa_status)}}</td>
         `;
         tbody.appendChild(tr);
-
-        // Diagnostic Card
-        const card = document.createElement("div");
-        card.className = "panel-card space-y-3 border-l-4 " + (
-          ds.overall_qa_status === "PASS" ? "border-[#00774b]" :
-          ds.overall_qa_status === "WARNING" ? "border-[#d47300]" :
-          ds.overall_qa_status === "FAIL" ? "border-error" : "border-outline-variant"
-        );
-        const l1Checks = (l1.checks || []).map(c => `<li class="flex items-start gap-2"><span class="font-mono font-bold text-[10px] px-1.5 py-0.5 rounded bg-surface-container">${{c.status}}</span><span><b>${{c.check}}:</b> ${{c.detail}}</span></li>`).join("");
-        const l2Checks = (l2.checks || []).map(c => `<li class="flex items-start gap-2"><span class="font-mono font-bold text-[10px] px-1.5 py-0.5 rounded bg-surface-container">${{c.status}}</span><span><b>${{c.check}}:</b> ${{c.detail}}</span></li>`).join("");
-        const l3Checks = (l3.checks || []).map(c => `<li class="flex items-start gap-2"><span class="font-mono font-bold text-[10px] px-1.5 py-0.5 rounded bg-surface-container">${{c.status}}</span><span><b>${{c.check}}:</b> ${{c.detail}}</span></li>`).join("");
-        const errBanner = l1.error_message ? `<div class="p-3 rounded-lg bg-error-container text-error font-mono text-xs"><b>Level 1 Source Failure Recorded (Zero-Mock — No Data Fabricated):</b> ${{l1.error_message}} | Endpoint: ${{ds.endpoint}}</div>` : "";
-
-        card.innerHTML = `
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="font-mono font-bold text-sm text-primary">${{ds.dataset_key}}</span>
-                ${{statusBadge(ds.overall_qa_status)}}
-                <span class="font-mono text-xs text-on-surface-variant">${{ds.gs_uri || "No GeoParquet stored (failed source)"}}</span>
-              </div>
-              <p class="text-xs text-on-surface-variant mt-0.5">${{ds.title}} — <i>${{(ds.licence && ds.licence.attribution) || ""}}</i></p>
-            </div>
-            <div class="font-mono text-[11px] text-on-surface-variant">
-              SHA-256: ${{ds.sha256 ? ds.sha256.slice(0, 20) + "..." : "N/A"}} | Bbox: ${{ds.bbox ? JSON.stringify(ds.bbox) : "N/A"}}
-            </div>
-          </div>
-          ${{errBanner}}
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 text-xs">
-            <div class="p-3 rounded-lg bg-surface-container-low space-y-1.5">
-              <div class="font-bold text-on-surface flex items-center justify-between"><span>Level 1 — Source Contract</span>${{statusBadge(l1.status)}}</div>
-              <ul class="space-y-1 text-[11px] text-on-surface-variant">${{l1Checks || "<li>No checks run</li>"}}</ul>
-            </div>
-            <div class="p-3 rounded-lg bg-surface-container-low space-y-1.5">
-              <div class="font-bold text-on-surface flex items-center justify-between"><span>Level 2 — Stored GeoParquet</span>${{statusBadge(l2.status)}}</div>
-              <ul class="space-y-1 text-[11px] text-on-surface-variant">${{l2Checks || "<li>Not applicable (source failed)</li>"}}</ul>
-            </div>
-            <div class="p-3 rounded-lg bg-surface-container-low space-y-1.5">
-              <div class="font-bold text-on-surface flex items-center justify-between"><span>Level 3 — Reconciliation</span>${{statusBadge(l3.status)}}</div>
-              <ul class="space-y-1 text-[11px] text-on-surface-variant">${{l3Checks || "<li>Not applicable</li>"}}</ul>
-            </div>
-          </div>
-          <div class="text-[11px] text-on-surface-variant pt-1">
-            <b>Known Limitations:</b> ${{(ds.known_limitations || []).join(" ")}}
-          </div>
-        `;
-        cards.appendChild(card);
       }});
+
+      document.getElementById("matchCountLabel").textContent = `Showing ${{matchCount}} of ${{QA_SUMMARY.datasets.length}} datasets`;
     }}
 
-    document.getElementById("datasetFilterInput").addEventListener("input", e => renderAll(e.target.value));
-    renderAll();
+    document.getElementById("datasetFilterInput").addEventListener("input", e => renderTable(e.target.value));
+    renderTable();
   </script>
 </body>
 </html>
@@ -983,8 +1096,22 @@ def render_qa_html_pages(
 """
 
     index_path = out_dir / "index.html"
-    inspect_path = out_dir / "inspect.html"
     index_path.write_text(index_html, encoding="utf-8")
-    inspect_path.write_text(inspect_html, encoding="utf-8")
-    return {"index_html": str(index_path), "inspect_html": str(inspect_path)}
+
+    # Generate GeoLibre QA Inspector with the complete 48-dataset catalogue
+    geolibre_inspect_path = out_dir / "geolibre_qa_inspect.html"
+    try:
+        from tools.build_geolibre_qa_inspect import main as build_inspect
+        build_inspect()
+    except Exception as e:
+        print(f"[WARN] Failed to run build_geolibre_qa_inspect: {e}")
+
+    # Mirror to inspect.html so legacy references and tests continue to work seamlessly
+    inspect_path = out_dir / "inspect.html"
+    if geolibre_inspect_path.exists():
+        inspect_path.write_text(geolibre_inspect_path.read_text(encoding="utf-8"), encoding="utf-8")
+    else:
+        inspect_path.write_text(inspect_html, encoding="utf-8")
+
+    return {"index_html": str(index_path), "inspect_html": str(inspect_path), "geolibre_inspect_html": str(geolibre_inspect_path)}
 

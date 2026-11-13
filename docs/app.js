@@ -3585,7 +3585,7 @@ LIMIT 50;`;
     document.getElementById("nlInput").value = "";
     const aoiEl = document.getElementById("aoiInput");
     if (aoiEl) aoiEl.value = "";
-    document.getElementById("globalSearch").value = "";
+    const gs = document.getElementById("globalSearch"); if (gs) gs.value = "";
     document.getElementById("sqlInput").value = "";
     document.getElementById("sqlTargetUri").textContent = "gs://operational-intelligence-crafter-lake/geoparquet/ (awaiting query)";
     document.getElementById("clarificationBox").style.display = "none";
@@ -5716,18 +5716,7 @@ th { color: var(--muted); font-weight: 600; }
       });
     }
 
-    const globalSearch = document.getElementById("globalSearch");
-    if (globalSearch) {
-      globalSearch.addEventListener("keydown", async e => {
-        if (e.key === "Enter") {
-          const nl = document.getElementById("nlInput");
-          if (nl) nl.value = e.target.value;
-          const key = inferScenarioFromText(e.target.value.trim(), activeScenarioKey);
-          await analyzeQuery(key, true);
-          await runActiveQuery();
-        }
-      });
-    }
+    // Note: globalSearch header input was removed in favor of step-by-step workflow in Step 01
 
     const fileInput = document.getElementById("spatialFileInput");
     const btnBrowse = document.getElementById("btnBrowseFile");

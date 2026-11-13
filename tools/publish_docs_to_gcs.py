@@ -22,8 +22,12 @@ def upload_web_assets():
         ("index.html", "text/html; charset=utf-8"),
         ("style.css", "text/css; charset=utf-8"),
         ("operational-intelligence-crafter.geolibre.json", "application/json; charset=utf-8"),
+        ("js/geolibre-qa-layer-registry.js", "application/javascript; charset=utf-8"),
+        ("qa/js/geolibre-qa-layer-registry.js", "application/javascript; charset=utf-8"),
         ("qa/index.html", "text/html; charset=utf-8"),
         ("qa/inspect.html", "text/html; charset=utf-8"),
+        ("qa/geolibre_qa_inspect.html", "text/html; charset=utf-8"),
+        ("geolibre_qa_inspect.html", "text/html; charset=utf-8"),
         ("data/WP302026_TRACK_latest.kmz", "application/vnd.google-earth.kmz"),
         ("data/WP302026_TRACK_latest.geojson", "application/geo+json; charset=utf-8"),
         ("data/WP302026_CYCLONE_ZONES.geojson", "application/geo+json; charset=utf-8"),
@@ -38,6 +42,15 @@ def upload_web_assets():
             if p.is_file():
                 rel = p.relative_to(DOCS_DIR).as_posix()
                 ct = "application/octet-stream" if p.suffix == ".parquet" else "application/geo+json; charset=utf-8" if p.suffix == ".geojson" else "application/json; charset=utf-8"
+                files_to_upload.append((rel, ct))
+
+    # Also include js directory (geolibre limiter & registry)
+    js_dir = DOCS_DIR / "js"
+    if js_dir.exists():
+        for p in sorted(js_dir.rglob("*")):
+            if p.is_file():
+                rel = p.relative_to(DOCS_DIR).as_posix()
+                ct = "application/javascript; charset=utf-8" if p.suffix == ".js" else "text/plain"
                 files_to_upload.append((rel, ct))
 
     # Also include exports files (parquet, geojson, json)
@@ -58,7 +71,12 @@ def upload_web_assets():
                 ct = "text/html; charset=utf-8" if p.suffix == ".html" else "application/json" if p.suffix == ".json" else "text/css" if p.suffix == ".css" else "application/javascript" if p.suffix == ".js" else "text/plain"
                 files_to_upload.append((rel, ct))
 
-    FORCE_UPLOAD = {"app.js", "duckdb_wasm.js", "layers.js", "geolibre_catalog_engine.js", "index.html", "style.css", "qa/index.html", "qa/inspect.html", "operational-intelligence-crafter.geolibre.json"}
+    FORCE_UPLOAD = {
+        "app.js", "duckdb_wasm.js", "layers.js", "geolibre_catalog_engine.js",
+        "index.html", "style.css", "qa/index.html", "qa/inspect.html",
+        "qa/geolibre_qa_inspect.html", "geolibre_qa_inspect.html",
+        "operational-intelligence-crafter.geolibre.json", "js/geolibre-qa-layer-registry.js", "qa/js/geolibre-qa-layer-registry.js"
+    }
 
     # Cleanup obsolete files from bucket
     obsolete_blobs = ["aura-siting-crafter.geolibre.json"]
