@@ -145,6 +145,7 @@ async function addDatasetLayer(key, allowPrimary) {
   };
   qaState.registry.set(key, rec);
   renderLayerCard(rec);
+  qaEnsureDockTab(rec);
   renderPicker();
   qaUpdateHash();
   try {
@@ -462,11 +463,31 @@ async function qaAddVector(rec) {
 
 async function qaRefreshVector(rec) {
   if (!rec.visible || !map.getSource(`qa-src-${rec.key}`)) return;
-  const url = qaVectorQueryUrl(rec);
+  let url = qaVectorQueryUrl(rec);
   rec.url = url;
   try {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    let r = null;
+    const preferLakehouse = (typeof qaSourceMode !== 'undefined' && qaSourceMode !== 'live');
+    if (preferLakehouse && rec.entry.geojson_url) {
+      try {
+        r = await fetch(rec.entry.geojson_url);
+        if (r && r.ok) url = rec.entry.geojson_url;
+      } catch (_) {}
+    }
+    if (!r || !r.ok) {
+      if (url) {
+        try {
+          r = await fetch(url);
+        } catch (err) {
+          console.warn(`Upstream query notice for ${rec.key}:`, err);
+        }
+      }
+    }
+    if ((!r || !r.ok) && rec.entry.geojson_url) {
+      url = rec.entry.geojson_url;
+      r = await fetch(url);
+    }
+    if (!r || !r.ok) throw new Error(`HTTP ${r ? r.status : 'fetch failed'}`);
     const fc = await r.json();
     if (!fc || !Array.isArray(fc.features)) throw new Error('response is not GeoJSON');
     const feats = fc.features.filter(f => f && f.geometry);
@@ -484,7 +505,7 @@ async function qaRefreshVector(rec) {
     rec.error = null;
     rec.status = `${rendered.length.toLocaleString()} shown of ${feats.length.toLocaleString()}${more ? '+' : ''} in view`;
   } catch (e) {
-    rec.error = `${e.message} — ${url}`;
+    rec.error = `${e.message} — ${rec.url || rec.entry.geojson_url || 'endpoint'}`;
     rec.status = 'Error';
   }
   renderLayerCard(rec);

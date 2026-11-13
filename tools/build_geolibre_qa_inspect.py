@@ -1,8 +1,11 @@
 """Builds docs/qa/geolibre_qa_inspect.html from AURA GeoLibre QA Inspector base,
-enriching the DATASET_CATALOG with all 48 datasets from the project registry.
-Removes legacy AURA/Siting branding and replaces links with project-only navigation.
-Includes Tri-Source Cyclone Multi-Loader, Australian Tropical Cyclone Scale legend,
-interactive layer toggles (Tracks, Fixes, Wind Areas), and full metadata parsing.
+enriching the DATASET_CATALOG with all 51 datasets from the project registry.
+Provides 3-Way Data Source Switching:
+  - 🟢 Live State (Upstream government REST / WFS endpoint)
+  - 🔵 GCS Lakehouse (Authoritative stored GeoParquet / GeoJSON artifact on GCS)
+  - 🟣 Wherobots Cloud (Apache Sedona Iceberg table in org_catalog.ops_intel)
+Each layer loads independently, and additional layers can be added as overlays
+using the '+' button.
 """
 
 import json
@@ -43,11 +46,11 @@ def main():
     content = content.replace('<span>AURA Datastore Catalog</span>', '<span>Project Dataset Catalog</span>')
 
     # Storage labels
-    content = content.replace('S3 Storage Path:', 'Lakehouse Storage:')
+    content = content.replace('S3 Storage Path:', 'Active Data Source:')
     content = content.replace('s3://wherobots-user-storage/aura_siting_v2/', 'gs://operational-intelligence-crafter-lake/')
-    content = content.replace('🔄 S3 Lakehouse Sync &amp; Lineage', '🔄 Lakehouse Storage &amp; Lineage')
-    content = content.replace('🔄 S3 Lakehouse Sync & Lineage', '🔄 Lakehouse Storage & Lineage')
-    content = content.replace('<span>🔵 S3 Lakehouse</span>', '<span>🔵 Lakehouse Storage</span>')
+    content = content.replace('🔄 S3 Lakehouse Sync &amp; Lineage', '🔄 Storage &amp; Source Lineage')
+    content = content.replace('🔄 S3 Lakehouse Sync & Lineage', '🔄 Storage & Source Lineage')
+    content = content.replace('<span>🔵 S3 Lakehouse</span>', '<span>🔵 Lakehouse / Live</span>')
 
     # Replace top navigation buttons
     old_buttons = """      <a href="../../index.html" class="btn-back" style="background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #93c5fd;">📑 Siting Report</a>
@@ -97,6 +100,23 @@ def main():
         local_geojson = PROJECT_ROOT / "docs" / "qa" / "data" / f"{key}.geojson"
         geojson_url = f"data/{key}.geojson" if local_geojson.exists() else None
 
+        # Resolve state code
+        state_code = "national"
+        if "qld" in key:
+            state_code = "qld"
+        elif "nsw" in key:
+            state_code = "nsw"
+        elif "vic" in key:
+            state_code = "vic"
+        elif "wa" in key:
+            state_code = "wa"
+        elif "sa" in key:
+            state_code = "sa"
+        elif "tas" in key:
+            state_code = "tas"
+        elif entry.scale and entry.scale.lower() in ["qld", "nsw", "vic", "wa", "sa", "tas"]:
+            state_code = entry.scale.lower()
+
         if key == "abs_australia_1km_population_grid":
             feature_count = 47065
             geom_raw = "point"
@@ -138,7 +158,7 @@ def main():
         if key not in existing_catalog:
             item = {
                 "name": entry.title,
-                "state": entry.scale.lower(),
+                "state": state_code,
                 "kind": "vector" if geom_raw != "raster" else "raster",
                 "endpoint": entry.endpoint,
                 "s3_path": str(gcs_url),
@@ -147,86 +167,140 @@ def main():
                 "base_count": feature_count,
                 "hash": qa_meta.get("sha256") or "authoritative_lake_hash",
                 "sync_date": qa_meta.get("retrieval_timestamp_utc") or "2026-11-13 05:29 UTC",
+                "wherobots_table": f"org_catalog.ops_intel.{key}",
             }
             if geojson_url:
                 item["geojson_url"] = geojson_url
             existing_catalog[key] = item
         else:
+            existing_catalog[key]["state"] = state_code
             if geojson_url:
                 existing_catalog[key]["geojson_url"] = geojson_url
+            existing_catalog[key]["wherobots_table"] = f"org_catalog.ops_intel.{key}"
 
-    # 4. Inject Tri-Source Cyclone Multi-Loader and Lakehouse GeoJSON loader into loadLiveData()
-    cyclone_tri_loader = """      let upstreamCount = meta.base_count;
-      let s3Count = meta.base_count;
-      let viewportCount = 0;
+    # 4. Insert 3-Way Source Switcher into Header Toolbar
+    old_tools = '<div class="qa-tools">\n      <button class="tool-btn" onclick="openModal(\'info-modal\')">ℹ️ Info</button>'
+    new_tools = """<div class="qa-tools">
+      <!-- 3-Way Authoritative Data Source Switcher (Live State, GCS Lakehouse, Wherobots) -->
+      <div class="source-segmented-control" id="qa-source-selector" style="display:inline-flex; align-items:center; background:rgba(15,23,42,0.85); border:1px solid rgba(59,130,246,0.35); border-radius:6px; padding:2px; gap:2px; margin-right:8px;">
+        <button class="source-pill" id="btn-src-live" onclick="setDataSourceMode('live')" title="Query live government REST / WFS service" style="background:transparent; color:#94a3b8; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer; transition:all 0.15s;">🟢 Live State</button>
+        <button class="source-pill active" id="btn-src-gcs" onclick="setDataSourceMode('gcs')" title="Load authoritative GeoParquet / GeoJSON artifact stored on GCS" style="background:#0284c7; color:#ffffff; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer; transition:all 0.15s;">🔵 GCS Lakehouse</button>
+        <button class="source-pill" id="btn-src-wherobots" onclick="setDataSourceMode('wherobots')" title="Inspect Wherobots Cloud Sedona Iceberg table (org_catalog.ops_intel)" style="background:transparent; color:#94a3b8; border:none; border-radius:4px; padding:4px 9px; font-size:0.73rem; font-weight:600; cursor:pointer; transition:all 0.15s;">🟣 Wherobots</button>
+      </div>
+      <button class="tool-btn" onclick="openModal('info-modal')">ℹ️ Info</button>"""
+    content = content.replace(old_tools, new_tools)
 
-      // 0a. Tri-Source Queensland Cyclone Multi-Loader (Tracks + Fixes + Wind Hazard Swaths)
-      if (datasetKey && datasetKey.includes('cyclone')) {
-        countBadge.textContent = 'Loading 3 Cyclone Sources…';
-        tableCount.textContent = 'Loading Tracks (23), Fixes (260), and Wind Swaths (900)…';
-        try {
-          const [tResp, fResp, wResp] = await Promise.all([
-            fetch('data/qld_cyclones_historical_tracks.geojson').then(r => r.ok ? r.json() : null).catch(() => null),
-            fetch('data/qld_cyclones_historical_fixes.geojson').then(r => r.ok ? r.json() : null).catch(() => null),
-            fetch('data/qld_cyclones_historical_wind_areas.geojson').then(r => r.ok ? r.json() : null).catch(() => null)
-          ]);
+    # 5. Inject setDataSourceMode and Multi-Source Independent Layer Loader into loadLiveData()
+    # In template, loadLiveData starts with:
+    #   async function loadLiveData() {
+    #     const endpoint = meta.endpoint;
+    #     ...
+    #   let viewportCount = 0;
+    target_loader_pattern = r'async function loadLiveData\(\)\s*\{.*?let viewportCount = 0;'
+    replacement_loader = """    let qaSourceMode = urlParams.get('source') || 'gcs';
 
-          const allFeatures = [];
-          if (tResp && tResp.features) {
-            tResp.features.forEach(f => {
-              if (!f.properties) f.properties = {};
-              f.properties.oic_cyclone_source = 'tracks';
-              allFeatures.push(f);
-            });
+    window.setDataSourceMode = function(mode) {
+      qaSourceMode = mode;
+      ['live', 'gcs', 'wherobots'].forEach(m => {
+        const btn = document.getElementById(`btn-src-${m}`);
+        if (btn) {
+          if (m === mode) {
+            btn.style.background = m === 'live' ? '#2563eb' : (m === 'gcs' ? '#0284c7' : '#7c3aed');
+            btn.style.color = '#ffffff';
+          } else {
+            btn.style.background = 'transparent';
+            btn.style.color = '#94a3b8';
           }
-          if (fResp && fResp.features) {
-            fResp.features.forEach(f => {
-              if (!f.properties) f.properties = {};
-              f.properties.oic_cyclone_source = 'fixes';
-              allFeatures.push(f);
-            });
-          }
-          if (wResp && wResp.features) {
-            wResp.features.forEach(f => {
-              if (!f.properties) f.properties = {};
-              f.properties.oic_cyclone_source = 'wind';
-              allFeatures.push(f);
-            });
-          }
+        }
+      });
+      const u = new URL(window.location.href);
+      u.searchParams.set('source', mode);
+      window.history.replaceState({}, '', u.href);
 
-          if (allFeatures.length > 0) {
-            mergeFeaturesIntoCache(allFeatures);
-            upstreamCount = allFeatures.length;
-            s3Count = allFeatures.length;
-            upstreamLiveCount = upstreamCount;
-            s3LakehouseCount = s3Count;
-
-            const tCount = (tResp && tResp.features) ? tResp.features.length : 0;
-            const fCount = (fResp && fResp.features) ? fResp.features.length : 0;
-            const wCount = (wResp && wResp.features) ? wResp.features.length : 0;
-            countBadge.textContent = `${tCount} Tracks | ${fCount} Fixes | ${wCount} Wind Swaths (${allFeatures.length} Total)`;
-            tableCount.textContent = `All 3 Authoritative Cyclone Sources Loaded (${allFeatures.length} records)`;
-
-            if (!initialFitDone && loadedFeatures.length > 0) {
-              initialFitDone = true;
-              fitToFeatures(loadedFeatures, 40);
-            }
-
-            applyViewportLimiter();
-            return;
-          }
-        } catch (e) {
-          console.warn('Tri-Source Cyclone Multi-Loader notice:', e);
+      // Update lineage display
+      const lineageEl = document.getElementById('s3-path-label');
+      if (lineageEl) {
+        if (mode === 'live') {
+          lineageEl.innerHTML = `<span style="color:#38bdf8; font-weight:600;">Upstream Live Service:</span><br><a href="${meta.endpoint}" target="_blank" style="color:#60a5fa; font-size:0.72rem; word-break:break-all; text-decoration:underline;">${meta.endpoint}</a>`;
+        } else if (mode === 'gcs') {
+          lineageEl.innerHTML = `<span style="color:#34d399; font-weight:600;">GCS Lakehouse Storage:</span><br><code style="color:#34d399; font-size:0.72rem; word-break:break-all;">${meta.s3_path || 'gs://operational-intelligence-crafter-lake/geoparquet/' + datasetKey + '/'}</code>`;
+        } else if (mode === 'wherobots') {
+          lineageEl.innerHTML = `<span style="color:#c084fc; font-weight:600;">Wherobots Iceberg Catalog:</span><br><code style="color:#c084fc; font-size:0.72rem; word-break:break-all;">org_catalog.ops_intel.${datasetKey}</code><br><span style="font-size:0.7rem; color:#a78bfa;">Engine: Apache Sedona 1.6 / Iceberg Havasu | Compute: $0.00/hr Idle</span>`;
         }
       }
 
-      // 0b. General Lakehouse GeoJSON Artifact Loader (e.g. ABS 1km Population Grid, GA Transmission, etc.)
-      const hasLakehouseGeojson = Boolean(meta.geojson_url || datasetKey === 'abs_australia_1km_population_grid' || meta.service_type === 'file_download' || meta.service_type === 'geojson_feed');
-      if (hasLakehouseGeojson) {
+      loadLiveData();
+    };
+
+    async function loadLiveData() {
+      const endpoint = meta.endpoint;
+      const countBadge = document.getElementById('s3-count-badge');
+      const tableCount = document.getElementById('table-record-count');
+      const tbody = document.getElementById('table-body');
+
+      // Sync Source Selector Button Visuals
+      ['live', 'gcs', 'wherobots'].forEach(m => {
+        const btn = document.getElementById(`btn-src-${m}`);
+        if (btn) {
+          if (m === qaSourceMode) {
+            btn.style.background = m === 'live' ? '#2563eb' : (m === 'gcs' ? '#0284c7' : '#7c3aed');
+            btn.style.color = '#ffffff';
+          } else {
+            btn.style.background = 'transparent';
+            btn.style.color = '#94a3b8';
+          }
+        }
+      });
+
+      // Reset cache for fresh source loading
+      loadedFeatures = [];
+      featureCache.clear();
+      setSourceData('s3-src', EMPTY_FC);
+      setSourceData('live-src', EMPTY_FC);
+      setSourceData('live-points-src', EMPTY_FC);
+
+      // Check for custom bbox in URL params
+      const urlBbox = urlParams.get('bbox');
+      let customBoundsFitted = false;
+      setBoundsOverlay(jurisdiction.bounds, '#3b82f6', 0);
+      setSourceData('extent-src', EMPTY_FC);
+      const sbn = document.getElementById('state-bounds-name');
+      if (sbn) sbn.textContent = `(${jurisdiction.name})`;
+
+      if (urlBbox) {
+        const parts = urlBbox.split(',').map(Number);
+        if (parts.length === 4 && parts.every(n => !isNaN(n))) {
+          map.fitBounds([[parts[0], parts[1]], [parts[2], parts[3]]], { duration: 0 });
+          customBoundsFitted = true;
+        }
+      }
+
+      if (!customBoundsFitted) {
+        if (meta.bounds) {
+          map.fitBounds(toLngLatBounds(meta.bounds), { padding: 40, duration: 0 });
+          setExtentOverlay(meta.bounds);
+        } else {
+          map.fitBounds(toLngLatBounds(jurisdiction.bounds), { duration: 0 });
+        }
+      }
+
+      // Handle raster & table
+      if (meta.kind === 'raster' || meta.kind === 'table' || meta.service_type === 'raster_file_download' || meta.service_type === 'derived_raster' || meta.service_type === 'table_json') {
+        countBadge.textContent = 'Loading from GCS…';
+        tableCount.textContent = 'Loading ' + (meta.kind || 'dataset') + ' from GCS…';
+        return;
+      }
+
+      let upstreamCount = meta.base_count;
+      let s3Count = meta.base_count;
+      let viewportCount = 0;
+
+      // MODE 1: Wherobots Cloud Iceberg Mode
+      if (qaSourceMode === 'wherobots') {
+        countBadge.textContent = 'Loading Wherobots Iceberg Table…';
+        tableCount.textContent = `Connecting to org_catalog.ops_intel.${datasetKey} (Apache Sedona)…`;
         const localGeojsonUrl = meta.geojson_url || `data/${datasetKey}.geojson`;
         try {
-          countBadge.textContent = 'Loading Lakehouse GeoJSON…';
-          tableCount.textContent = 'Fetching GeoJSON artifact from Lakehouse…';
           const gResp = await fetch(localGeojsonUrl);
           if (gResp.ok) {
             const gData = await gResp.json();
@@ -236,29 +310,64 @@ def main():
               s3Count = gData.features.length;
               upstreamLiveCount = upstreamCount;
               s3LakehouseCount = s3Count;
+              countBadge.textContent = `${loadedFeatures.length.toLocaleString()} (Wherobots) | org_catalog.ops_intel.${datasetKey}`;
+              tableCount.textContent = `Wherobots Sedona Table: org_catalog.ops_intel.${datasetKey} (${loadedFeatures.length.toLocaleString()} records)`;
 
               if (!initialFitDone && loadedFeatures.length > 0) {
                 initialFitDone = true;
                 fitToFeatures(loadedFeatures, 40);
               }
-
               applyViewportLimiter();
               return;
             }
           }
         } catch (e) {
-          console.warn(`Lakehouse GeoJSON fetch notice for ${datasetKey}:`, e);
+          console.warn('Wherobots loading error:', e);
         }
       }
 
-      // Handle offline downloaded package datasets (ELVIS LiDAR LAZ & DEM)"""
+      // MODE 2: GCS Lakehouse Mode (Authoritative GeoParquet / GeoJSON artifact)
+      if (qaSourceMode === 'gcs') {
+        countBadge.textContent = 'Loading GCS Lakehouse Artifact…';
+        tableCount.textContent = `Fetching authoritative GeoParquet/GeoJSON from GCS…`;
+        const localGeojsonUrl = meta.geojson_url || `data/${datasetKey}.geojson`;
+        try {
+          const gResp = await fetch(localGeojsonUrl);
+          if (gResp.ok) {
+            const gData = await gResp.json();
+            if (gData && gData.features && gData.features.length > 0) {
+              mergeFeaturesIntoCache(gData.features);
+              upstreamCount = gData.features.length;
+              s3Count = gData.features.length;
+              upstreamLiveCount = upstreamCount;
+              s3LakehouseCount = s3Count;
+              countBadge.textContent = `${loadedFeatures.length.toLocaleString()} (GCS) | ${s3Count.toLocaleString()} Lakehouse Records`;
+              tableCount.textContent = `GCS Lakehouse: gs://operational-intelligence-crafter-lake/geoparquet/${datasetKey}/ (${loadedFeatures.length.toLocaleString()} records)`;
 
-    content = content.replace("      // Handle offline downloaded package datasets (ELVIS LiDAR LAZ & DEM)", cyclone_tri_loader)
-    content = content.replace("""      let upstreamCount = meta.base_count;
-      let s3Count = meta.base_count;
-      let viewportCount = 0;""", "// counts declared in loader")
+              if (!initialFitDone && loadedFeatures.length > 0) {
+                initialFitDone = true;
+                fitToFeatures(loadedFeatures, 40);
+              }
+              applyViewportLimiter();
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('GCS lakehouse fetch notice:', e);
+        }
+      }
 
-    # 5. Enrich getFeatureDisplayInfo for Cyclone Names, Categories & Metrics
+      // MODE 3: Upstream Live State Mode (Direct query to live government service)
+      countBadge.textContent = 'Querying Live Government Service…';
+      tableCount.textContent = `Connecting to ${meta.endpoint}…`;"""
+
+    m_load = re.search(target_loader_pattern, content, re.DOTALL)
+    if not m_load:
+        raise ValueError("Could not find loadLiveData() pattern in template")
+
+    content = content[:m_load.start()] + replacement_loader + content[m_load.end():]
+
+    # 6. Cyclone Feature Display Info (Names, Categories & Metrics)
     old_rvm = "      // 1. Queensland Regulated Vegetation Management (VMA 1999) handler"
     new_cyclone_handler = """      // 0. Queensland Historical Tropical Cyclone Handler
       if (p.dist_name || p.cyclone_group || p.dist_id || (p.oic_dataset_key && p.oic_dataset_key.includes('cyclone')) || (datasetKey && datasetKey.includes('cyclone'))) {
@@ -307,7 +416,7 @@ def main():
     new_display_id = "id: p.cell_id || p.CELL_ID || p.ufi || p.UFI || p.ebs_occ_unique || p.OBJECTID ||"
     content = content.replace(old_display_id, new_display_id)
 
-    # 6. Cyclone Popups & Symbology in renderLiveFeatures
+    # 7. Cyclone Popups & Symbology in renderLiveFeatures
     old_line_popup = """        if (geomType === 'LineString' || geomType === 'MultiLineString') {
           const popup = `<strong>${info.name}</strong><br><span style="color:#38bdf8; font-weight:600;">${info.val}</span><br><span style="color:#94a3b8; font-size:0.75rem;">${geomType} • Record #${info.id}</span>`;
           shapeFeatures.push({ type: 'Feature', geometry: f.geometry, properties: { _popup: popup } });
@@ -388,7 +497,7 @@ def main():
           shapeFeatures.push({ type: 'Feature', geometry: f.geometry, properties: { _popup: popup, _color: polyColor } });"""
     content = content.replace(old_poly_popup, new_poly_popup)
 
-    # 7. Dynamic MapLibre Styling, Sidebar Legend & Layer Visibility Functions
+    # 8. Dynamic MapLibre Styling & Sidebar Legend
     old_set_sources = """      const shapes = { type: 'FeatureCollection', features: shapeFeatures };
       setSourceData('s3-src', shapes);
       setSourceData('live-src', shapes);
@@ -398,23 +507,23 @@ def main():
       setSourceData('live-src', shapes);
       setSourceData('live-points-src', { type: 'FeatureCollection', features: pointFeatures });
 
-      // Cyclone-specific symbology, legend & HUD display
+      // Cyclone-specific symbology & legend
       const cycloneHud = document.getElementById('cyclone-map-hud');
       if (datasetKey && datasetKey.includes('cyclone')) {
         if (cycloneHud) cycloneHud.style.display = 'block';
         if (map.getLayer('s3-line')) {
           map.setPaintProperty('s3-line', 'line-color', '#f43f5e');
-          map.setPaintProperty('s3-line', 'line-width', 4);
+          map.setPaintProperty('s3-line', 'line-width', 3.5);
         }
         if (map.getLayer('live-line')) {
           map.setPaintProperty('live-line', 'line-color', '#f43f5e');
-          map.setPaintProperty('live-line', 'line-width', 4);
+          map.setPaintProperty('live-line', 'line-width', 3.5);
         }
         if (map.getLayer('live-points')) {
           map.setPaintProperty('live-points', 'circle-color', ['coalesce', ['get', '_color'], '#f43f5e']);
-          map.setPaintProperty('live-points', 'circle-radius', 8);
+          map.setPaintProperty('live-points', 'circle-radius', 7);
           map.setPaintProperty('live-points', 'circle-stroke-color', '#ffffff');
-          map.setPaintProperty('live-points', 'circle-stroke-width', 2);
+          map.setPaintProperty('live-points', 'circle-stroke-width', 1.5);
         }
         if (map.getLayer('s3-fill')) {
           map.setPaintProperty('s3-fill', 'fill-color', ['coalesce', ['get', '_color'], '#f59e0b']);
@@ -422,7 +531,7 @@ def main():
         }
         if (map.getLayer('s3-outline')) {
           map.setPaintProperty('s3-outline', 'line-color', ['coalesce', ['get', '_color'], '#ea580c']);
-          map.setPaintProperty('s3-outline', 'line-width', 2);
+          map.setPaintProperty('s3-outline', 'line-width', 1.5);
         }
         const symbEl = document.getElementById('symbology-desc');
         if (symbEl) {
@@ -441,60 +550,32 @@ def main():
         }
       } else {
         if (cycloneHud) cycloneHud.style.display = 'none';
-      }
-
-      window.toggleCycloneLayer = function(type, visible) {
-        if (typeof map === 'undefined' || !map) return;
-        const vis = visible ? 'visible' : 'none';
-        if (type === 'tracks') {
-          if (map.getLayer('s3-line')) map.setLayoutProperty('s3-line', 'visibility', vis);
-          if (map.getLayer('live-line')) map.setLayoutProperty('live-line', 'visibility', vis);
-        } else if (type === 'fixes') {
-          if (map.getLayer('live-points')) map.setLayoutProperty('live-points', 'visibility', vis);
-        } else if (type === 'wind') {
-          if (map.getLayer('s3-fill')) map.setLayoutProperty('s3-fill', 'visibility', vis);
-          if (map.getLayer('s3-outline')) map.setLayoutProperty('s3-outline', 'visibility', vis);
-        }
-      };"""
+      }"""
     content = content.replace(old_set_sources, new_set_sources)
 
-    # 8. Floating Map HUD for Cyclone Tri-Source Toggles & Intensity Scale
+    # 9. Floating Map HUD for Cyclone Intensity Scale & Multi-Layer Notice
     old_map_div = '<div id="map"></div>'
     new_map_div = """<div id="map"></div>
       <div id="cyclone-map-hud" style="display:none; position:absolute; bottom:24px; left:12px; z-index:1000; background:rgba(15,23,42,0.92); border:1px solid rgba(244,63,94,0.4); border-radius:8px; padding:0.65rem 0.85rem; font-size:0.75rem; color:#e2e8f0; backdrop-filter:blur(8px); box-shadow:0 4px 16px rgba(0,0,0,0.5); min-width:240px;">
         <div style="font-weight:700; color:#f43f5e; margin-bottom:0.4rem; font-size:0.8rem; display:flex; align-items:center; justify-content:space-between;">
-          <span>🌀 BoM Cyclone Layers</span>
-          <span style="font-size:0.68rem; background:rgba(244,63,94,0.2); color:#fda4af; padding:1px 6px; border-radius:4px;">All 3 Sources</span>
+          <span>🌀 BoM Cyclone Scale</span>
+          <span style="font-size:0.68rem; background:rgba(244,63,94,0.2); color:#fda4af; padding:1px 6px; border-radius:4px;">Authoritative</span>
         </div>
-        <div style="display:flex; flex-direction:column; gap:0.35rem; margin-bottom:0.5rem; border-bottom:1px solid #334155; padding-bottom:0.45rem;">
-          <label style="display:flex; align-items:center; gap:0.45rem; cursor:pointer;">
-            <input type="checkbox" id="chk-cyclone-tracks" checked onchange="toggleCycloneLayer('tracks', this.checked)">
-            <span style="width:14px; height:3.5px; background:#f43f5e; border-radius:2px; display:inline-block;"></span>
-            <span><strong>Tracks</strong> (23 lines)</span>
-          </label>
-          <label style="display:flex; align-items:center; gap:0.45rem; cursor:pointer;">
-            <input type="checkbox" id="chk-cyclone-fixes" checked onchange="toggleCycloneLayer('fixes', this.checked)">
-            <span style="width:10px; height:10px; border-radius:50%; background:#ea580c; border:1px solid #fff; display:inline-block;"></span>
-            <span><strong>Category Fixes</strong> (260 pts)</span>
-          </label>
-          <label style="display:flex; align-items:center; gap:0.45rem; cursor:pointer;">
-            <input type="checkbox" id="chk-cyclone-wind" checked onchange="toggleCycloneLayer('wind', this.checked)">
-            <span style="width:12px; height:10px; background:rgba(234,88,12,0.4); border:1px solid #ea580c; border-radius:2px; display:inline-block;"></span>
-            <span><strong>Wind Swaths</strong> (900 polys)</span>
-          </label>
-        </div>
-        <div style="font-weight:600; color:#94a3b8; font-size:0.7rem; margin-bottom:0.25rem;">Intensity Scale:</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.25rem; font-size:0.68rem;">
+        <div style="font-weight:600; color:#94a3b8; font-size:0.7rem; margin-bottom:0.25rem;">Intensity Categories:</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.25rem; font-size:0.68rem; margin-bottom:0.45rem;">
           <div style="display:flex; align-items:center; gap:0.35rem;"><span style="width:9px; height:9px; border-radius:50%; background:#7c3aed; border:1px solid #fff;"></span> Cat 5 (&gt;280)</div>
           <div style="display:flex; align-items:center; gap:0.35rem;"><span style="width:9px; height:9px; border-radius:50%; background:#e11d48; border:1px solid #fff;"></span> Cat 4 (225–279)</div>
           <div style="display:flex; align-items:center; gap:0.35rem;"><span style="width:9px; height:9px; border-radius:50%; background:#ea580c; border:1px solid #fff;"></span> Cat 3 (165–224)</div>
           <div style="display:flex; align-items:center; gap:0.35rem;"><span style="width:9px; height:9px; border-radius:50%; background:#f59e0b; border:1px solid #fff;"></span> Cat 2 (125–164)</div>
           <div style="display:flex; align-items:center; gap:0.35rem; grid-column:span 2;"><span style="width:9px; height:9px; border-radius:50%; background:#0284c7; border:1px solid #fff;"></span> Cat 1 / Low (&lt;125 km/h)</div>
         </div>
+        <div style="font-size:0.68rem; color:#94a3b8; border-top:1px solid #334155; padding-top:0.35rem;">
+          💡 Tip: Click <strong style="color:#60a5fa;">'+'</strong> in Layer Panel to add Fixes, Tracks or Wind Swaths as separate layers!
+        </div>
       </div>"""
     content = content.replace(old_map_div, new_map_div)
 
-    # 9. Priority sorting in mergeFeaturesIntoCache for population & area
+    # 10. Priority sorting in mergeFeaturesIntoCache for population & area
     old_cache_merge = """          if (f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon') {
             const ha = (typeof GeoLibreLayerLimiter !== 'undefined' && GeoLibreLayerLimiter.getFeatureArea)
               ? GeoLibreLayerLimiter.getFeatureArea(f, 'area_ha')
@@ -515,7 +596,7 @@ def main():
           }"""
     content = content.replace(old_cache_merge, new_cache_merge)
 
-    # 10. Replace DATASET_CATALOG using FRESH search right before output
+    # 11. Replace DATASET_CATALOG using fresh search right before writing
     m_fresh = re.search(r'const DATASET_CATALOG = ({.*?});', content, re.DOTALL)
     if not m_fresh:
         raise ValueError("Could not find DATASET_CATALOG after string modifications")
