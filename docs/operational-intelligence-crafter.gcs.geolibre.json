@@ -1,0 +1,719 @@
+{
+  "version": "0.2.0",
+  "name": "Operational Intelligence Crafter â€” National Emergency Spatial Workbench",
+  "description": "Direct GCS GeoParquet project (byte-range reads via DuckDB-WASM / GeoLibre Desktop / QGIS).",
+  "mapView": {
+    "center": [
+      133.7751,
+      -25.2744
+    ],
+    "zoom": 4.0,
+    "bearing": 0,
+    "pitch": 0,
+    "bbox": [
+      112.9,
+      -43.7,
+      153.7,
+      -10.0
+    ]
+  },
+  "basemapStyleUrl": "https://tiles.openfreemap.org/styles/liberty",
+  "cloudStorage": {
+    "provider": "gcs",
+    "endpoint": "https://storage.googleapis.com",
+    "bucket": "operational-intelligence-crafter-lake",
+    "authMode": "public"
+  },
+  "layerGroups": [
+    {
+      "id": "grp_emergency",
+      "name": "ðŸš¨ Emergency Operations & Active Incidents",
+      "visible": true
+    },
+    {
+      "id": "grp_population",
+      "name": "ðŸ‘¥ ABS Population Grid (Methods A/B/C)",
+      "visible": true
+    },
+    {
+      "id": "grp_infrastructure",
+      "name": "âš¡ Energy & Critical Infrastructure",
+      "visible": true
+    },
+    {
+      "id": "grp_hazards",
+      "name": "ðŸŒŠ Flood, Cyclone & Seismic Hazards",
+      "visible": true
+    },
+    {
+      "id": "grp_receptors",
+      "name": "ðŸ¥ Health, Schools & Sensitive Receptors",
+      "visible": true
+    },
+    {
+      "id": "grp_boundaries",
+      "name": "ðŸ—ºï¸ Statistical & Administrative Boundaries",
+      "visible": false
+    }
+  ],
+  "layers": [
+    {
+      "id": "abs_australia_1km_population_grid",
+      "name": "ABS 2025 — Australian Population Grid 1 km² (National Modeled ERP Grid)",
+      "groupId": "grp_population",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet"
+      },
+      "style": {
+        "circleRadius": 3,
+        "fillColor": "#006973",
+        "strokeColor": "#004f57",
+        "strokeWidth": 0.5
+      },
+      "metadata": {
+        "source_agency": "Australian Bureau of Statistics (ABS)",
+        "features_stored": 286827,
+        "object_bytes": 32380819,
+        "object_updated_utc": "2026-11-10T02:27:09.169000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "datacenter_candidates_v2",
+      "name": "AURA Candidate Siting & Multi-Criteria Ranking Table",
+      "groupId": "grp_infrastructure",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/datacenter_candidates_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/datacenter_candidates_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
+      },
+      "style": {
+        "circleRadius": 6,
+        "fillColor": "#22d3ee",
+        "strokeColor": "#ffffff",
+        "strokeWidth": 1
+      },
+      "metadata": {
+        "source_agency": "AURA Siting Crafter Engine",
+        "features_stored": 17,
+        "object_bytes": 34186,
+        "object_updated_utc": "2026-11-13T01:07:37.801000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "derived_hunter_1km_population_grid",
+      "name": "Derived Hunter 1Km Population Grid",
+      "groupId": "grp_population",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T003500Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T003500Z/part-00000.parquet"
+      },
+      "style": {
+        "circleRadius": 3,
+        "fillColor": "#006973",
+        "strokeColor": "#004f57",
+        "strokeWidth": 0.5
+      },
+      "metadata": {
+        "source_agency": null,
+        "features_stored": 1326,
+        "object_bytes": 148313,
+        "object_updated_utc": "2026-11-10T01:38:37.201000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "ga_electricity_substations",
+      "name": "National Electricity Infrastructure — Power Substations",
+      "groupId": "grp_infrastructure",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet"
+      },
+      "style": {
+        "circleRadius": 5,
+        "fillColor": "#facc15",
+        "strokeColor": "#111827",
+        "strokeWidth": 1
+      },
+      "metadata": {
+        "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+        "features_stored": 1866,
+        "object_bytes": 323389,
+        "object_updated_utc": "2026-11-10T01:38:37.524000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "ga_electricity_transmission_lines",
+      "name": "National Electricity Infrastructure — High-Voltage Transmission Lines",
+      "groupId": "grp_infrastructure",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet"
+      },
+      "style": {
+        "strokeColor": "#f97316",
+        "strokeWidth": 1.6
+      },
+      "metadata": {
+        "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+        "features_stored": 3147,
+        "object_bytes": 6374729,
+        "object_updated_utc": "2026-11-10T01:38:38.958000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "ga_major_power_stations",
+      "name": "National Electricity Infrastructure — Major Power Stations",
+      "groupId": "grp_infrastructure",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet"
+      },
+      "style": {
+        "circleRadius": 6,
+        "fillColor": "#a855f7",
+        "strokeColor": "#ffffff",
+        "strokeWidth": 1
+      },
+      "metadata": {
+        "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+        "features_stored": 430,
+        "object_bytes": 108601,
+        "object_updated_utc": "2026-11-10T01:38:39.266000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "ga_seismic_hazard_pga_10pct",
+      "name": "National Seismic Hazard Assessment 2018 — PGA Contours (10% in 50 Years)",
+      "groupId": "grp_hazards",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet"
+      },
+      "style": {
+        "strokeColor": "#8b5cf6",
+        "strokeWidth": 1.2
+      },
+      "metadata": {
+        "source_agency": "Commonwealth of Australia (Geoscience Australia)",
+        "features_stored": 100,
+        "object_bytes": 224737,
+        "object_updated_utc": "2026-11-10T01:38:39.739000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "national_cyclone_hazard_tcha_v2",
+      "name": "Tropical Cyclone Hazard Assessment (TCHA) & AS/NZS 1170.2 Wind Regions",
+      "groupId": "grp_hazards",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/national_cyclone_hazard_tcha_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_cyclone_hazard_tcha_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
+      },
+      "style": {
+        "fillColor": "#fb7185",
+        "fillOpacity": 0.25,
+        "strokeColor": "#e11d48",
+        "strokeWidth": 0.8
+      },
+      "metadata": {
+        "source_agency": "Geoscience Australia / BoM",
+        "features_stored": 9,
+        "object_bytes": 158771,
+        "object_updated_utc": "2026-11-13T01:07:54.556000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "national_healthcare_nhsd_v2",
+      "name": "National Health Services Directory (NHSD) Hospitals & Health Facilities",
+      "groupId": "grp_receptors",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/national_healthcare_nhsd_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_healthcare_nhsd_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
+      },
+      "style": {
+        "circleRadius": 5,
+        "fillColor": "#ef4444",
+        "strokeColor": "#ffffff",
+        "strokeWidth": 1
+      },
+      "metadata": {
+        "source_agency": "Australian Digital Health Agency / Healthdirect",
+        "features_stored": 297,
+        "object_bytes": 20979,
+        "object_updated_utc": "2026-11-13T01:07:41.449000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "national_schools_acara_v2",
+      "name": "ACARA National Schools Directory",
+      "groupId": "grp_receptors",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/national_schools_acara_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_schools_acara_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
+      },
+      "style": {
+        "circleRadius": 4,
+        "fillColor": "#0ea5e9",
+        "strokeColor": "#ffffff",
+        "strokeWidth": 1
+      },
+      "metadata": {
+        "source_agency": "Australian Curriculum, Assessment and Reporting Authority (ACARA)",
+        "features_stored": 3578,
+        "object_bytes": 121111,
+        "object_updated_utc": "2026-11-13T01:07:48.121000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "next_lga_boundaries_asgs2025",
+      "name": "ABS ASGS Edition 3 (2025) — Local Government Areas (NExT Administrative Baseline)",
+      "groupId": "grp_boundaries",
+      "type": "geoparquet",
+      "visible": false,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet"
+      },
+      "style": {
+        "fillColor": "#94a3b8",
+        "fillOpacity": 0.05,
+        "strokeColor": "#475569",
+        "strokeWidth": 0.8
+      },
+      "metadata": {
+        "source_agency": "Australian Bureau of Statistics (ABS)",
+        "features_stored": 567,
+        "object_bytes": 53870639,
+        "object_updated_utc": "2026-11-10T01:38:49.698000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "next_sa2_boundaries_asgs2021",
+      "name": "ABS ASGS 2021 — Statistical Areas Level 2 (SA2 Population & Vulnerability Baseline)",
+      "groupId": "grp_boundaries",
+      "type": "geoparquet",
+      "visible": false,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet"
+      },
+      "style": {
+        "fillColor": "#94a3b8",
+        "fillOpacity": 0.05,
+        "strokeColor": "#475569",
+        "strokeWidth": 0.8
+      },
+      "metadata": {
+        "source_agency": "Australian Bureau of Statistics (ABS)",
+        "features_stored": 2473,
+        "object_bytes": 69056426,
+        "object_updated_utc": "2026-11-10T01:39:01.854000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "nsw_coastal_inundation_hazard_v2",
+      "name": "NSW Coastal Inundation, Storm Surge and Tidal Extent",
+      "groupId": "grp_hazards",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_coastal_inundation_hazard_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_coastal_inundation_hazard_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
+      },
+      "style": {
+        "fillColor": "#3b82f6",
+        "fillOpacity": 0.35,
+        "strokeColor": "#1d4ed8",
+        "strokeWidth": 0.8
+      },
+      "metadata": {
+        "source_agency": "NSW DCCEEW Coastal Branch",
+        "features_stored": 880,
+        "object_bytes": 6867718,
+        "object_updated_utc": "2026-11-13T01:08:03.388000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "nsw_foi_building_complexes",
+      "name": "NSW Features of Interest — Emergency, Health, Education & Community Facilities",
+      "groupId": "grp_receptors",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet"
+      },
+      "style": {
+        "fillColor": "#10b981",
+        "fillOpacity": 0.4,
+        "strokeColor": "#047857",
+        "strokeWidth": 0.6
+      },
+      "metadata": {
+        "source_agency": "NSW Department of Customer Service — Spatial Services",
+        "features_stored": 76629,
+        "object_bytes": 11977228,
+        "object_updated_utc": "2026-11-10T01:39:04.333000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "nsw_lga_boundaries",
+      "name": "NSW Spatial Services — Local Government Area Boundaries",
+      "groupId": "grp_boundaries",
+      "type": "geoparquet",
+      "visible": false,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet"
+      },
+      "style": {
+        "fillColor": "#94a3b8",
+        "fillOpacity": 0.05,
+        "strokeColor": "#475569",
+        "strokeWidth": 0.8
+      },
+      "metadata": {
+        "source_agency": "NSW Department of Customer Service — Spatial Services",
+        "features_stored": 132,
+        "object_bytes": 26510856,
+        "object_updated_utc": "2026-11-10T01:39:09.338000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "nsw_rfs_major_incidents_live",
+      "name": "NSW Rural Fire Service — Current Major Bushfire & Emergency Incidents Feed",
+      "groupId": "grp_emergency",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet"
+      },
+      "style": {
+        "circleRadius": 7,
+        "fillColor": "#dc2626",
+        "strokeColor": "#ffffff",
+        "strokeWidth": 1.5
+      },
+      "metadata": {
+        "source_agency": "NSW Rural Fire Service",
+        "features_stored": 20,
+        "object_bytes": 25113,
+        "object_updated_utc": "2026-11-10T01:39:09.744000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "nsw_transmission_grid_v2",
+      "name": "High-Voltage Transmission Network and Terminal Substations (>=132kV)",
+      "groupId": "grp_infrastructure",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet"
+      },
+      "style": {
+        "strokeColor": "#f97316",
+        "strokeWidth": 1.6
+      },
+      "metadata": {
+        "source_agency": "Transgrid / Geoscience Australia / AEMO",
+        "features_stored": 6575,
+        "object_bytes": 3865140,
+        "object_updated_utc": "2026-11-13T01:13:57.466000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "nsw_water_inundation_areas",
+      "name": "NSW Spatial Services — Fuzzy Extent Water & Flood Inundation Areas",
+      "groupId": "grp_hazards",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet"
+      },
+      "style": {
+        "fillColor": "#3b82f6",
+        "fillOpacity": 0.35,
+        "strokeColor": "#1d4ed8",
+        "strokeWidth": 0.8
+      },
+      "metadata": {
+        "source_agency": "NSW Department of Customer Service — Spatial Services",
+        "features_stored": 880,
+        "object_bytes": 6931951,
+        "object_updated_utc": "2026-11-10T01:39:11.658000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "qld_cyclones_historical_fixes",
+      "name": "Queensland Historical Tropical Cyclone Fixes & Observations",
+      "groupId": "grp_emergency",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+      },
+      "style": {
+        "circleRadius": 5,
+        "fillColor": "#ea580c",
+        "strokeColor": "#ffffff",
+        "strokeWidth": 1
+      },
+      "metadata": {
+        "source_agency": "State of Queensland (DESI)",
+        "features_stored": 260,
+        "object_bytes": 29551,
+        "object_updated_utc": "2026-11-13T05:29:31.204000+00:00",
+        "qa_status": "PASS",
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "qld_cyclones_historical_tracks",
+      "name": "Queensland Historical Tropical Cyclone Tracks",
+      "groupId": "grp_emergency",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+      },
+      "style": {
+        "strokeColor": "#f43f5e",
+        "strokeWidth": 2.5
+      },
+      "metadata": {
+        "source_agency": "State of Queensland (DESI)",
+        "features_stored": 23,
+        "object_bytes": 38274,
+        "object_updated_utc": "2026-11-13T05:29:27.673000+00:00",
+        "qa_status": "PASS",
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "qld_cyclones_historical_wind_areas",
+      "name": "Queensland Historical Tropical Cyclone Wind Swaths & Hazard Areas",
+      "groupId": "grp_hazards",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+      },
+      "style": {
+        "fillColor": "#f59e0b",
+        "fillOpacity": 0.28,
+        "strokeColor": "#ea580c",
+        "strokeWidth": 1
+      },
+      "metadata": {
+        "source_agency": "State of Queensland (DESI)",
+        "features_stored": 900,
+        "object_bytes": 8861127,
+        "object_updated_utc": "2026-11-13T05:29:37.717000+00:00",
+        "qa_status": "PASS",
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "wa_transmission_grid_v2",
+      "name": "Western Power SWIS & Horizon Power Transmission Network (>=66kV)",
+      "groupId": "grp_infrastructure",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/wa_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/wa_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet"
+      },
+      "style": {
+        "strokeColor": "#f97316",
+        "strokeWidth": 1.6
+      },
+      "metadata": {
+        "source_agency": "Western Power / EnergyPolicy WA",
+        "features_stored": 26132,
+        "object_bytes": 2605925,
+        "object_updated_utc": "2026-11-13T01:14:12.010000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    }
+  ],
+  "metadata": {
+    "generated_utc": "2026-11-13T06:50:05Z",
+    "generator": "tools/export_geolibre_project.py",
+    "datasets_on_gcs": 22,
+    "read_failures": [],
+    "zero_mock": true,
+    "disclaimer": "Engineering proof of concept only. Not for operational emergency warning, dispatch, or life-safety decisions."
+  }
+}

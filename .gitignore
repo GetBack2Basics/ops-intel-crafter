@@ -22,3 +22,6 @@ docs/qa/data/*.parquet
 docs/data/workbench_bundle.json
 docs/exports/
 docs/map_packages/
+
+# Authenticated GeoLibre exports (may contain signed URLs / HMAC keys)
+exports/geolibre/
