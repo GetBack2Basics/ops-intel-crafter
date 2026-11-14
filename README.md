@@ -50,7 +50,8 @@
 # 3. Rebuild multi-scale analyses, exports, and offline Map-in-a-Box
 & .\.venv\Scripts\python.exe tools\build_workbench_and_packs.py
 
-# 4. Sync all GeoParquet snapshots, QA reports, and web deliverables to GCS
+# 4. Audit canonical GCS artifacts, rebuild QA reports, and publish web deliverables
+#    (cloud-first: no local data/lake staging is read or written)
 & .\.venv\Scripts\python.exe tools\publish_to_gcs.py
 ```
 

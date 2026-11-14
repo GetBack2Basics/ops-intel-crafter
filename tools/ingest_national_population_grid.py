@@ -1,18 +1,24 @@
-"""Ingest and Publish National ABS 1 km² Population Grid (Australia-Wide).
+"""Ingest and Publish National ABS 1 km² Population Grid (Australia-Wide) — Cloud-First.
 
-- Downloads official ABS 2025 Australian Population Grid raster GeoTIFF.
-- Extracts all 286,827 populated cells across the Australian continent (~27.61M people).
+- Downloads the official ABS 2025 Australian Population Grid raster GeoTIFF.
+- Extracts all populated cells across the Australian continent (~27.61M people).
 - Runs Zero-Mock Level 1, Level 2, and Level 3 validation gates.
-- Writes Stored GeoParquet (EPSG:7844) to data/lake/geoparquet/abs_australia_1km_population_grid/.
-- Generates RFC 7946 deliverables in data/lake/exports/australia_population_grid/ (result.parquet, result.geojson, analysis_manifest.json).
-- Updates config/dataset_manifest.json and uploads directly to Google Cloud Storage.
+- Writes Stored GeoParquet (EPSG:7844) to an in-memory buffer and uploads it directly
+  to `gs://<bucket>/geoparquet/abs_australia_1km_population_grid/<vintage>/<ts>/`.
+- Level 2 validates the stored artifact by reading it back from `gs://` (no local lake).
+- Streams RFC 7946 deliverables straight to `gs://<bucket>/exports/australia_population_grid/`
+  (result.parquet, result.geojson, analysis_manifest.json).
+- Publishes canonical dataset/QA manifests and updates `config/dataset_manifest.json`.
+
+No `data/lake/` staging is written. Passing `upload_cloud=False` performs a fully
+ephemeral dry-run: validation runs against a temp file and nothing is persisted.
 """
 
+import hashlib
 import io
 import json
-import os
 import sys
-import time
+import tempfile
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -28,9 +34,16 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.catalogue.manifest_loader import DatasetCategory, DatasetEntry, LicenceMetadata, QAStatus, load_manifest, save_manifest
+from src.catalogue.manifest_loader import (
+    DatasetCategory,
+    DatasetEntry,
+    LicenceMetadata,
+    QAStatus,
+    load_manifest,
+    save_manifest,
+)
 from src.ingestion.gcs_storage import GCSLakeStorage
-from src.ingestion.telemetry import compute_sha256, utc_now_compact, utc_now_iso
+from src.ingestion.telemetry import utc_now_compact, utc_now_iso
 from src.validation.geoparquet_validation import verify_level2_stored_artifact
 from src.validation.reconciliation import compute_overall_dataset_qa_status, verify_level3_reconciliation
 from src.validation.source_contracts import verify_level1_source_contract
@@ -38,6 +51,7 @@ from src.validation.source_contracts import verify_level1_source_contract
 ABS_GEOTIFF_ZIP_URL = "https://www.abs.gov.au/statistics/people/population/regional-population/2024-25/GEOTIFF.zip"
 DATASET_KEY = "abs_australia_1km_population_grid"
 SOURCE_VINTAGE = "2025-ABS"
+EXPORT_NAME = "australia_population_grid"
 
 
 def create_national_dataset_entry() -> DatasetEntry:
@@ -84,12 +98,51 @@ def create_national_dataset_entry() -> DatasetEntry:
     )
 
 
-def ingest_national_population_grid(upload_cloud: bool = True) -> Dict[str, Any]:
+def _stream_national_geojson(
+    cell_ids: list[str],
+    pops: np.ndarray,
+    gdf_7844: gpd.GeoDataFrame,
+    bbox_4326: list[float],
+    provenance: Dict[str, Any],
+    num_cells: int,
+) -> bytes:
+    """Streams the RFC 7946 centroids GeoJSON into memory (no local file staging)."""
+    buf = io.StringIO()
+    buf.write('{"type":"FeatureCollection","name":"australia_population_grid","bbox":')
+    json.dump(bbox_4326, buf)
+    buf.write(',"oic_provenance":')
+    json.dump(provenance, buf, separators=(",", ":"))
+    buf.write(',"features":[')
+
+    centroids = gdf_7844[["centroid_lon", "centroid_lat"]].to_numpy(copy=False)
+    easting = gdf_7844["easting_m"].to_numpy(copy=False)
+    northing = gdf_7844["northing_m"].to_numpy(copy=False)
+    for i in range(num_cells):
+        cid = cell_ids[i]
+        lon = float(centroids[i, 0])
+        lat = float(centroids[i, 1])
+        sep = "," if i > 0 else ""
+        buf.write(
+            f'{sep}{{"type":"Feature","id":"{cid}",'
+            f'"properties":{{"cell_id":"{cid}","cell_population":{round(float(pops[i]), 1)},'
+            f'"easting_m":{round(float(easting[i]), 1)},"northing_m":{round(float(northing[i]), 1)}}},'
+            f'"geometry":{{"type":"Point","coordinates":[{lon},{lat}]}}}}'
+        )
+    buf.write("]}")
+    return buf.getvalue().encode("utf-8")
+
+
+def ingest_national_population_grid(
+    upload_cloud: bool = True,
+    persist_records: bool = True,
+) -> Dict[str, Any]:
+    """Ingests the national grid cloud-first; `upload_cloud=False` is an ephemeral dry-run."""
     print("=" * 78)
     print("INGESTING NATIONAL ABS 1 KM² POPULATION GRID (ALL OF AUSTRALIA)")
     print("=" * 78)
 
     entry = create_national_dataset_entry()
+    store = GCSLakeStorage()
 
     # Step 1: Level 1 Source Contract Verification
     print("\n[Step 1/6] Running Level 1 Source Contract Verification...")
@@ -105,7 +158,7 @@ def ingest_national_population_grid(upload_cloud: bool = True) -> Dict[str, Any]
         with urllib.request.urlopen(req, timeout=45) as resp:
             raw_zip_bytes = resp.read()
 
-    # Step 2: Extract & Vectorize 286,827 Grid Cells
+    # Step 2: Extract & Vectorize the continental grid
     print("\n[Step 2/6] Vectorizing 1 km² continental grid from GeoTIFF...")
     zf = zipfile.ZipFile(io.BytesIO(raw_zip_bytes))
     tif_name = [n for n in zf.namelist() if n.endswith(".tif")][0]
@@ -170,27 +223,48 @@ def ingest_national_population_grid(upload_cloud: bool = True) -> Dict[str, Any]
     gdf_7844["_oic_source_vintage"] = SOURCE_VINTAGE
     gdf_7844["_oic_retrieval_utc"] = retrieval_iso
 
-    # Step 3: Write Level 2 Stored GeoParquet Artifact
-    print("\n[Step 3/6] Writing Stored GeoParquet artifact...")
-    parquet_dir = (
-        PROJECT_ROOT
-        / "data"
-        / "lake"
-        / "geoparquet"
-        / DATASET_KEY
-        / SOURCE_VINTAGE
-        / retrieval_compact
+    # Step 3: Write Level 2 Stored GeoParquet artifact IN MEMORY, then upload to GCS
+    print("\n[Step 3/6] Writing Stored GeoParquet artifact (in memory)...")
+    gpq_key = store.geoparquet_object_key(
+        dataset_key=DATASET_KEY,
+        source_vintage=SOURCE_VINTAGE,
+        retrieval_ts=retrieval_compact,
+        part=0,
     )
-    parquet_dir.mkdir(parents=True, exist_ok=True)
-    parquet_file = parquet_dir / "part-00000.parquet"
-    gdf_7844.to_parquet(parquet_file, index=False, schema_version="1.1.0")
+    pq_buffer = io.BytesIO()
+    gdf_7844.to_parquet(pq_buffer, index=False, schema_version="1.1.0")
+    pq_bytes = pq_buffer.getvalue()
+    file_size_mb = round(len(pq_bytes) / (1024 * 1024), 2)
+    print(f"  GeoParquet serialized: part-00000.parquet ({file_size_mb} MB)")
 
-    file_size_mb = round(parquet_file.stat().st_size / (1024 * 1024), 2)
-    print(f"  GeoParquet written: {parquet_file.name} ({file_size_mb} MB)")
+    if upload_cloud:
+        gpq_meta = store.upload_bytes_cloud(
+            gpq_key,
+            pq_bytes,
+            dataset_entry=entry.model_dump(mode="json"),
+            content_type="application/vnd.apache.parquet",
+        )
+        validation_source: Any = gpq_meta["gs_uri"]
+        print(f"  Uploaded {gpq_meta['gs_uri']} (generation={gpq_meta['gcs_generation']})")
+    else:
+        tmp = tempfile.NamedTemporaryFile(suffix=".parquet", delete=False)
+        tmp.write(pq_bytes)
+        tmp.close()
+        validation_source = tmp.name
+        gpq_meta = {
+            "object_key": gpq_key,
+            "gs_uri": store.gs_uri(gpq_key),
+            "local_path": None,
+            "file_size_bytes": len(pq_bytes),
+            "sha256": hashlib.sha256(pq_bytes).hexdigest(),
+            "storage_mode": "dry_run_ephemeral",
+            "gcs_generation": "dry-run-not-uploaded",
+        }
+        print(f"  Dry-run: validating ephemeral buffer ({len(pq_bytes):,} bytes, not persisted)")
 
-    # Run Level 2 & Level 3 Validation
+    # Run Level 2 & Level 3 Validation against the stored artifact (gs:// when uploaded)
     print("  Running Level 2 Stored Artifact Validation...")
-    l2_report = verify_level2_stored_artifact(parquet_file, entry)
+    l2_report = verify_level2_stored_artifact(validation_source, entry, storage_meta=gpq_meta)
     print(f"  Level 2 Status: {l2_report['status']}")
 
     print("  Running Level 3 Source-to-Storage Reconciliation...")
@@ -200,31 +274,25 @@ def ingest_national_population_grid(upload_cloud: bool = True) -> Dict[str, Any]
     overall_status = compute_overall_dataset_qa_status(l1_report, l2_report, l3_report)
     print(f"  Overall Dataset QA Status: {overall_status}")
 
-    # Update manifest entry
+    if not upload_cloud:
+        Path(validation_source).unlink(missing_ok=True)
+
+    # Update the top-level catalogue manifest pointer (only when persisting records)
     entry.qa_status = QAStatus(overall_status)
-    rel_parquet_path = str(parquet_file.relative_to(PROJECT_ROOT)).replace("\\", "/")
-    entry.latest_snapshot_path = rel_parquet_path
     entry.latest_retrieval_utc = retrieval_iso
+    if upload_cloud:
+        entry.latest_snapshot_path = gpq_meta["gs_uri"]
+        manifest = load_manifest()
+        manifest.datasets[DATASET_KEY] = entry
+        manifest.updated_at_utc = retrieval_iso
+        save_manifest(manifest)
+        print("  Updated config/dataset_manifest.json with gs:// snapshot pointer.")
+    else:
+        print("  Dry-run: config/dataset_manifest.json left unchanged.")
 
-    manifest = load_manifest()
-    manifest.datasets[DATASET_KEY] = entry
-    manifest.updated_at_utc = retrieval_iso
-    save_manifest(manifest)
-    print("  Updated config/dataset_manifest.json with new dataset entry.")
-
-    # Step 4: Export National Deliverables (Parquet + GeoJSON Centroids + Manifest)
-    print("\n[Step 4/6] Exporting RFC 7946 National Deliverables...")
-    exports_dir = PROJECT_ROOT / "data" / "lake" / "exports" / "australia_population_grid"
-    exports_dir.mkdir(parents=True, exist_ok=True)
-
-    # 1. Full Polygon Parquet
-    exp_parquet = exports_dir / "result.parquet"
-    gdf_7844.to_parquet(exp_parquet, index=False, schema_version="1.1.0")
-    print(f"  Exported result.parquet ({round(exp_parquet.stat().st_size / (1024*1024), 2)} MB)")
-
-    # 2. RFC 7946 Centroids GeoJSON (fast, web-friendly, ~32MB compact)
-    print("  Generating RFC 7946 Centroids GeoJSON...")
-    exp_geojson = exports_dir / "result.geojson"
+    # Step 4: Export National Deliverables (Parquet + GeoJSON Centroids + Manifest) in memory
+    print("\n[Step 4/6] Building RFC 7946 National Deliverables (in memory)...")
+    exp_parquet_bytes = pq_bytes
 
     min_lon = float(gdf_7844["centroid_lon"].min())
     min_lat = float(gdf_7844["centroid_lat"].min())
@@ -232,129 +300,136 @@ def ingest_national_population_grid(upload_cloud: bool = True) -> Dict[str, Any]
     max_lat = float(gdf_7844["centroid_lat"].max())
     bbox_4326 = [round(min_lon, 6), round(min_lat, 6), round(max_lon, 6), round(max_lat, 6)]
 
-    # Stream compact GeoJSON to avoid memory overhead
-    with open(exp_geojson, "w", encoding="utf-8") as f:
-        f.write('{"type":"FeatureCollection","name":"australia_population_grid","bbox":')
-        json.dump(bbox_4326, f)
-        f.write(',"oic_provenance":{')
-        prov = {
-            "analysis_id": "australia_population_grid",
-            "title": "ABS 2025 Australian National 1 km² Population Grid (All Australia)",
-            "generated_at_utc": retrieval_iso,
-            "rfc7946_crs": "EPSG:4326",
-            "source_datasets": [DATASET_KEY],
-            "source_vintages": {DATASET_KEY: SOURCE_VINTAGE},
-            "population_method": "ABS_NESTED_GRID_ERP",
-            "total_population": round(total_pop, 1),
-            "feature_count": num_cells,
-            "bbox": bbox_4326,
-            "geolibre_qgis_compatible": True,
-        }
-        f.write(f'"analysis_id":"{prov["analysis_id"]}",')
-        f.write(f'"title":"{prov["title"]}",')
-        f.write(f'"total_population":{prov["total_population"]},')
-        f.write(f'"feature_count":{prov["feature_count"]},')
-        f.write(f'"rfc7946_crs":"EPSG:4326"')
-        f.write('},"features":[')
+    provenance = {
+        "analysis_id": EXPORT_NAME,
+        "title": "ABS 2025 Australian National 1 km² Population Grid (All Australia)",
+        "generated_at_utc": retrieval_iso,
+        "rfc7946_crs": "EPSG:4326",
+        "source_datasets": [DATASET_KEY],
+        "source_vintages": {DATASET_KEY: SOURCE_VINTAGE},
+        "population_method": "ABS_NESTED_GRID_ERP",
+        "total_population": round(total_pop, 1),
+        "feature_count": num_cells,
+        "bbox": bbox_4326,
+        "stored_parquet_gs_uri": gpq_meta["gs_uri"],
+        "geolibre_qgis_compatible": True,
+    }
+    exp_geojson_bytes = _stream_national_geojson(
+        cell_ids=cell_ids,
+        pops=pops,
+        gdf_7844=gdf_7844,
+        bbox_4326=bbox_4326,
+        provenance=provenance,
+        num_cells=num_cells,
+    )
+    print(
+        f"  Built result.geojson ({round(len(exp_geojson_bytes) / (1024 * 1024), 2)} MB, {num_cells:,} features)"
+    )
 
-        # Vectorized write of feature items
-        chunk_size = 50000
-        for i in range(num_cells):
-            cid = cell_ids[i]
-            p = float(pops[i])
-            lon = float(gdf_7844["centroid_lon"].iloc[i])
-            lat = float(gdf_7844["centroid_lat"].iloc[i])
-            em = float(gdf_7844["easting_m"].iloc[i])
-            nm = float(gdf_7844["northing_m"].iloc[i])
-            sep = "," if i > 0 else ""
-            feat_str = (
-                f'{sep}{{"type":"Feature","id":"{cid}",'
-                f'"properties":{{"cell_id":"{cid}","cell_population":{round(p, 1)},'
-                f'"easting_m":{round(em, 1)},"northing_m":{round(nm, 1)}}},'
-                f'"geometry":{{"type":"Point","coordinates":[{lon},{lat}]}}}}'
-            )
-            f.write(feat_str)
-        f.write("]}")
-
-    geojson_size_mb = round(exp_geojson.stat().st_size / (1024 * 1024), 2)
-    print(f"  Exported result.geojson ({geojson_size_mb} MB, {num_cells:,} features)")
-
-    # 3. Sidecar Analysis Manifest
-    exp_manifest = exports_dir / "analysis_manifest.json"
     manifest_doc = {
-        "analysis_id": "australia_population_grid",
+        "analysis_id": EXPORT_NAME,
         "title": "ABS 2025 Australian National 1 km² Population Grid (All Australia)",
         "generated_at_utc": retrieval_iso,
         "source_dataset": DATASET_KEY,
         "source_vintage": SOURCE_VINTAGE,
         "feature_count": num_cells,
         "total_population": round(total_pop, 1),
-        "parquet_sha256": compute_sha256(exp_parquet),
-        "geojson_sha256": compute_sha256(exp_geojson),
+        "parquet_sha256": hashlib.sha256(exp_parquet_bytes).hexdigest(),
+        "geojson_sha256": hashlib.sha256(exp_geojson_bytes).hexdigest(),
+        "stored_parquet_gs_uri": gpq_meta["gs_uri"],
+        "gcs_generation": gpq_meta["gcs_generation"],
         "licence": entry.licence.model_dump(),
         "level1_source_contract": l1_report,
         "level2_stored_artifact": l2_report,
         "level3_reconciliation": l3_report,
     }
-    with open(exp_manifest, "w", encoding="utf-8") as f:
-        json.dump(manifest_doc, f, indent=2)
-    print(f"  Exported analysis_manifest.json")
+    exp_manifest_bytes = json.dumps(manifest_doc, indent=2, ensure_ascii=False).encode("utf-8")
+    print("  Built analysis_manifest.json")
 
-    # Mirror to docs/exports/ for local static web hosting / QA
-    docs_exp_dir = PROJECT_ROOT / "docs" / "exports" / "australia_population_grid"
-    docs_exp_dir.mkdir(parents=True, exist_ok=True)
-    import shutil
-    shutil.copy2(exp_parquet, docs_exp_dir / "result.parquet")
-    shutil.copy2(exp_geojson, docs_exp_dir / "result.geojson")
-    shutil.copy2(exp_manifest, docs_exp_dir / "analysis_manifest.json")
-    print("  Mirrored exports to docs/exports/australia_population_grid/")
-
-    # Step 5: Upload to Cloud Lakehouse (GCS)
+    # Step 5: Publish stored snapshot, exports, and canonical manifests to GCS
     if upload_cloud:
-        print("\n[Step 5/6] Uploading to Google Cloud Storage (gs://operational-intelligence-crafter-lake/)...")
-        from google.cloud import storage
+        print("\n[Step 5/6] Publishing to Google Cloud Storage...")
+        for filename, payload, content_type in (
+            ("result.parquet", exp_parquet_bytes, "application/vnd.apache.parquet"),
+            ("result.geojson", exp_geojson_bytes, "application/geo+json; charset=utf-8"),
+            ("analysis_manifest.json", exp_manifest_bytes, "application/json; charset=utf-8"),
+        ):
+            export_meta = store.upload_bytes_cloud(
+                f"exports/{EXPORT_NAME}/{filename}",
+                payload,
+                dataset_entry=entry.model_dump(mode="json"),
+                content_type=content_type,
+            )
+            print(f"  Uploaded {export_meta['gs_uri']} ({export_meta['file_size_bytes']:,} bytes)")
 
-        client = storage.Client()
-        bucket = client.bucket("operational-intelligence-crafter-lake")
+        # Canonical per-dataset version + QA record so the QA report reads it from GCS
+        dataset_record = {
+            "dataset_key": entry.dataset_key,
+            "title": entry.title,
+            "provider": entry.provider,
+            "source_agency": entry.source_agency,
+            "category": entry.category.value,
+            "scale": entry.scale,
+            "jurisdiction": entry.jurisdiction,
+            "theme": entry.theme,
+            "endpoint": entry.endpoint,
+            "licence": entry.licence.model_dump(mode="json"),
+            "source_publication_date": entry.source_publication_date,
+            "source_vintage": entry.source_vintage,
+            "retrieval_timestamp_utc": retrieval_iso,
+            "retrieval_id": retrieval_compact,
+            "original_crs": entry.original_crs,
+            "stored_crs": l2_report["stored_crs"],
+            "geometry_type": ", ".join(l2_report["geometry_types"]),
+            "feature_count": l2_report["feature_count"],
+            "bbox": l2_report["bbox"],
+            "file_size_bytes": l2_report["file_size_bytes"],
+            "sha256": l2_report["sha256"],
+            "gcs_generation": gpq_meta["gcs_generation"],
+            "gs_uri": gpq_meta["gs_uri"],
+            "local_parquet_path": None,
+            "overall_qa_status": overall_status,
+            "level1_source_contract": l1_report,
+            "level2_stored_artifact": l2_report,
+            "level3_reconciliation": l3_report,
+            "known_limitations": entry.known_limitations,
+            "refresh_policy": entry.refresh_policy,
+            "operational_suitability": entry.operational_suitability,
+        }
+        record_bytes = json.dumps(dataset_record, indent=2, ensure_ascii=False).encode("utf-8")
+        for object_key in (
+            store.dataset_qa_object_key(DATASET_KEY, retrieval_compact),
+            store.dataset_manifest_object_key(DATASET_KEY),
+        ):
+            store.upload_bytes_cloud(
+                object_key,
+                record_bytes,
+                dataset_entry=entry.model_dump(mode="json"),
+                content_type="application/json; charset=utf-8",
+            )
+            print(f"  Uploaded {store.gs_uri(object_key)}")
 
-        # 1. Upload Stored GeoParquet snapshot
-        gcs_pq_key = f"geoparquet/{DATASET_KEY}/{SOURCE_VINTAGE}/{retrieval_compact}/part-00000.parquet"
-        blob_pq = bucket.blob(gcs_pq_key)
-        blob_pq.upload_from_filename(str(parquet_file), content_type="application/vnd.apache.parquet")
-        print(f"  Uploaded gs://operational-intelligence-crafter-lake/{gcs_pq_key}")
-
-        # 2. Upload Exports
-        for local_f, ctype in [
-            (exp_parquet, "application/vnd.apache.parquet"),
-            (exp_geojson, "application/geo+json"),
-            (exp_manifest, "application/json"),
-        ]:
-            blob_key = f"exports/australia_population_grid/{local_f.name}"
-            b = bucket.blob(blob_key)
-            b.upload_from_filename(str(local_f), content_type=ctype)
-            print(f"  Uploaded gs://operational-intelligence-crafter-lake/{blob_key}")
-
-        # 3. Upload updated config/dataset_manifest.json
-        manifest_blob = bucket.blob("config/dataset_manifest.json")
-        manifest_blob.upload_from_filename(
-            str(PROJECT_ROOT / "config" / "dataset_manifest.json"), content_type="application/json"
+        catalogue_bytes = (PROJECT_ROOT / "config" / "dataset_manifest.json").read_bytes()
+        store.upload_bytes_cloud(
+            "manifests/dataset_manifest.json",
+            catalogue_bytes,
+            content_type="application/json; charset=utf-8",
         )
-        print("  Uploaded gs://operational-intelligence-crafter-lake/config/dataset_manifest.json")
+        print(f"  Uploaded {store.gs_uri('manifests/dataset_manifest.json')}")
 
-    # Step 6: Verify HTTPS Endpoints
-    print("\n[Step 6/6] Verifying Live GCS HTTPS Endpoints...")
-    test_urls = [
-        "https://storage.googleapis.com/operational-intelligence-crafter-lake/exports/australia_population_grid/result.geojson",
-        "https://storage.googleapis.com/operational-intelligence-crafter-lake/exports/australia_population_grid/result.parquet",
-        "https://storage.googleapis.com/operational-intelligence-crafter-lake/exports/australia_population_grid/analysis_manifest.json",
-    ]
-    for url in test_urls:
-        try:
-            req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                print(f"  [OK {resp.status}] {url}")
-        except Exception as e:
-            print(f"  [WARN] {url}: {e}")
+        # Step 6: Verify HTTPS Endpoints
+        print("\n[Step 6/6] Verifying Live GCS HTTPS Endpoints...")
+        for filename in ("result.geojson", "result.parquet", "analysis_manifest.json"):
+            url = f"https://storage.googleapis.com/{store.bucket_name}/exports/{EXPORT_NAME}/{filename}"
+            try:
+                req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    print(f"  [OK {resp.status}] {url}")
+            except Exception as e:
+                print(f"  [WARN] {url}: {e}")
+    else:
+        print("\n[Step 5/6] Dry-run: skipping GCS publication (nothing persisted).")
+        print("[Step 6/6] Dry-run: skipping live HTTPS verification.")
 
     print("\n" + "=" * 78)
     print("NATIONAL POPULATION GRID INGESTION & PUBLICATION COMPLETE")
@@ -362,15 +437,16 @@ def ingest_national_population_grid(upload_cloud: bool = True) -> Dict[str, Any]
 
     return {
         "status": "SUCCESS",
+        "storage_mode": gpq_meta["storage_mode"],
         "cell_count": num_cells,
         "total_population": total_pop,
-        "parquet_path": str(parquet_file),
-        "export_geojson_path": str(exp_geojson),
-        "export_parquet_path": str(exp_parquet),
+        "parquet_gs_uri": gpq_meta["gs_uri"] if upload_cloud else None,
+        "gcs_generation": gpq_meta["gcs_generation"],
         "overall_qa_status": overall_status,
     }
 
 
 if __name__ == "__main__":
-    res = ingest_national_population_grid(upload_cloud=True)
-    print("\nResult summary:", json.dumps({k: v for k, v in res.items() if not k.endswith("_path")}, indent=2))
+    dry_run = "--dry-run" in sys.argv or "--skip-gcs" in sys.argv
+    res = ingest_national_population_grid(upload_cloud=not dry_run)
+    print("\nResult summary:", json.dumps(res, indent=2))

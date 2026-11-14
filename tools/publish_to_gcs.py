@@ -1,20 +1,27 @@
-"""Provision GCS Bucket (`gs://operational-intelligence-crafter-lake` in `operational-intelligence-crafter`),
-Sync All Lakehouse GeoParquet/Manifest/QA Artifacts, and Verify Live HTTPS Endpoints.
+"""Provision & Publish the Canonical GCS Lakehouse (`gs://operational-intelligence-crafter-lake`).
 
-Enforces:
-- Publish Gate (`assert_safe_object_name`, `assert_publishable_dataset`, zero `.env` secrets).
-- Records real GCS `blob.generation` numbers into dataset manifests and `qa_summary.json`.
-- Configures CORS and public object viewer IAM on `gs://operational-intelligence-crafter-lake`
-  so MapLibre / GeoLibre web pages and GeoParquet / GeoJSON deliverables are live-testable on GCS.
+Cloud-first by design: all GeoParquet snapshots, per-dataset manifests, and QA records
+are written directly to GCS by the ingestion/harvest pipelines. This tool never reads
+or writes a local `data/lake/` staging tree. It:
+
+1. Ensures the billing account, bucket, versioning, CORS, and public object-viewer IAM.
+2. Fails loudly when no canonical cloud artifacts exist yet.
+3. Audits per-dataset manifest lineage against the real stored GCS generations/sizes.
+4. Rebuilds and publishes the QA summary + QA HTML pages from canonical GCS records.
+5. Publishes the catalogue manifest and delegates web/static assets to
+   `tools/publish_docs_to_gcs.py`.
+6. Verifies the live HTTPS endpoints.
+
+Enforces the publish gate (`assert_publishable_dataset`, secret scanning, safe object
+names) before any catalogue metadata is published.
 """
 
 import json
-import mimetypes
 import os
 import sys
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import dotenv
 from google.cloud import storage
@@ -39,6 +46,27 @@ dotenv.load_dotenv(PROJECT_ROOT / ".env")
 GCP_PROJECT = os.environ.get("OIC_GCP_PROJECT", "operational-intelligence-crafter")
 BUCKET_NAME = os.environ.get("OIC_GCS_BUCKET", "operational-intelligence-crafter-lake")
 BUCKET_LOCATION = "AUSTRALIA-SOUTHEAST1"
+
+# Canonical cloud-first artifact families. At least one object must already exist.
+CANONICAL_PREFIXES = ("geoparquet/", "manifests/", "qa/", "exports/")
+
+# Web/QA endpoints that must resolve after publication.
+REQUIRED_WEB_OBJECTS = (
+    "index.html",
+    "qa/index.html",
+    "qa/inspect.html",
+    "qa/data/qa_summary.json",
+    "manifests/dataset_manifest.json",
+    "operational-intelligence-crafter.geolibre.json",
+)
+
+# Optional deliverables (only verified when present in the bucket).
+OPTIONAL_WEB_OBJECTS = (
+    "qa/geolibre_qa_inspect.html",
+    "map_packages/hunter_flood_emergency_pack/index.html",
+    "exports/hunter_population_grid_comparison/result.geojson",
+    "data/locality_gazetteer.json",
+)
 
 
 def ensure_project_billing_linked(project_id: str) -> None:
@@ -103,7 +131,7 @@ def ensure_project_billing_linked(project_id: str) -> None:
     print(f"[BILLING] Linked '{project_id}' -> '{target_acct}' (billingEnabled={link_resp.json().get('billingEnabled')}).")
 
 
-def ensure_bucket_provisioned(bucket_name: str) -> tuple[storage.Client, storage.Bucket]:
+def ensure_bucket_provisioned(bucket_name: str) -> Tuple[storage.Client, storage.Bucket]:
     """Ensures the canonical GCS bucket exists in operational-intelligence-crafter with versioning, CORS, and public reader access."""
     ensure_project_billing_linked(GCP_PROJECT)
     client = storage.Client(project=GCP_PROJECT)
@@ -148,165 +176,187 @@ def ensure_bucket_provisioned(bucket_name: str) -> tuple[storage.Client, storage
     return client, bucket
 
 
-def _guess_content_type(path: Path) -> str:
-    if path.suffix == ".parquet":
-        return "application/octet-stream"
-    if path.suffix == ".geojson":
-        return "application/geo+json; charset=utf-8"
-    if path.suffix == ".json":
-        return "application/json; charset=utf-8"
-    if path.suffix == ".html":
-        return "text/html; charset=utf-8"
-    if path.suffix == ".css":
-        return "text/css; charset=utf-8"
-    if path.suffix == ".js":
-        return "application/javascript; charset=utf-8"
-    ctype, _ = mimetypes.guess_type(str(path))
-    return ctype or "application/octet-stream"
+def audit_cloud_inventory(bucket: storage.Bucket) -> Dict[str, Any]:
+    """Counts canonical cloud artifacts and fails loudly when the lakehouse is empty."""
+    prefix_counts: Dict[str, int] = {}
+    total_blobs = 0
+    total_bytes = 0
+    for prefix in CANONICAL_PREFIXES:
+        count = 0
+        for blob in bucket.list_blobs(prefix=prefix, fields="name,size"):
+            count += 1
+            total_bytes += int(blob.size or 0)
+        prefix_counts[prefix] = count
+        total_blobs += count
+
+    print("[INVENTORY] Canonical cloud artifacts: " + ", ".join(f"{p}{n}" for p, n in prefix_counts.items()))
+    if total_blobs == 0:
+        raise RuntimeError(
+            f"gs://{bucket.name}/ contains no canonical artifacts under {CANONICAL_PREFIXES}. "
+            "Run a cloud-first ingestion/harvest pipeline before publishing; local `data/lake` staging is not supported."
+        )
+    return {
+        "prefix_counts": prefix_counts,
+        "total_blobs": total_blobs,
+        "total_bytes": total_bytes,
+    }
 
 
-def upload_and_sync_all() -> Dict[str, Any]:
+def audit_manifest_lineage(
+    bucket: storage.Bucket, dataset_records: Dict[str, Dict[str, Any]]
+) -> Dict[str, Any]:
+    """Compares recorded GCS generations/sizes with the real stored blobs (read-only audit)."""
+    bucket_prefix = f"gs://{bucket.name}/"
+    checked = 0
+    mismatches: List[Dict[str, Any]] = []
+
+    for record_key, record in dataset_records.items():
+        gs_uri = record.get("gs_uri")
+        if not gs_uri or not str(gs_uri).startswith(bucket_prefix):
+            continue
+        object_key = str(gs_uri)[len(bucket_prefix):]
+        blob = bucket.get_blob(object_key)
+        if blob is None:
+            mismatches.append({"record": record_key, "issue": "missing_blob", "gs_uri": gs_uri})
+            continue
+        checked += 1
+        recorded_gen = record.get("gcs_generation")
+        if recorded_gen and str(recorded_gen) != str(blob.generation):
+            mismatches.append(
+                {
+                    "record": record_key,
+                    "issue": "generation_mismatch",
+                    "recorded": str(recorded_gen),
+                    "actual": str(blob.generation),
+                    "gs_uri": gs_uri,
+                }
+            )
+            continue
+        recorded_size = record.get("file_size_bytes")
+        if recorded_size and int(recorded_size) != int(blob.size or 0):
+            mismatches.append(
+                {
+                    "record": record_key,
+                    "issue": "size_mismatch",
+                    "recorded": int(recorded_size),
+                    "actual": int(blob.size or 0),
+                    "gs_uri": gs_uri,
+                }
+            )
+
+    if mismatches:
+        print(f"[LINEAGE] WARNING: {len(mismatches)} dataset manifest record(s) disagree with stored GCS blobs.")
+        for item in mismatches[:10]:
+            print(f"  [LINEAGE] {item}")
+    else:
+        print(f"[LINEAGE] Verified {checked} dataset manifest generation/size reference(s) against GCS.")
+    return {"checked": checked, "mismatches": mismatches}
+
+
+def _assert_paths_secret_free(paths: List[Path], secrets: List[str]) -> None:
+    """Blocks publication of any static asset that embeds a `.env` secret value."""
+    text_suffixes = {".json", ".html", ".css", ".js", ".txt", ".geojson", ".svg", ".md"}
+    for path in paths:
+        if path.suffix.lower() not in text_suffixes or not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        if any(secret and secret in text for secret in secrets):
+            raise RuntimeError(f"Blocked publication: {path} contains a secret value from .env")
+
+
+def _verify_urls(items: List[Tuple[str, bool]], bucket_name: str) -> Dict[str, Any]:
+    """HEAD-checks live HTTPS endpoints; missing required objects raise, optional ones warn."""
+    verified: List[Dict[str, Any]] = []
+    failures: List[str] = []
+    for object_key, required in items:
+        url = f"https://storage.googleapis.com/{bucket_name}/{object_key}"
+        try:
+            req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                print(f"  [VERIFY HTTP {resp.status}] {url}")
+                verified.append({"url": url, "status": resp.status})
+        except Exception as exc:
+            label = "FAIL" if required else "WARN"
+            print(f"  [{label}] {url}: {exc}")
+            if required:
+                failures.append(url)
+
+    if failures:
+        raise RuntimeError(f"Required live endpoints failed verification: {failures}")
+    return {"verified": verified, "required_failures": failures}
+
+
+def publish_and_verify() -> Dict[str, Any]:
+    """Publishes catalogue metadata, QA pages, and web assets, then verifies live endpoints."""
     reg = DatasetRegistry()
     store = GCSLakeStorage(bucket_name=BUCKET_NAME, gcp_project=GCP_PROJECT)
     secrets = load_env_secret_values(PROJECT_ROOT)
 
-    # Ensure every catalogued dataset passes publish_gate
-    for k in reg.list_keys():
-        entry = reg.get(k)
-        assert_publishable_dataset(entry.model_dump(mode="json"))
+    # Enforce the publish gate for every catalogued dataset before publishing anything.
+    for key in reg.list_keys():
+        assert_publishable_dataset(reg.get(key).model_dump(mode="json"))
 
     client, bucket = ensure_bucket_provisioned(BUCKET_NAME)
 
-    uploaded_generations: Dict[str, str] = {}
-    lake_root = PROJECT_ROOT / "data" / "lake"
+    # 1. Refuse to publish an empty lakehouse (no local staging fallback exists).
+    inventory = audit_cloud_inventory(bucket)
 
-    # 1. Upload raw/ and geoparquet/ first so we capture exact GCS object generation IDs
-    for subdir in ("raw", "geoparquet"):
-        folder = lake_root / subdir
-        if not folder.exists():
-            continue
-        for item in sorted(folder.rglob("*")):
-            if not item.is_file():
-                continue
-            object_key = item.relative_to(lake_root).as_posix()
-            assert_safe_object_name(object_key)
-            blob = bucket.blob(object_key)
-            blob.cache_control = "public, max-age=300"
-            blob.upload_from_filename(str(item), content_type=_guess_content_type(item))
-            blob.reload()
-            uploaded_generations[object_key] = str(blob.generation)
-            print(f"  [UPLOAD] gs://{BUCKET_NAME}/{object_key} (gen={blob.generation}, {item.stat().st_size:,} B)")
+    # 2. Audit canonical per-dataset manifests against the real stored blobs.
+    dataset_records = store.read_json_prefix_cloud("manifests/datasets/")
+    if not dataset_records:
+        raise RuntimeError(
+            "No canonical dataset manifests found under gs://.../manifests/datasets/. "
+            "Run cloud-first ingestion/harvest before publishing."
+        )
+    lineage = audit_manifest_lineage(bucket, dataset_records)
 
-    # 2. Update dataset manifests with real GCS generation IDs and re-render QA pages
-    manifests_dir = lake_root / "manifests" / "datasets"
-    if manifests_dir.exists():
-        for mf in sorted(manifests_dir.glob("*.json")):
-            rec = json.loads(mf.read_text(encoding="utf-8"))
-            local_pq = rec.get("local_parquet_path") or ""
-            if local_pq.startswith("data/lake/"):
-                obj_key = local_pq[len("data/lake/"):]
-                if obj_key in uploaded_generations:
-                    gen = uploaded_generations[obj_key]
-                    rec["gcs_generation"] = gen
-                    if "level2_stored_artifact" in rec and isinstance(rec["level2_stored_artifact"], dict):
-                        rec["level2_stored_artifact"]["gcs_generation"] = gen
-                        for chk in rec["level2_stored_artifact"].get("checks", []):
-                            if chk.get("check") == "sha256_and_storage_lineage":
-                                chk["detail"] = f"sha256={rec.get('sha256', '')[:16]}... | generation={gen}"
-            mf.write_text(json.dumps(rec, indent=2, ensure_ascii=False), encoding="utf-8")
-
-    # Rebuild QA summary and HTML pages with real GCS generations
-    summary = build_qa_summary(registry=reg, storage=store)
-    render_qa_html_pages(summary)
-
-    # 3. Upload manifests/, qa/, exports/, and map_packages/ under data/lake/
-    for subdir in ("manifests", "qa", "exports", "map_packages"):
-        folder = lake_root / subdir
-        if not folder.exists():
-            continue
-        for item in sorted(folder.rglob("*")):
-            if not item.is_file():
-                continue
-            object_key = item.relative_to(lake_root).as_posix()
-            assert_safe_object_name(object_key)
-            if item.suffix in (".json", ".html", ".css", ".js", ".txt", ".geojson"):
-                text = item.read_text(encoding="utf-8", errors="ignore")
-                if any(s in text for s in secrets if s):
-                    raise RuntimeError(f"Blocked {object_key}: contains secret value")
-            blob = bucket.blob(object_key)
-            blob.cache_control = "public, max-age=60"
-            blob.upload_from_filename(str(item), content_type=_guess_content_type(item))
-            print(f"  [UPLOAD] gs://{BUCKET_NAME}/{object_key} ({item.stat().st_size:,} B)")
-
-    # 4. Upload docs/qa/ web deliverables to gs://<bucket>/qa/ and docs/index.html to root
-    docs_qa = PROJECT_ROOT / "docs" / "qa"
-    for item in sorted(docs_qa.rglob("*")):
-        if not item.is_file():
-            continue
-        rel = item.relative_to(docs_qa).as_posix()
-        object_key = f"qa/{rel}"
-        assert_safe_object_name(object_key)
-        text = item.read_text(encoding="utf-8", errors="ignore")
-        if any(s in text for s in secrets if s):
-            raise RuntimeError(f"Blocked {object_key}: contains secret value")
-        blob = bucket.blob(object_key)
-        blob.cache_control = "public, max-age=60"
-        blob.upload_from_filename(str(item), content_type=_guess_content_type(item))
-        print(f"  [UPLOAD] gs://{BUCKET_NAME}/{object_key} ({item.stat().st_size:,} B)")
-
-    for root_doc in (
-        "index.html",
-        "style.css",
-        "app.js",
-        "duckdb_wasm.js",
-        "layers.js",
-        "data/workbench_bundle.json",
-        "data/locality_gazetteer.json",
-        "data/lga_gazetteer_compact.json",
-        "data/WP302026_CYCLONE_ZONES.geojson",
-        "data/WP302026_TRACK_latest.geojson",
-        "data/WP302026_TRACK_latest.kmz",
-        "operational-intelligence-crafter.geolibre.json",
-    ):
-        doc_path = PROJECT_ROOT / "docs" / root_doc
-        if doc_path.exists():
-            assert_safe_object_name(root_doc)
-            text = doc_path.read_text(encoding="utf-8", errors="ignore")
-            if any(s in text for s in secrets if s):
-                raise RuntimeError(f"Blocked {root_doc}: contains secret value")
-            blob = bucket.blob(root_doc)
-            blob.cache_control = "public, max-age=60"
-            blob.upload_from_filename(str(doc_path), content_type=_guess_content_type(doc_path))
-            print(f"  [UPLOAD] gs://{BUCKET_NAME}/{root_doc} ({doc_path.stat().st_size:,} B)")
-
-    # 5. Also upload config/dataset_manifest.json to manifests/dataset_manifest.json
+    # 3. Publish the canonical catalogue manifest (config is the tracked source of truth).
     manifest_cfg = PROJECT_ROOT / "config" / "dataset_manifest.json"
-    blob = bucket.blob("manifests/dataset_manifest.json")
-    blob.cache_control = "public, max-age=60"
-    blob.upload_from_filename(str(manifest_cfg), content_type="application/json; charset=utf-8")
+    catalogue_bytes = manifest_cfg.read_bytes()
+    if any(secret and secret in catalogue_bytes.decode("utf-8", errors="ignore") for secret in secrets):
+        raise RuntimeError("Blocked publication: config/dataset_manifest.json contains a .env secret value.")
+    assert_safe_object_name("manifests/dataset_manifest.json")
+    store.upload_bytes_cloud(
+        "manifests/dataset_manifest.json",
+        catalogue_bytes,
+        content_type="application/json; charset=utf-8",
+    )
+    print(f"[UPLOAD] gs://{BUCKET_NAME}/manifests/dataset_manifest.json ({len(catalogue_bytes):,} B)")
 
-    # 6. Verify live HTTPS URLs
-    test_urls = [
-        f"https://storage.googleapis.com/{BUCKET_NAME}/index.html",
-        f"https://storage.googleapis.com/{BUCKET_NAME}/qa/index.html",
-        f"https://storage.googleapis.com/{BUCKET_NAME}/qa/inspect.html",
-        f"https://storage.googleapis.com/{BUCKET_NAME}/map_packages/hunter_flood_emergency_pack/index.html",
-        f"https://storage.googleapis.com/{BUCKET_NAME}/exports/hunter_population_grid_comparison/result.geojson",
-        f"https://storage.googleapis.com/{BUCKET_NAME}/qa/data/qa_summary.json",
-        f"https://storage.googleapis.com/{BUCKET_NAME}/manifests/dataset_manifest.json",
-        f"https://storage.googleapis.com/{BUCKET_NAME}/operational-intelligence-crafter.geolibre.json",
-        f"https://storage.googleapis.com/{BUCKET_NAME}/data/locality_gazetteer.json",
-    ]
-    verified = []
-    for u in test_urls:
-        req = urllib.request.Request(u, method="HEAD")
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            print(f"  [VERIFY HTTP {resp.status}] {u}")
-            verified.append({"url": u, "status": resp.status})
+    # 4. Rebuild the QA summary from canonical GCS records and publish QA pages.
+    summary = build_qa_summary(registry=reg, storage=store, upload_cloud=True, write_local=False)
+    docs_qa_data = PROJECT_ROOT / "docs" / "qa" / "data"
+    docs_qa_data.mkdir(parents=True, exist_ok=True)
+    (docs_qa_data / "qa_summary.json").write_bytes(
+        json.dumps(summary, indent=2, ensure_ascii=False).encode("utf-8")
+    )
+    render_qa_html_pages(summary, storage=store, upload_cloud=True)
 
-    return {"bucket": BUCKET_NAME, "project": GCP_PROJECT, "verified_urls": verified}
+    # 5. Publish static web assets (no stale qa/data previews are uploaded by the delegate).
+    from tools.publish_docs_to_gcs import upload_web_assets
+
+    _assert_paths_secret_free(sorted((PROJECT_ROOT / "docs").rglob("*")), secrets)
+    upload_web_assets()
+
+    # 6. Verify live HTTPS endpoints.
+    items = [(key, True) for key in REQUIRED_WEB_OBJECTS]
+    items += [(key, False) for key in OPTIONAL_WEB_OBJECTS if bucket.get_blob(key) is not None]
+    verification = _verify_urls(items, BUCKET_NAME)
+
+    return {
+        "bucket": BUCKET_NAME,
+        "project": GCP_PROJECT,
+        "inventory": inventory,
+        "lineage": lineage,
+        "qa_report_id": summary["report_id"],
+        "verified_urls": verification["verified"],
+    }
+
+
+def upload_and_sync_all() -> Dict[str, Any]:
+    """Backwards-compatible alias for `publish_and_verify` (cloud-first; no local lake)."""
+    return publish_and_verify()
 
 
 if __name__ == "__main__":
-    upload_and_sync_all()
-
+    publish_and_verify()
