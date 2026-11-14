@@ -49,6 +49,7 @@ $("cancelBtn").addEventListener("click", async () => {
   $("log").textContent = "";
   $("result").classList.add("hidden");
   $("jobId").textContent = "";
+  const useJob = $("useJob").checked;
   try {
     const body = {
       url,
@@ -59,38 +60,43 @@ $("cancelBtn").addEventListener("click", async () => {
       skip_wherobots: $("skipWb").checked,
       refresh_geolibre: $("refreshGl").checked,
     };
-    const r = await api("/harvest", { method: "POST", body: JSON.stringify(body) });
-    $("jobId").textContent = `job: ${r.job_id}`;
-    currentJobId = r.job_id;
-    $("cancelBtn").disabled = false;
+    const endpoint = useJob ? "/harvest-large" : "/harvest";
+    const r = await api(endpoint, { method: "POST", body: JSON.stringify(body) });
+    const id = useJob ? r.execution : r.job_id;
+    $("jobId").textContent = `job: ${id}`;
+    currentJobId = id;
+    $("cancelBtn").disabled = !useJob; // cancel only for in-process
     $("status").textContent = "Running...";
-    poll(r.job_id);
+    poll(id, useJob);
   } catch (e) {
     $("status").textContent = "Error: " + e.message;
     $("submitBtn").disabled = false;
   }
 });
 
-function poll(jobId) {
+function poll(jobId, useJob = false) {
   if (pollTimer) clearInterval(pollTimer);
   pollTimer = setInterval(async () => {
     try {
-      const d = await api(`/harvest/${jobId}`);
-      $("log").textContent = d.log_tail || "";
-      $("log").scrollTop = $("log").scrollHeight;
-      if (d.status === "succeeded" || d.status === "failed") {
+      const path = useJob ? `/harvest-large/${encodeURIComponent(jobId)}` : `/harvest/${jobId}`;
+      const d = await api(path);
+      if (useJob) {
+        $("log").textContent = `status: ${d.status}\nexecution: ${d.execution}\n${d.log_url || ""}`;
+      } else {
+        $("log").textContent = d.log_tail || "";
+        $("log").scrollTop = $("log").scrollHeight;
+      }
+      if (["succeeded","failed","completed","cancelled"].includes(d.status)) {
         clearInterval(pollTimer);
         pollTimer = null;
         $("submitBtn").disabled = false;
         $("cancelBtn").disabled = true;
-        $("status").textContent = d.status === "succeeded" ? "Succeeded" : "Failed";
-        if (d.status === "succeeded") {
-          $("result").classList.remove("hidden");
-          $("resultBody").textContent = JSON.stringify(d, null, 2);
-        }
+        $("status").textContent = d.status;
+        $("result").classList.remove("hidden");
+        $("resultBody").textContent = JSON.stringify(d, null, 2);
       }
     } catch (e) {
       $("status").textContent = "Poll error: " + e.message;
     }
-  }, 5000);
+  }, useJob ? 10000 : 5000);
 }

@@ -148,20 +148,35 @@ def http_get_json(url: str, cfg: Dict[str, Any], params: Optional[Dict[str, Any]
 
 
 def download_to_temp(url: str, cfg: Dict[str, Any], suffix: str) -> Tuple[Path, int, int]:
-    """Streams a URL to a temp file. Returns (path, http_status, elapsed_ms)."""
+    """Streams a URL to a temp file. Returns (path, http_status, elapsed_ms).
+
+    Enforces a hard total deadline (connect + read) so a slow/hung transfer
+    cannot block the worker forever.
+    """
     t0 = time.perf_counter()
+    timeout_s = int(cfg["portals"].get("http_timeout_s", 120))
+    deadline = t0 + timeout_s
     resp = requests.get(
         url,
         headers={"User-Agent": cfg["portals"]["user_agent"]},
-        timeout=cfg["portals"]["http_timeout_s"],
+        timeout=(10, 30),
         stream=True,
     )
     resp.raise_for_status()
     fd, tmp = tempfile.mkstemp(suffix=suffix)
-    with os.fdopen(fd, "wb") as f:
-        for chunk in resp.iter_content(chunk_size=1 << 20):
-            if chunk:
-                f.write(chunk)
+    try:
+        with os.fdopen(fd, "wb") as f:
+            for chunk in resp.iter_content(chunk_size=1 << 20):
+                if chunk:
+                    f.write(chunk)
+                if time.perf_counter() > deadline:
+                    raise TimeoutError(f"Download exceeded {timeout_s}s total deadline")
+    except Exception:
+        try:
+            Path(tmp).unlink(missing_ok=True)
+        except Exception:
+            pass
+        raise
     return Path(tmp), resp.status_code, round((time.perf_counter() - t0) * 1000.0, 2)
 
 

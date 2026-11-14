@@ -27,7 +27,13 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-PROJECT_ROOT = Path(os.environ.get("OIC_PROJECT_ROOT", "/app"))
+import google.auth
+from google.auth.transport.requests import AuthorizedSession
+
+PROJECT = os.environ.get("OIC_GCP_PROJECT", "ops-intelligence-crafter")
+REGION = os.environ.get("OIC_REGION", "australia-southeast1")
+JOB_NAME = os.environ.get("OIC_RUN_JOB", "oic-harvester-job")
+RUN_API = "https://run.googleapis.com/v2"
 HARVESTER = PROJECT_ROOT / "tools" / "harvest_portal_dataset.py"
 CONFIG = PROJECT_ROOT / "config" / "harvester_config.json"
 
@@ -64,7 +70,9 @@ class HarvestRequest(BaseModel):
     refresh_geolibre: bool = False
 
 
-def _check_key(x_api_key: Optional[str]) -> None:
+def _authed_session():
+    creds, _ = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
+    return AuthorizedSession(creds)
     if not API_KEY or x_api_key != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid or missing X-API-Key")
 
@@ -191,6 +199,70 @@ def _run_job(job_id: str, req: HarvestRequest) -> None:
     state["finished_at"] = time.time()
     _write_job(job_id, state)
     PROCS.pop(job_id, None)
+
+
+@app.post("/harvest-large", status_code=202)
+def harvest_large(req: HarvestRequest, x_api_key: Optional[str] = Header(default=None)) -> Dict[str, Any]:
+    _check_key(x_api_key)
+    if not req.url.lower().startswith(("http://", "https://")):
+        raise HTTPException(status_code=400, detail="url must be http(s)")
+    args = ["tools/harvest_portal_dataset.py", "--config", "config/harvester_config.json", "--url", req.url]
+    if req.key:
+        args += ["--key", req.key]
+    if req.theme:
+        args += ["--theme", req.theme]
+    if req.scale:
+        args += ["--scale", req.scale]
+    if req.jurisdiction:
+        args += ["--jurisdiction", req.jurisdiction]
+    if req.max_features:
+        args += ["--max-features", str(req.max_features)]
+    if req.dry_run:
+        args += ["--dry-run"]
+    if req.skip_wherobots:
+        args += ["--skip-wherobots"]
+    if req.refresh_geolibre:
+        # refresh handled post-run by a separate job if needed; keep flag for future
+        pass
+
+    sess = _authed_session()
+    url = f"{RUN_API}/projects/{PROJECT}/locations/{REGION}/jobs/{JOB_NAME}:run"
+    body = {"overrides": {"containerOverrides": [{"args": ["python"] + args}]}}
+    resp = sess.post(url, json=body, timeout=60)
+    if resp.status_code not in (200, 202):
+        raise HTTPException(status_code=502, detail=f"Cloud Run Jobs run failed: {resp.status_code} {resp.text[:300]}")
+    data = resp.json()
+    exec_name = (data.get("metadata") or {}).get("name") or data.get("name")
+    return {"execution": exec_name, "operation": data.get("name")}
+
+
+@app.get("/harvest-large/{execution:path}")
+def harvest_large_status(execution: str, x_api_key: Optional[str] = Header(default=None)) -> Dict[str, Any]:
+    _check_key(x_api_key)
+    # execution may be full resource name or short name; normalize
+    if not execution.startswith("projects/"):
+        execution = f"projects/{PROJECT}/locations/{REGION}/jobs/{JOB_NAME}/executions/{execution}"
+    sess = _authed_session()
+    url = f"{RUN_API}/{execution}"
+    resp = sess.get(url, timeout=30)
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail=resp.text[:300])
+    data = resp.json()
+    completed = data.get("completionTime")
+    succeeded = (data.get("succeededCount") or 0) > 0
+    failed = (data.get("failedCount") or 0) > 0
+    if completed:
+        status = "succeeded" if succeeded else ("failed" if failed else "completed")
+    else:
+        status = "running"
+    return {
+        "execution": execution,
+        "status": status,
+        "completionTime": completed,
+        "succeededCount": data.get("succeededCount"),
+        "failedCount": data.get("failedCount"),
+        "log_url": f"https://console.cloud.google.com/run/jobs/executions/details/{REGION}/{execution.split('/')[-1]}/logs?project={PROJECT}",
+    }
 
 
 @app.get("/healthz")
