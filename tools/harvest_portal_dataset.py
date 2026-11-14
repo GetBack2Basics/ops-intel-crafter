@@ -1169,7 +1169,7 @@ def main() -> int:
         cfg.setdefault("dataset_defaults", {})["licence_override"] = {
             "name": args.licence_name,
             "url": args.licence_url,
-            "attribution": args.licence_attribution or f"© {args.licence_name}",
+            "attribution": f"Copyright {args.licence_name}",
             "redistribution_permitted": True,
         }
     record = harvest_portal_dataset(args.url, cfg, args)
