@@ -718,8 +718,8 @@
         "type": "geoparquet",
         "format": "parquet",
         "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet"
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T123817Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T123817Z/part-00000.parquet"
       },
       "style": {
         "strokeColor": "#64748b",
@@ -729,7 +729,7 @@
         "source_agency": "spatial-gp.information.qld.gov.au",
         "features_stored": 4514,
         "object_bytes": 116170210,
-        "object_updated_utc": "2026-11-14T10:05:46.020000+00:00",
+        "object_updated_utc": "2026-11-14T12:38:36.460000+00:00",
         "qa_status": "WARNING",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
@@ -793,7 +793,7 @@
     }
   ],
   "metadata": {
-    "generated_utc": "2026-11-14T10:09:40Z",
+    "generated_utc": "2026-11-14T12:45:19Z",
     "generator": "tools/export_geolibre_project.py",
     "datasets_on_gcs": 25,
     "read_failures": [],

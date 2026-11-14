@@ -1,6 +1,6 @@
 {
-  "report_id": "qa-report-20261114T110847Z",
-  "generated_at_utc": "2026-11-14T11:08:47Z",
+  "report_id": "qa-report-20261114T124551Z",
+  "generated_at_utc": "2026-11-14T12:45:51Z",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
   "total_datasets": 53,
@@ -7755,8 +7755,8 @@
       },
       "source_publication_date": null,
       "source_vintage": "2026-INFORMATION",
-      "retrieval_timestamp_utc": "2026-11-14T10:05:27Z",
-      "retrieval_id": "20261114T100527Z",
+      "retrieval_timestamp_utc": "2026-11-14T12:38:17Z",
+      "retrieval_id": "20261114T123817Z",
       "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
       "transformation_version": "geoparquet-1.1.0-gda2020-v1",
       "original_crs": "EPSG:4326",
@@ -7770,11 +7770,11 @@
         -9.410524
       ],
       "file_size_bytes": 116170210,
-      "sha256": "1eca4232394da2b19ea5155d887ec3d912d18238d5df4b26dfc1dabeea5cf40e",
-      "gcs_generation": "1794650746014822",
-      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet",
+      "sha256": "0541effff9670e4a224508a6e63a255d183d407decc00a961580878133609ac5",
+      "gcs_generation": "1794659916455784",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T123817Z/part-00000.parquet",
       "local_parquet_path": null,
-      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/qld_storm_tide_high_hazard/20261114T100527Z/source_payload.json",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/qld_storm_tide_high_hazard/20261114T123817Z/source_payload.json",
       "raw_payload_sha256": "bf19e4c12afc4934b2c276b98525bdf4428ba0fb70bff7e21e479ef73cdf21f0",
       "preview_geojson": {
         "preview_geojson_path": "data/qld_storm_tide_high_hazard.geojson",
@@ -7790,7 +7790,7 @@
         "layer_name": "Storm Tide High Hazard",
         "http_status": 200,
         "content_type": "application/json;charset=UTF-8",
-        "latency_ms": 679.28,
+        "latency_ms": 749.48,
         "max_record_count": null,
         "source_feature_count": 4514,
         "query_bbox": null,
@@ -7801,7 +7801,7 @@
           {
             "check": "endpoint_reachable",
             "status": "PASS",
-            "detail": "HTTP 200 (679.28 ms) from https://spatial-gp.information.qld.gov.au/arcgis/rest/directories/arcgisoutput/QSC_Extract/QSC_Extracted_Data_20261114_174311037395-8872.zip"
+            "detail": "HTTP 200 (749.48 ms) from https://spatial-gp.information.qld.gov.au/arcgis/rest/directories/arcgisoutput/QSC_Extract/QSC_Extracted_Data_20261114_174311037395-8872.zip"
           },
           {
             "check": "not_embedded_error_or_html",
@@ -7824,11 +7824,11 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "PASS",
-        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet",
-        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet",
-        "gcs_generation": "1794650746014822",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T123817Z/part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T123817Z/part-00000.parquet",
+        "gcs_generation": "1794659916455784",
         "file_size_bytes": 116170210,
-        "sha256": "1eca4232394da2b19ea5155d887ec3d912d18238d5df4b26dfc1dabeea5cf40e",
+        "sha256": "0541effff9670e4a224508a6e63a255d183d407decc00a961580878133609ac5",
         "geoparquet_version": "1.1.0",
         "geometry_encoding": "WKB",
         "stored_crs": "EPSG:7844",
@@ -7936,7 +7936,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=1eca4232394da2b1... | generation=1794650746014822"
+            "detail": "sha256=0541effff9670e4a... | generation=1794659916455784"
           }
         ]
       },
@@ -7978,17 +7978,17 @@
       "operational_suitability": "Suitable for flood & hydrography exposure analysis and emergency planning overlays.",
       "telemetry": {
         "dataset_key": "qld_storm_tide_high_hazard",
-        "retrieval_timestamp_utc": "2026-11-14T10:05:27Z",
+        "retrieval_timestamp_utc": "2026-11-14T12:38:17Z",
         "http_requests_count": 1,
-        "source_download_ms": 679.28,
-        "normalization_ms": 2346.27,
-        "validation_ms": 9257.87,
+        "source_download_ms": 749.48,
+        "normalization_ms": 2345.22,
+        "validation_ms": 8480.66,
         "bytes_written": 116170210,
         "notes": [
           "Zero-AI deterministic portal harvest (no LLM credits used)."
         ]
       },
-      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet",
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T123817Z/part-00000.parquet",
       "source_count": 4514,
       "stored_count": 4514,
       "sync_status": "100.0%"
