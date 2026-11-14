@@ -1240,6 +1240,16 @@ def main() -> int:
         "wherobots_table": f"org_catalog.ops_intel.{record['dataset_key']}" if not args.skip_wherobots else None,
     }
     print("OIC_RESULT_JSON: " + _json.dumps(_result))
+    # Persist result to GCS for the console to read after completion
+    if upload_cloud:
+        try:
+            store.upload_bytes_cloud(
+                "harvest_results/latest.json",
+                ("OIC_RESULT_JSON: " + _json.dumps(_result)).encode("utf-8"),
+                content_type="application/json; charset=utf-8",
+            )
+        except Exception:
+            pass
     return 0
 
 
@@ -1252,4 +1262,3 @@ if __name__ == "__main__":
 
 # cache bust
 
-# cache bust v2

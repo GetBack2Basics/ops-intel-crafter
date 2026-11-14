@@ -118,29 +118,18 @@ def _tail(path: Path, n: int = 200) -> str:
     return "\n".join(lines[-n:])
 
 
-def _fetch_job_logs(execution: str) -> str:
-    """Fetches recent log lines for a Cloud Run Job execution via Cloud Logging."""
+def _fetch_job_result() -> Optional[Dict[str, Any]]:
+    """Reads the latest harvest result from GCS (written by the harvester)."""
     try:
-        sess = _authed_session()
-        exec_short = execution.split("/")[-1]
-        body = {
-            "resourceNames": [f"projects/{PROJECT}"],
-            "filter": f'resource.type="cloud_run_job" AND labels."run.googleapis.com/execution_name"="{exec_short}"',
-            "orderBy": "timestamp desc",
-            "pageSize": 300,
-        }
-        resp = sess.post("https://logging.googleapis.com/v2/entries:list", json=body, timeout=30)
-        if resp.status_code != 200:
-            return ""
-        entries = resp.json().get("entries", [])
-        lines = []
-        for e in reversed(entries):
-            payload = e.get("textPayload") or ""
-            if payload:
-                lines.append(payload)
-        return "\n".join(lines)
+        data = _store().read_bytes_cloud("harvest_results/latest.json")
+        if not data:
+            return None
+        text = data.decode("utf-8", errors="replace")
+        if "OIC_RESULT_JSON:" in text:
+            text = text.split("OIC_RESULT_JSON:", 1)[1].strip()
+        return json.loads(text)
     except Exception:
-        return ""
+        return None
 
 
 def _parse_result(log_text: str) -> Optional[Dict[str, Any]]:
