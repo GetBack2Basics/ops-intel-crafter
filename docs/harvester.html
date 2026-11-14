@@ -21,7 +21,7 @@
     <header>
       <h1 class="text-2xl font-bold text-sky-300">Harvester Console</h1>
       <p class="text-sm text-slate-400">Deterministic portal → GeoParquet → GCS → QA → (Wherobots) pipeline. Dry-run only in v1.</p>
-    <p class="text-xs text-slate-500 mt-1">Supported portals: CKAN (<code>/dataset/&lt;slug&gt;</code>) and Opendatasoft (<code>/explore/dataset/&lt;id&gt;</code>). CSIRO/search pages are not supported. Use "Cloud Run Job" for large datasets.</p>
+    <p class="text-xs text-slate-500 mt-1">Supported portals: CKAN (<code>/dataset/&lt;slug&gt;</code>) and Opendatasoft (<code>/explore/dataset/&lt;id&gt;</code>). The dataset must expose a directly downloadable resource (GeoJSON, ArcGIS REST, GeoPackage, zipped Shapefile, WFS, or CSV with lat/lon). Search-result pages (e.g. CSIRO, QLD Spatial catalogue search) are not harvestable. Use "Cloud Run Job" for large datasets.</p>
     </header>
 
     <div class="card space-y-4">
