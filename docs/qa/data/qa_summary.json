@@ -1,6 +1,6 @@
 {
-  "report_id": "qa-report-20261114T100907Z",
-  "generated_at_utc": "2026-11-14T10:09:07Z",
+  "report_id": "qa-report-20261114T110847Z",
+  "generated_at_utc": "2026-11-14T11:08:47Z",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
   "total_datasets": 53,
