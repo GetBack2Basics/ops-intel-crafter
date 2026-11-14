@@ -85,6 +85,9 @@ function poll(jobId, useJob = false) {
       const d = await api(path);
       if (useJob) {
         $("log").textContent = `status: ${d.status}\nexecution: ${d.execution}\n${d.log_url || ""}`;
+        if (d.result) {
+          $("log").textContent += `\n\nDataset: ${d.result.dataset_key}\nGCS: ${d.result.gs_uri}\nQA: ${d.result.qa_inspector_url}\nWherobots: ${d.result.wherobots_table || "skipped"}`;
+        }
       } else {
         $("log").textContent = d.log_tail || "";
         $("log").scrollTop = $("log").scrollHeight;

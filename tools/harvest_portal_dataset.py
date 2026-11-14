@@ -1177,6 +1177,18 @@ def main() -> int:
     print(f"DONE: {record['dataset_key']} | {record['overall_qa_status']} | {record['feature_count']} features | {record['stored_crs']}")
     print(f"  snapshot: {record['gs_uri']}")
     print("=" * 70)
+    import json as _json
+    _result = {
+        "dataset_key": record["dataset_key"],
+        "feature_count": record["feature_count"],
+        "qa_status": record["overall_qa_status"],
+        "gs_uri": record["gs_uri"],
+        "gcs_https_url": record.get("gcs_https_url"),
+        "qa_inspector_url": f"https://storage.googleapis.com/{cfg['gcs']['bucket']}/qa/geolibre_qa_inspect.html?dataset={record['dataset_key']}",
+        "qa_summary_url": f"https://storage.googleapis.com/{cfg['gcs']['bucket']}/qa/data/qa_summary.json",
+        "wherobots_table": f"org_catalog.ops_intel.{record['dataset_key']}" if not args.skip_wherobots else None,
+    }
+    print("OIC_RESULT_JSON: " + _json.dumps(_result))
     return 0
 
 

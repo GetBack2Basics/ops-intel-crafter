@@ -118,6 +118,46 @@ def _tail(path: Path, n: int = 200) -> str:
     return "\n".join(lines[-n:])
 
 
+def _fetch_job_logs(execution: str) -> str:
+    """Fetches recent log lines for a Cloud Run Job execution via Cloud Logging."""
+    try:
+        sess = _authed_session()
+        exec_short = execution.split("/")[-1]
+        body = {
+            "resourceNames": [f"projects/{PROJECT}"],
+            "filter": f'resource.type="cloud_run_job" AND labels."run.googleapis.com/execution_name"="{exec_short}"',
+            "orderBy": "timestamp desc",
+            "pageSize": 300,
+        }
+        resp = sess.post("https://logging.googleapis.com/v2/entries:list", json=body, timeout=30)
+        if resp.status_code != 200:
+            return ""
+        entries = resp.json().get("entries", [])
+        lines = []
+        for e in reversed(entries):
+            payload = e.get("textPayload") or ""
+            if payload:
+                lines.append(payload)
+        return "\n".join(lines)
+    except Exception:
+        return ""
+
+
+def _parse_result(log_text: str) -> Optional[Dict[str, Any]]:
+    for line in reversed(log_text.splitlines()):
+        if "OIC_RESULT_JSON:" in line:
+            try:
+                return json.loads(line.split("OIC_RESULT_JSON:", 1)[1].strip())
+            except Exception:
+                return None
+    return None
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except FileNotFoundError:
+        return ""
+    return "\n".join(lines[-n:])
+
+
 def _run_job(job_id: str, req: HarvestRequest) -> None:
     log_path = Path(f"/tmp/oic_harvest_{job_id}.log")
     state = {
@@ -130,6 +170,7 @@ def _run_job(job_id: str, req: HarvestRequest) -> None:
         "error": None,
         "cancel_requested": False,
         "finished_at": None,
+        "result": None,
     }
     _write_job(job_id, state)
     state["status"] = "running"
@@ -196,6 +237,8 @@ def _run_job(job_id: str, req: HarvestRequest) -> None:
             if rc is not None:
                 state["returncode"] = rc
                 state["status"] = "succeeded" if rc == 0 else "failed"
+                state["log_tail"] = _tail(log_path)
+                state["result"] = _parse_result(state["log_tail"]) if state["status"] == "succeeded" else None
                 break
             time.sleep(2)
 
@@ -214,6 +257,7 @@ def _run_job(job_id: str, req: HarvestRequest) -> None:
                     )
 
         state["log_tail"] = _tail(log_path)
+        state["result"] = _parse_result(state["log_tail"]) if state.get("status") == "succeeded" else state.get("result")
         state["finished_at"] = time.time()
         _write_job(job_id, state)
     except Exception as exc:  # noqa: BLE001
@@ -327,12 +371,16 @@ def harvest_large_status(execution: str, x_api_key: Optional[str] = Header(defau
         status = "succeeded" if succeeded else ("failed" if failed else "completed")
     else:
         status = "running"
+    logs = _fetch_job_logs(execution) if completed else ""
+    result = _parse_result(logs) if (completed and status == "succeeded") else None
     return {
         "execution": execution,
         "status": status,
         "completionTime": completed,
         "succeededCount": data.get("succeededCount"),
         "failedCount": data.get("failedCount"),
+        "log_tail": logs[-4000:],
+        "result": result,
         "log_url": f"https://console.cloud.google.com/run/jobs/executions/details/{REGION}/{execution.split('/')[-1]}/logs?project={PROJECT}",
-    }# cache bust
+    }
 
