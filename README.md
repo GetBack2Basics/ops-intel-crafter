@@ -5,7 +5,7 @@
 
 ---
 
-## Live GCS Hosted Deliverables (`ops-intelligence-crafter`)
+## Live GCS Hosted Deliverables (`operational-intelligence-crafter`)
 
 - **Emergency Spatial Intelligence Workbench (Blank-on-Start Progressive Workflow):**  
   https://storage.googleapis.com/operational-intelligence-crafter-lake/index.html

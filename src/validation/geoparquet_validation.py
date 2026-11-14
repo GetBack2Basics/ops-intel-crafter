@@ -43,16 +43,19 @@ def verify_level2_stored_artifact(
     entry: DatasetEntry,
     storage_meta: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Executes Level 2 Stored Artifact validation on a GeoParquet file."""
+    """Executes Level 2 Stored Artifact validation on a GeoParquet file (local path or gs:// URI)."""
+    from src.catalogue.schema_inspector import _open_parquet_source
+
     checks: List[Dict[str, Any]] = []
-    if not parquet_path.exists():
+    exists, _size, opener = _open_parquet_source(parquet_path)
+    if not exists:
         return {
             "level": 2,
             "level_name": "Stored GeoParquet Artifact",
             "status": QAStatus.FAIL.value,
             "file_path": str(parquet_path),
             "error_message": f"GeoParquet file does not exist: {parquet_path}",
-            "checks": [{"check": "file_exists", "status": "FAIL", "detail": "File missing on disk"}],
+            "checks": [{"check": "file_exists", "status": "FAIL", "detail": "File missing (local or cloud)"}],
         }
 
     try:
@@ -118,25 +121,45 @@ def verify_level2_stored_artifact(
         }
     )
 
-    # Read GeoDataFrame for geometry validity and bounding box checks
-    gdf = gpd.read_parquet(parquet_path)
+    # Read GeoDataFrame for geometry validity and bounding box checks (cloud URI or local path)
+    source = opener()
+    if hasattr(source, "read"):
+        with source as f:
+            gdf = gpd.read_parquet(f)
+    else:
+        gdf = gpd.read_parquet(source)
     geom_stats = validate_geodataframe_geometries(gdf, primary_key=entry.primary_key)
 
     bbox = gpq_bbox if (gpq_bbox and len(gpq_bbox) == 4) else [float(x) for x in gdf.total_bounds]
-    bbox_valid = (
-        len(bbox) == 4
-        and bbox[0] <= bbox[2]
-        and bbox[1] <= bbox[3]
-        and AUSTRALIA_LON_BOUNDS[0] <= bbox[0] <= AUSTRALIA_LON_BOUNDS[1]
-        and AUSTRALIA_LON_BOUNDS[0] <= bbox[2] <= AUSTRALIA_LON_BOUNDS[1]
-        and AUSTRALIA_LAT_BOUNDS[0] <= bbox[1] <= AUSTRALIA_LAT_BOUNDS[1]
-        and AUSTRALIA_LAT_BOUNDS[0] <= bbox[3] <= AUSTRALIA_LAT_BOUNDS[1]
-    )
+    ordered = len(bbox) == 4 and bbox[0] <= bbox[2] and bbox[1] <= bbox[3]
+    declared = getattr(entry, "default_bbox", None)
+    if declared and len(declared) == 4:
+        # Catalogue-declared spatial contract (e.g. tropical cyclone basins extending
+        # beyond the continental envelope). Validate the stored extent against it.
+        tol = 0.5  # degrees of tolerated drift beyond the declared extent
+        bbox_valid = (
+            ordered
+            and all(declared[0] - tol <= v <= declared[2] + tol for v in (bbox[0], bbox[2]))
+            and all(declared[1] - tol <= v <= declared[3] + tol for v in (bbox[1], bbox[3]))
+        )
+        bbox_detail = (
+            f"Bbox {[round(x, 5) for x in bbox]} within declared catalogue extent "
+            f"{[round(float(x), 3) for x in declared]} (\u00b1{tol}\u00b0)"
+        )
+    else:
+        bbox_valid = (
+            ordered
+            and AUSTRALIA_LON_BOUNDS[0] <= bbox[0] <= AUSTRALIA_LON_BOUNDS[1]
+            and AUSTRALIA_LON_BOUNDS[0] <= bbox[2] <= AUSTRALIA_LON_BOUNDS[1]
+            and AUSTRALIA_LAT_BOUNDS[0] <= bbox[1] <= AUSTRALIA_LAT_BOUNDS[1]
+            and AUSTRALIA_LAT_BOUNDS[0] <= bbox[3] <= AUSTRALIA_LAT_BOUNDS[1]
+        )
+        bbox_detail = f"Bbox {[round(x, 5) for x in bbox]} within Australian geographic envelope"
     checks.append(
         {
             "check": "bounding_box_australian_envelope",
             "status": "PASS" if bbox_valid else "FAIL",
-            "detail": f"Bbox {[round(x, 5) for x in bbox]} within Australian geographic envelope",
+            "detail": bbox_detail,
         }
     )
 

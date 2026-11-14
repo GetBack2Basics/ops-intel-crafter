@@ -2,7 +2,7 @@
   "manifest_version": "1.0.0",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
-  "updated_at_utc": "2026-11-10T02:26:39Z",
+  "updated_at_utc": "2026-11-14T00:42:39Z",
   "default_stored_crs": "EPSG:7844",
   "default_metric_crs": "EPSG:3112",
   "default_export_crs": "EPSG:4326",
@@ -55,7 +55,7 @@
       "operational_suitability": "Suitable for national and regional infrastructure exposure and grid dependency screening.",
       "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
       "latest_retrieval_utc": "2026-11-09T07:30:13Z"
     },
     "ga_major_power_stations": {
@@ -106,7 +106,7 @@
       "operational_suitability": "Suitable for national and state power generation hazard exposure analysis.",
       "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
       "latest_retrieval_utc": "2026-11-09T07:30:26Z"
     },
     "ga_electricity_transmission_lines": {
@@ -156,7 +156,7 @@
       "operational_suitability": "Suitable for transmission corridor bushfire, flood, and wind exposure assessment.",
       "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
       "latest_retrieval_utc": "2026-11-09T07:30:16Z"
     },
     "ga_seismic_hazard_pga_10pct": {
@@ -201,8 +201,8 @@
       "operational_suitability": "Suitable for national seismic hazard screening and multi-hazard critical infrastructure overlay.",
       "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-09T07:30:27Z"
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261114T004230Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-14T00:42:30Z"
     },
     "next_lga_boundaries_asgs2025": {
       "dataset_key": "next_lga_boundaries_asgs2025",
@@ -251,7 +251,7 @@
       "operational_suitability": "Authoritative administrative boundary baseline for emergency management LGA aggregation.",
       "default_bbox": null,
       "qa_status": "WARNING",
-      "latest_snapshot_path": "data/lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
       "latest_retrieval_utc": "2026-11-09T07:30:27Z"
     },
     "next_sa2_boundaries_asgs2021": {
@@ -300,7 +300,7 @@
       "operational_suitability": "Suitable for national and regional population exposure and Method A/B/C statistical comparison.",
       "default_bbox": null,
       "qa_status": "WARNING",
-      "latest_snapshot_path": "data/lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
       "latest_retrieval_utc": "2026-11-09T07:30:56Z"
     },
     "nsw_lga_boundaries": {
@@ -349,8 +349,8 @@
       "operational_suitability": "Authoritative NSW state emergency management LGA boundary layer.",
       "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-09T07:32:49Z"
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-14T00:42:39Z"
     },
     "nsw_water_inundation_areas": {
       "dataset_key": "nsw_water_inundation_areas",
@@ -398,7 +398,7 @@
       "operational_suitability": "Suitable for flood inundation corridor buffering, population exposure, and road isolation modelling.",
       "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
       "latest_retrieval_utc": "2026-11-09T07:33:10Z"
     },
     "nsw_foi_building_complexes": {
@@ -447,7 +447,7 @@
       "operational_suitability": "Suitable for statewide emergency facility accessibility, evacuation centre siting, and critical asset exposure.",
       "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
       "latest_retrieval_utc": "2026-11-09T07:31:28Z"
     },
     "nsw_rfs_major_incidents_live": {
@@ -498,7 +498,7 @@
       "operational_suitability": "Suitable for demonstrating live just-in-time feed ingestion alongside versioned stored snapshots (not an operational warning tool).",
       "default_bbox": null,
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
       "latest_retrieval_utc": "2026-11-09T07:33:10Z"
     },
     "nsw_emergency_management_restricted": {
@@ -596,7 +596,7 @@
         -9.0
       ],
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
       "latest_retrieval_utc": "2026-11-10T02:26:39Z"
     },
     "qld_cyclones_historical_tracks": {
@@ -623,10 +623,10 @@
       "source_vintage": "QLD-HISTORICAL",
       "refresh_policy": "annual_snapshot",
       "original_crs": "EPSG:4326",
-      "stored_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
       "metric_crs": "EPSG:3112",
       "geometry_type": "LineString",
-      "primary_key": "objectid",
+      "primary_key": "feature_uid",
       "required_fields": [
         "dist_name",
         "dist_id",
@@ -642,14 +642,14 @@
       ],
       "operational_suitability": "Suitable for historical hazard overlay, track trajectory analysis, and emergency planning.",
       "default_bbox": [
-        119.6,
-        -28.3,
-        165.0,
-        -7.4
+        105.0,
+        -35.0,
+        170.0,
+        -5.0
       ],
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-13T05:29:10Z"
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-14T00:28:40Z"
     },
     "qld_cyclones_historical_fixes": {
       "dataset_key": "qld_cyclones_historical_fixes",
@@ -675,10 +675,10 @@
       "source_vintage": "QLD-HISTORICAL",
       "refresh_policy": "annual_snapshot",
       "original_crs": "EPSG:4326",
-      "stored_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
       "metric_crs": "EPSG:3112",
       "geometry_type": "Point",
-      "primary_key": "objectid",
+      "primary_key": "feature_uid",
       "required_fields": [
         "dist_name",
         "category",
@@ -694,14 +694,14 @@
       ],
       "operational_suitability": "Suitable for cyclone intensity progression and landfall timing analysis.",
       "default_bbox": [
-        119.6,
-        -28.3,
-        165.0,
-        -7.4
+        105.0,
+        -35.0,
+        170.0,
+        -5.0
       ],
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-13T05:29:10Z"
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-14T00:28:40Z"
     },
     "qld_cyclones_historical_wind_areas": {
       "dataset_key": "qld_cyclones_historical_wind_areas",
@@ -727,10 +727,10 @@
       "source_vintage": "QLD-HISTORICAL",
       "refresh_policy": "annual_snapshot",
       "original_crs": "EPSG:4326",
-      "stored_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
       "metric_crs": "EPSG:3112",
       "geometry_type": "MultiPolygon",
-      "primary_key": "objectid",
+      "primary_key": "feature_uid",
       "required_fields": [
         "dist_name",
         "wind_type",
@@ -746,14 +746,1758 @@
       ],
       "operational_suitability": "Suitable for wind damage exposure estimation and multi-hazard buffer intersections.",
       "default_bbox": [
-        119.6,
-        -28.3,
-        165.0,
-        -7.4
+        105.0,
+        -35.0,
+        170.0,
+        -5.0
       ],
       "qa_status": "PASS",
-      "latest_snapshot_path": "data/lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-13T05:29:10Z"
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-14T00:28:40Z"
+    },
+    "flood_awareness_storm_tide": {
+      "dataset_key": "flood_awareness_storm_tide",
+      "title": "Flood \u2014 Awareness \u2014 Storm Tide",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "Flood & Hydrography",
+      "scale": "local",
+      "jurisdiction": "QLD",
+      "provider": "Brisbane City Council",
+      "source_agency": "Brisbane City Council",
+      "service_type": "geojson_feed",
+      "endpoint": "https://data.brisbane.qld.gov.au/api/explore/v2.1/catalog/datasets/flood-awareness-storm-tide/exports/geojson",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC BY 4.0",
+        "url": null,
+        "attribution": "\u00a9 Brisbane City Council \u2014 CC BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-14"
+      },
+      "source_publication_date": "2025-06-09",
+      "source_vintage": "2025-BRISBANE",
+      "refresh_policy": "portal_snapshot",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Geometry",
+      "primary_key": "objectid",
+      "required_fields": [],
+      "schema_mapping": {},
+      "known_limitations": [
+        "Harvested from data.brisbane.qld.gov.au open-data portal via deterministic zero-AI pipeline (ods).",
+        "default_bbox declared from the first verified harvest extent (+/-0.25 deg); re-harvests outside it will flag at Level 2.",
+        "Source licence: CC BY 4.0. Native source columns preserved; no attribute synthesis."
+      ],
+      "operational_suitability": "Suitable for flood & hydrography exposure analysis and emergency planning overlays.",
+      "default_bbox": [
+        152.535,
+        -27.856,
+        153.452,
+        -27.025
+      ],
+      "qa_status": "PASS",
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-14T00:25:59Z"
+    },
+    "national_cadastre_gnaf_v2": {
+      "dataset_key": "national_cadastre_gnaf_v2",
+      "title": "Geoscape National Cadastre & G-NAF Parcel Fabric",
+      "category": "static_authoritative",
+      "theme": "AURA: Cadastre Parcels",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "NationalMap / Geoscape",
+      "source_agency": "Geoscape Australia / ICSM",
+      "service_type": "arcgis_featureserver",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Land_Parcel_Property_Theme/FeatureServer/8",
+      "layer_id": 8,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geoscape Australia / ICSM",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "LOT_PLAN_ID",
+        "TENURE_TYPE",
+        "AREA_HA",
+        "LGA_NAME"
+      ],
+      "schema_mapping": {
+        "lot_id": "OBJECTID",
+        "lot_plan": "LOT_PLAN_ID",
+        "tenure": "TENURE_TYPE",
+        "area_ha": "AREA_HA",
+        "lga_name": "LGA_NAME"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "national_cyclone_hazard_tcha_v2": {
+      "dataset_key": "national_cyclone_hazard_tcha_v2",
+      "title": "Tropical Cyclone Hazard Assessment (TCHA) & AS/NZS 1170.2 Wind Regions",
+      "category": "static_authoritative",
+      "theme": "AURA: Cyclone Hazard",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "NationalMap / Geoscience Australia",
+      "source_agency": "Geoscience Australia / BoM",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/Tropical_Cyclone_Hazard_Assessment_2018/MapServer/1",
+      "layer_id": 1,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geoscience Australia / BoM",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Polygon",
+      "primary_key": null,
+      "required_fields": [
+        "WIND_REGION",
+        "V_DESIGN_MS"
+      ],
+      "schema_mapping": {
+        "wind_region": "WIND_REGION",
+        "design_wind_speed_ms": "V_DESIGN_MS"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "national_electricity_grid_v2": {
+      "dataset_key": "national_electricity_grid_v2",
+      "title": "Geoscience Australia National Electricity Transmission Grid (>=66kV)",
+      "category": "static_authoritative",
+      "theme": "AURA: Transmission Grid",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "NationalMap / Geoscience Australia",
+      "source_agency": "Geoscience Australia / AEMO",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2",
+      "layer_id": 2,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geoscience Australia / AEMO",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Linestring",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "NAME",
+        "VOLTAGE_KV",
+        "OPERATOR"
+      ],
+      "schema_mapping": {
+        "line_id": "OBJECTID",
+        "line_name": "NAME",
+        "voltage_kv": "VOLTAGE_KV",
+        "operator": "OPERATOR"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "national_healthcare_nhsd_v2": {
+      "dataset_key": "national_healthcare_nhsd_v2",
+      "title": "National Health Services Directory (NHSD) Hospitals & Health Facilities",
+      "category": "static_authoritative",
+      "theme": "AURA: Sensitive Receptors",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "NationalMap / NHSD",
+      "source_agency": "Australian Digital Health Agency / Healthdirect",
+      "service_type": "arcgis_featureserver",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3",
+      "layer_id": 3,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Australian Digital Health Agency / Healthdirect",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Point",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "FACILITY_NAME",
+        "FACILITY_TYPE",
+        "300.0"
+      ],
+      "schema_mapping": {
+        "receptor_id": "OBJECTID",
+        "name": "FACILITY_NAME",
+        "category": "FACILITY_TYPE",
+        "buffer_m": "300.0"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "national_schools_acara_v2": {
+      "dataset_key": "national_schools_acara_v2",
+      "title": "ACARA National Schools Directory",
+      "category": "static_authoritative",
+      "theme": "AURA: Sensitive Receptors",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "NationalMap / ACARA",
+      "source_agency": "Australian Curriculum, Assessment and Reporting Authority (ACARA)",
+      "service_type": "arcgis_featureserver",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/3",
+      "layer_id": 3,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Australian Curriculum, Assessment and Reporting Authority (ACARA)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Point",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "SCHOOL_NAME",
+        "SCHOOL_TYPE",
+        "300.0"
+      ],
+      "schema_mapping": {
+        "receptor_id": "OBJECTID",
+        "name": "SCHOOL_NAME",
+        "category": "SCHOOL_TYPE",
+        "buffer_m": "300.0"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "national_seismic_hazard_nsha_v2": {
+      "dataset_key": "national_seismic_hazard_nsha_v2",
+      "title": "National Seismic Hazard Assessment (NSHA) Ground Motion PGA (National)",
+      "category": "static_authoritative",
+      "theme": "AURA: Earthquake Hazard",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "NationalMap / Geoscience Australia",
+      "source_agency": "Geoscience Australia",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/0",
+      "layer_id": 0,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geoscience Australia",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Polygon",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "PGA_500YR",
+        "SITE_CLASS"
+      ],
+      "schema_mapping": {
+        "zone_id": "OBJECTID",
+        "pga_value": "PGA_500YR",
+        "site_subsoil_class": "SITE_CLASS"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "nsw_bionet_bv_map_v2": {
+      "dataset_key": "nsw_bionet_bv_map_v2",
+      "title": "Biodiversity Values Map (Biodiversity Conservation Act 2016)",
+      "category": "static_authoritative",
+      "theme": "AURA: Biodiversity Constraints",
+      "scale": "nsw",
+      "jurisdiction": "NSW",
+      "provider": "NSW SEED Portal",
+      "source_agency": "NSW DCCEEW / Biodiversity Conservation Trust",
+      "service_type": "arcgis_featureserver",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/9?f=json",
+      "layer_id": 9,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "NSW DCCEEW / Biodiversity Conservation Trust",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "BV_REASON",
+        "THRESHOLD_STATUS",
+        "Biodiversity Conservation Act 2016"
+      ],
+      "schema_mapping": {
+        "constraint_id": "OBJECTID",
+        "tec_name": "BV_REASON",
+        "status": "THRESHOLD_STATUS",
+        "statutory_act": "Biodiversity Conservation Act 2016"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "nsw_coastal_inundation_hazard_v2": {
+      "dataset_key": "nsw_coastal_inundation_hazard_v2",
+      "title": "NSW Coastal Inundation, Storm Surge and Tidal Extent",
+      "category": "static_authoritative",
+      "theme": "AURA: Coastal Inundation Hazard",
+      "scale": "nsw",
+      "jurisdiction": "NSW",
+      "provider": "NSW SEED Portal",
+      "source_agency": "NSW DCCEEW Coastal Branch",
+      "service_type": "arcgis_featureserver",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Water_Theme/FeatureServer/7?f=json",
+      "layer_id": 7,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "NSW DCCEEW Coastal Branch",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "objectid",
+        "hydroname",
+        "classsubtype",
+        "Shape__Area"
+      ],
+      "schema_mapping": {
+        "inundation_id": "objectid",
+        "name": "hydroname",
+        "subtype": "classsubtype",
+        "area_m2": "Shape__Area"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "nsw_elvis_lidar_1m_dem_v2": {
+      "dataset_key": "nsw_elvis_lidar_1m_dem_v2",
+      "title": "ELVIS NSW 1m High-Resolution LiDAR Digital Elevation Model & Contours",
+      "category": "static_authoritative",
+      "theme": "AURA: Elevation Lidar Dem",
+      "scale": "nsw",
+      "jurisdiction": "NSW",
+      "provider": "ELVIS Elevation - Foundation Spatial Data",
+      "source_agency": "Geoscience Australia / NSW Spatial Services (ELVIS)",
+      "service_type": "gcs_octree_dem",
+      "endpoint": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/nsw_elvis_lidar_laz_pointcloud_v2/cloud.js",
+      "layer_id": 1,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geoscience Australia / NSW Spatial Services (ELVIS)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:7856",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "ELEVATION_AHD",
+        "CONTOUR_TYPE",
+        "SLOPE_PCT",
+        "SLOPE_CLASS",
+        "ASPECT_DEG",
+        "PT_DENSITY",
+        "VERT_ACC_M"
+      ],
+      "schema_mapping": {
+        "elevation_m": "ELEVATION_AHD",
+        "contour_type": "CONTOUR_TYPE",
+        "slope_pct": "SLOPE_PCT",
+        "slope_class": "SLOPE_CLASS",
+        "aspect_deg": "ASPECT_DEG",
+        "point_density_pts_m2": "PT_DENSITY",
+        "vertical_accuracy_m": "VERT_ACC_M"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/nsw_elvis_lidar_laz_pointcloud_v2/cloud.js",
+      "latest_retrieval_utc": null
+    },
+    "nsw_elvis_lidar_1m_dsm_v2": {
+      "dataset_key": "nsw_elvis_lidar_1m_dsm_v2",
+      "title": "ELVIS NSW 1m High-Resolution Digital Surface Model (Canopy & Structure DSM)",
+      "category": "static_authoritative",
+      "theme": "AURA: Elevation Lidar Dsm",
+      "scale": "nsw",
+      "jurisdiction": "NSW",
+      "provider": "ELVIS Elevation - Foundation Spatial Data",
+      "source_agency": "Geoscience Australia / NSW Spatial Services (ELVIS)",
+      "service_type": "gcs_octree_dsm",
+      "endpoint": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/lake_macquarie_elvis.copc.laz",
+      "layer_id": 1,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geoscience Australia / NSW Spatial Services (ELVIS)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:7856",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "DSM_ELEVATION_AHD",
+        "CANOPY_HEIGHT_AGL",
+        "ROUGHNESS_INDEX",
+        "SLOPE_PCT",
+        "ASPECT_DEG"
+      ],
+      "schema_mapping": {
+        "elevation_m": "DSM_ELEVATION_AHD",
+        "canopy_height_m": "CANOPY_HEIGHT_AGL",
+        "surface_roughness": "ROUGHNESS_INDEX",
+        "slope_pct": "SLOPE_PCT",
+        "aspect_deg": "ASPECT_DEG"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/lake_macquarie_elvis.copc.laz",
+      "latest_retrieval_utc": null
+    },
+    "nsw_elvis_lidar_contours_v2": {
+      "dataset_key": "nsw_elvis_lidar_contours_v2",
+      "title": "ELVIS NSW 0.5m/1m Topographic Elevation Contours Fabric",
+      "category": "static_authoritative",
+      "theme": "AURA: Elevation Lidar Contours",
+      "scale": "nsw",
+      "jurisdiction": "NSW",
+      "provider": "ELVIS Elevation - Foundation Spatial Data",
+      "source_agency": "Geoscience Australia / NSW Spatial Services (ELVIS)",
+      "service_type": "gcs_contours",
+      "endpoint": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/nsw_elvis_lidar_laz_pointcloud_v2/cloud.js",
+      "layer_id": 1,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geoscience Australia / NSW Spatial Services (ELVIS)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:7856",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multilinestring",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "CONTOUR_AHD",
+        "INTERVAL_TYPE",
+        "INDEX_FLAG"
+      ],
+      "schema_mapping": {
+        "contour_id": "OBJECTID",
+        "elevation_m": "CONTOUR_AHD",
+        "interval_m": "INTERVAL_TYPE",
+        "index_contour": "INDEX_FLAG"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/nsw_elvis_lidar_laz_pointcloud_v2/cloud.js",
+      "latest_retrieval_utc": null
+    },
+    "nsw_elvis_lidar_laz_pointcloud_v2": {
+      "dataset_key": "nsw_elvis_lidar_laz_pointcloud_v2",
+      "title": "ELVIS NSW Classified 3D LiDAR Point Cloud (.LAZ / ASPRS Ground, Canopy & Structures)",
+      "category": "static_authoritative",
+      "theme": "AURA: Elevation Lidar Pointcloud",
+      "scale": "nsw",
+      "jurisdiction": "NSW",
+      "provider": "ELVIS Elevation - Foundation Spatial Data",
+      "source_agency": "Geoscience Australia / NSW Spatial Services (ELVIS)",
+      "service_type": "gcs_copc_laz",
+      "endpoint": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/lake_macquarie_elvis.copc.laz",
+      "layer_id": 1,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geoscience Australia / NSW Spatial Services (ELVIS)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:7856",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipoint",
+      "primary_key": null,
+      "required_fields": [
+        "X",
+        "Y",
+        "Z_AHD",
+        "CLASSIFICATION",
+        "INTENSITY",
+        "RETURN_NUM",
+        "PT_DENSITY"
+      ],
+      "schema_mapping": {
+        "x_coord": "X",
+        "y_coord": "Y",
+        "elevation_m": "Z_AHD",
+        "asprs_class": "CLASSIFICATION",
+        "intensity": "INTENSITY",
+        "return_number": "RETURN_NUM",
+        "point_density_pts_m2": "PT_DENSITY"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/potree/pointclouds/lake_macquarie_elvis.copc.laz",
+      "latest_retrieval_utc": null
+    },
+    "nsw_landslide_susceptibility_v2": {
+      "dataset_key": "nsw_landslide_susceptibility_v2",
+      "title": "NSW Slope Instability and Landslide Hazard Susceptibility",
+      "category": "static_authoritative",
+      "theme": "AURA: Landslide Hazard",
+      "scale": "nsw",
+      "jurisdiction": "NSW",
+      "provider": "NSW MinView / SEED Portal",
+      "source_agency": "Geological Survey of NSW / DPHI",
+      "service_type": "arcgis_featureserver",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Land_Parcel_Property_Theme/FeatureServer/7?f=json",
+      "layer_id": 7,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geological Survey of NSW / DPHI",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "SLOPE_DEG",
+        "HAZARD_CLASS",
+        "SLOPE_TYPE"
+      ],
+      "schema_mapping": {
+        "hazard_id": "OBJECTID",
+        "slope_degrees": "SLOPE_DEG",
+        "susceptibility": "HAZARD_CLASS",
+        "instability_type": "SLOPE_TYPE"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "nsw_national_seismic_hazard_v2": {
+      "dataset_key": "nsw_national_seismic_hazard_v2",
+      "title": "National Seismic Hazard Assessment (NSHA) Ground Motion PGA (NSW)",
+      "category": "static_authoritative",
+      "theme": "AURA: Earthquake Hazard",
+      "scale": "nsw",
+      "jurisdiction": "NSW",
+      "provider": "NationalMap / Geoscience Australia",
+      "source_agency": "Geoscience Australia",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/National_Seismic_Hazard_Assessment_2018/MapServer/0",
+      "layer_id": 0,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geoscience Australia",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Polygon",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "PGA_500YR",
+        "SITE_CLASS"
+      ],
+      "schema_mapping": {
+        "zone_id": "OBJECTID",
+        "pga_value": "PGA_500YR",
+        "site_subsoil_class": "SITE_CLASS"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "nsw_transmission_grid_v2": {
+      "dataset_key": "nsw_transmission_grid_v2",
+      "title": "High-Voltage Transmission Network and Terminal Substations (>=132kV)",
+      "category": "static_authoritative",
+      "theme": "AURA: Transmission Grid",
+      "scale": "nsw",
+      "jurisdiction": "NSW",
+      "provider": "NSW Spatial Services / NationalMap",
+      "source_agency": "Transgrid / Geoscience Australia / AEMO",
+      "service_type": "arcgis_featureserver",
+      "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Features_of_Interest_Category/FeatureServer/6?f=json",
+      "layer_id": 6,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Transgrid / Geoscience Australia / AEMO",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Linestring",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "NAME",
+        "VOLTAGE_KV",
+        "OPERATOR"
+      ],
+      "schema_mapping": {
+        "line_id": "OBJECTID",
+        "line_name": "NAME",
+        "voltage_kv": "VOLTAGE_KV",
+        "operator": "OPERATOR"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "qld_cyclone_hazard_tcha_v2": {
+      "dataset_key": "qld_cyclone_hazard_tcha_v2",
+      "title": "Tropical Cyclone Hazard Assessment (TCHA) & AS/NZS 1170.2 Wind Regions",
+      "category": "static_authoritative",
+      "theme": "AURA: Cyclone Hazard",
+      "scale": "qld",
+      "jurisdiction": "QLD",
+      "provider": "NationalMap / Geoscience Australia",
+      "source_agency": "Geoscience Australia / BoM",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/Tropical_Cyclone_Hazard_Assessment_2018/MapServer/1",
+      "layer_id": 1,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geoscience Australia / BoM",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Polygon",
+      "primary_key": null,
+      "required_fields": [
+        "WIND_REGION",
+        "V_DESIGN_MS"
+      ],
+      "schema_mapping": {
+        "wind_region": "WIND_REGION",
+        "design_wind_speed_ms": "V_DESIGN_MS"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "qld_landslide_susceptibility_v2": {
+      "dataset_key": "qld_landslide_susceptibility_v2",
+      "title": "Queensland State Planning Policy (SPP) Landslide Hazard Overlays",
+      "category": "static_authoritative",
+      "theme": "AURA: Landslide Hazard",
+      "scale": "qld",
+      "jurisdiction": "QLD",
+      "provider": "QSpatial / QLD Globe",
+      "source_agency": "Queensland Department of Resources",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/GeoscientificInformation/SoilsAndLandResource/MapServer/51",
+      "layer_id": 51,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Queensland Department of Resources",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "SLOPE_PERCENT",
+        "LANDSLIDE_HAZARD_CATEGORY",
+        "GEOTECH_TYPE"
+      ],
+      "schema_mapping": {
+        "hazard_id": "OBJECTID",
+        "slope_degrees": "SLOPE_PERCENT",
+        "susceptibility": "LANDSLIDE_HAZARD_CATEGORY",
+        "instability_type": "GEOTECH_TYPE"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "qld_regulated_vegetation_vma_v2": {
+      "dataset_key": "qld_regulated_vegetation_vma_v2",
+      "title": "Regulated Vegetation Management Map (Vegetation Management Act 1999)",
+      "category": "static_authoritative",
+      "theme": "AURA: Biodiversity Constraints",
+      "scale": "qld",
+      "jurisdiction": "QLD",
+      "provider": "QSpatial / Queensland Globe",
+      "source_agency": "Department of Environment, Science and Innovation (DESI)",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/Biota/VegetationManagement/MapServer/103",
+      "layer_id": 103,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Department of Environment, Science and Innovation (DESI)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "VM_CATEGORY",
+        "REGULATORY_STATUS",
+        "Vegetation Management Act 1999"
+      ],
+      "schema_mapping": {
+        "constraint_id": "OBJECTID",
+        "tec_name": "VM_CATEGORY",
+        "status": "REGULATORY_STATUS",
+        "statutory_act": "Vegetation Management Act 1999"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "qld_transmission_grid_v2": {
+      "dataset_key": "qld_transmission_grid_v2",
+      "title": "Powerlink & Energex High-Voltage Transmission Grid (>=110kV)",
+      "category": "static_authoritative",
+      "theme": "AURA: Transmission Grid",
+      "scale": "qld",
+      "jurisdiction": "QLD",
+      "provider": "QSpatial / Queensland Globe",
+      "source_agency": "Powerlink Queensland / Department of Energy and Climate",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2",
+      "layer_id": 2,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Powerlink Queensland / Department of Energy and Climate",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Linestring",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "CIRCUIT_NAME",
+        "VOLTAGE",
+        "OPERATOR"
+      ],
+      "schema_mapping": {
+        "line_id": "OBJECTID",
+        "line_name": "CIRCUIT_NAME",
+        "voltage_kv": "VOLTAGE",
+        "operator": "OPERATOR"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "qld_waterway_barriers_hydro_v2": {
+      "dataset_key": "qld_waterway_barriers_hydro_v2",
+      "title": "Queensland Waterways for Waterway Barrier Works & Riparian Networks",
+      "category": "static_authoritative",
+      "theme": "AURA: Water Hydrography",
+      "scale": "qld",
+      "jurisdiction": "QLD",
+      "provider": "QSpatial / Queensland Globe",
+      "source_agency": "Department of Agriculture and Fisheries (DAF) / RDMW",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/InlandWaters/WaterCoursesAndBodies/MapServer/33",
+      "layer_id": 33,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Department of Agriculture and Fisheries (DAF) / RDMW",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Linestring",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "WATERCOURSE_NAME",
+        "STRAHLER_STREAM_ORDER",
+        "FEATURE_TYPE"
+      ],
+      "schema_mapping": {
+        "hydro_id": "OBJECTID",
+        "waterway_name": "WATERCOURSE_NAME",
+        "strahler_order": "STRAHLER_STREAM_ORDER",
+        "water_type": "FEATURE_TYPE"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "sa_transmission_grid_electranet_v2": {
+      "dataset_key": "sa_transmission_grid_electranet_v2",
+      "title": "ElectraNet & SA Power Networks High-Voltage Grid (>=132kV)",
+      "category": "static_authoritative",
+      "theme": "AURA: Transmission Grid",
+      "scale": "sa",
+      "jurisdiction": "SA",
+      "provider": "LocationSA / Data.SA",
+      "source_agency": "ElectraNet / Department for Energy and Mining",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer/2",
+      "layer_id": 2,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "ElectraNet / Department for Energy and Mining",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Linestring",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "CIRCUIT_DESCR",
+        "VOLTAGE_KV",
+        "NETWORK_OPERATOR"
+      ],
+      "schema_mapping": {
+        "line_id": "OBJECTID",
+        "line_name": "CIRCUIT_DESCR",
+        "voltage_kv": "VOLTAGE_KV",
+        "operator": "NETWORK_OPERATOR"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "tas_transmission_grid_tasnetworks_v2": {
+      "dataset_key": "tas_transmission_grid_tasnetworks_v2",
+      "title": "TasNetworks High-Voltage Transmission Network (>=110kV)",
+      "category": "static_authoritative",
+      "theme": "AURA: Transmission Grid",
+      "scale": "tas",
+      "jurisdiction": "TAS",
+      "provider": "LISTdata / Land Information System Tasmania",
+      "source_agency": "TasNetworks / Department of State Growth",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.thelist.tas.gov.au/arcgis/rest/services/Public/Infrastructure/MapServer/4",
+      "layer_id": 4,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "TasNetworks / Department of State Growth",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Linestring",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "LINE_NAME",
+        "VOLTAGE",
+        "OWNER"
+      ],
+      "schema_mapping": {
+        "line_id": "OBJECTID",
+        "line_name": "LINE_NAME",
+        "voltage_kv": "VOLTAGE",
+        "operator": "OWNER"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "vic_hydro_watercourses_v2": {
+      "dataset_key": "vic_hydro_watercourses_v2",
+      "title": "Vicmap Hydrography Watercourses and Water Bodies",
+      "category": "static_authoritative",
+      "theme": "AURA: Water Hydrography",
+      "scale": "vic",
+      "jurisdiction": "VIC",
+      "provider": "Data.Vic / Vicmap Spatial Platform",
+      "source_agency": "DEECA / Vicmap",
+      "service_type": "geoserver_wfs",
+      "endpoint": "https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities",
+      "layer_id": 4,
+      "wfs_type_name": "open-data-platform:vmlite_hy_watercourse",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "DEECA / Vicmap",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Linestring",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "NAME",
+        "HIERARCHY",
+        "FEATURE_TYPE_CODE"
+      ],
+      "schema_mapping": {
+        "hydro_id": "OBJECTID",
+        "waterway_name": "NAME",
+        "strahler_order": "HIERARCHY",
+        "water_type": "FEATURE_TYPE_CODE"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "vic_landslide_slope_stability_v2": {
+      "dataset_key": "vic_landslide_slope_stability_v2",
+      "title": "Victorian Geotechnical Slope Stability and Landslide Hazard Overlay",
+      "category": "static_authoritative",
+      "theme": "AURA: Landslide Hazard",
+      "scale": "vic",
+      "jurisdiction": "VIC",
+      "provider": "Data.Vic / Vicmap Spatial Platform",
+      "source_agency": "Geological Survey of Victoria / DEECA",
+      "service_type": "geoserver_wfs",
+      "endpoint": "https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities",
+      "layer_id": 3,
+      "wfs_type_name": "open-data-platform:shalld100_polygon",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Geological Survey of Victoria / DEECA",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "SLOPE_DEG",
+        "SUSCEPTIBILITY_CLASS",
+        "LANDSLIDE_TYPE"
+      ],
+      "schema_mapping": {
+        "hazard_id": "OBJECTID",
+        "slope_degrees": "SLOPE_DEG",
+        "susceptibility": "SUSCEPTIBILITY_CLASS",
+        "instability_type": "LANDSLIDE_TYPE"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "vic_native_veg_nvim_v2": {
+      "dataset_key": "vic_native_veg_nvim_v2",
+      "title": "Native Vegetation Information Management (NVIM) & Habitat Quality",
+      "category": "static_authoritative",
+      "theme": "AURA: Biodiversity Constraints",
+      "scale": "vic",
+      "jurisdiction": "VIC",
+      "provider": "Data.Vic / Vicmap Spatial Platform",
+      "source_agency": "Department of Energy, Environment and Climate Action (DEECA)",
+      "service_type": "geoserver_wfs",
+      "endpoint": "https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities",
+      "layer_id": 2,
+      "wfs_type_name": "open-data-platform:sveg100",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Department of Energy, Environment and Climate Action (DEECA)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "EVC_NAME",
+        "CONSERVATION_STATUS",
+        "Flora and Fauna Guarantee Act 1988"
+      ],
+      "schema_mapping": {
+        "constraint_id": "OBJECTID",
+        "tec_name": "EVC_NAME",
+        "status": "CONSERVATION_STATUS",
+        "statutory_act": "Flora and Fauna Guarantee Act 1988"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "vic_planning_scheme_zones_v2": {
+      "dataset_key": "vic_planning_scheme_zones_v2",
+      "title": "Vicmap Planning Schemes (VPP Standardised Zones)",
+      "category": "static_authoritative",
+      "theme": "AURA: Cadastre Parcels",
+      "scale": "vic",
+      "jurisdiction": "VIC",
+      "provider": "Data.Vic / Vicmap Spatial Platform",
+      "source_agency": "Department of Transport and Planning (DTP)",
+      "service_type": "geoserver_wfs",
+      "endpoint": "https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities",
+      "layer_id": 1,
+      "wfs_type_name": "open-data-platform:plan_zone",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Department of Transport and Planning (DTP)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "PARCEL_SPI",
+        "ZONE_CODE",
+        "LGA_NAME"
+      ],
+      "schema_mapping": {
+        "lot_id": "OBJECTID",
+        "lot_plan": "PARCEL_SPI",
+        "zoning_code": "ZONE_CODE",
+        "lga_name": "LGA_NAME"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "vic_transmission_grid_vicgrid_v2": {
+      "dataset_key": "vic_transmission_grid_vicgrid_v2",
+      "title": "Victorian High-Voltage Transmission Network (>=66kV)",
+      "category": "static_authoritative",
+      "theme": "AURA: Transmission Grid",
+      "scale": "vic",
+      "jurisdiction": "VIC",
+      "provider": "Data.Vic / Vicmap Spatial Platform",
+      "source_agency": "VicGrid / AusNet Services / AEMO",
+      "service_type": "geoserver_wfs",
+      "endpoint": "https://opendata.maps.vic.gov.au/geoserver/wfs?service=WFS&version=2.0.0&request=GetCapabilities",
+      "layer_id": 0,
+      "wfs_type_name": "open-data-platform:rez_2026",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "VicGrid / AusNet Services / AEMO",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Linestring",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "FEATURE_NAME",
+        "VOLTAGE",
+        "SUPPLIER"
+      ],
+      "schema_mapping": {
+        "line_id": "OBJECTID",
+        "line_name": "FEATURE_NAME",
+        "voltage_kv": "VOLTAGE",
+        "operator": "SUPPLIER"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "wa_dbca_threatened_ecological_communities_v2": {
+      "dataset_key": "wa_dbca_threatened_ecological_communities_v2",
+      "title": "DBCA Threatened Ecological Communities (TEC) & Priority Flora/Fauna",
+      "category": "static_authoritative",
+      "theme": "AURA: Biodiversity Constraints",
+      "scale": "wa",
+      "jurisdiction": "WA",
+      "provider": "Data WA / SLIP Platform",
+      "source_agency": "Department of Biodiversity, Conservation and Attractions (DBCA)",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.slip.wa.gov.au/public/rest/services/SLIP_Public_Services/Environment/MapServer/23",
+      "layer_id": 23,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Department of Biodiversity, Conservation and Attractions (DBCA)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Multipolygon",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "COMMUNITY_NAME",
+        "STATUS_CODE",
+        "Biodiversity Conservation Act 2016 (WA)"
+      ],
+      "schema_mapping": {
+        "constraint_id": "OBJECTID",
+        "tec_name": "COMMUNITY_NAME",
+        "status": "STATUS_CODE",
+        "statutory_act": "Biodiversity Conservation Act 2016 (WA)"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "wa_transmission_grid_v2": {
+      "dataset_key": "wa_transmission_grid_v2",
+      "title": "Western Power SWIS & Horizon Power Transmission Network (>=66kV)",
+      "category": "static_authoritative",
+      "theme": "AURA: Transmission Grid",
+      "scale": "wa",
+      "jurisdiction": "WA",
+      "provider": "Data WA / SLIP Platform",
+      "source_agency": "Western Power / EnergyPolicy WA",
+      "service_type": "arcgis_mapserver",
+      "endpoint": "https://services.slip.wa.gov.au/public/rest/services/SLIP_Public_Services/Infrastructure_and_Utilities/MapServer/75",
+      "layer_id": 75,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "Western Power / EnergyPolicy WA",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4283",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Linestring",
+      "primary_key": null,
+      "required_fields": [
+        "OBJECTID",
+        "FEEDER_NAME",
+        "OPERATING_VOLTAGE",
+        "UTILITY_OWNER"
+      ],
+      "schema_mapping": {
+        "line_id": "OBJECTID",
+        "line_name": "FEEDER_NAME",
+        "voltage_kv": "OPERATING_VOLTAGE",
+        "operator": "UTILITY_OWNER"
+      },
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": null,
+      "latest_retrieval_utc": null
+    },
+    "hydrosheds_au_acc_3s_v1": {
+      "dataset_key": "hydrosheds_au_acc_3s_v1",
+      "title": "HydroSHEDS v1 Australia Flow Accumulation (3 arc-second)",
+      "category": "static_authoritative",
+      "theme": "AURA: Water Hydrography",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "hydrosheds.org",
+      "source_agency": "HydroSHEDS project (WWF)",
+      "service_type": "raster_file_download",
+      "endpoint": "https://data.hydrosheds.org/file/hydrosheds-v1-acc/au_acc_3s.zip",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "HydroSHEDS project (WWF)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Raster",
+      "primary_key": null,
+      "required_fields": [],
+      "schema_mapping": {},
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/hydrosheds_au_acc_3s_v1/au_acc_3s.tif",
+      "latest_retrieval_utc": null
+    },
+    "hydrosheds_au_con_3s_v1": {
+      "dataset_key": "hydrosheds_au_con_3s_v1",
+      "title": "HydroSHEDS v1 Australia Hydrologically Conditioned DEM (3 arc-second)",
+      "category": "static_authoritative",
+      "theme": "AURA: Water Hydrography",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "hydrosheds.org",
+      "source_agency": "HydroSHEDS project (WWF)",
+      "service_type": "raster_file_download",
+      "endpoint": "https://data.hydrosheds.org/file/hydrosheds-v1-con/au_con_3s.zip",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "HydroSHEDS project (WWF)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Raster",
+      "primary_key": null,
+      "required_fields": [],
+      "schema_mapping": {},
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/hydrosheds_au_con_3s_v1/au_con_3s.tif",
+      "latest_retrieval_utc": null
+    },
+    "aura_drainage_slope_deg_v1": {
+      "dataset_key": "aura_drainage_slope_deg_v1",
+      "title": "Slope (degrees) derived from HydroSHEDS v1 conditioned DEM",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "AURA: Water Hydrography",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "aura-siting-crafter-geolibre-app",
+      "source_agency": "AURA Siting Crafter (derived from HydroSHEDS project data)",
+      "service_type": "derived_raster",
+      "endpoint": "https://services.ga.gov.au",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "AURA Siting Crafter (derived from HydroSHEDS project data)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Raster",
+      "primary_key": null,
+      "required_fields": [],
+      "schema_mapping": {},
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/aura_drainage_slope_deg_v1/slope_deg.tif",
+      "latest_retrieval_utc": null
+    },
+    "aura_drainage_hand_euclid_m_v1": {
+      "dataset_key": "aura_drainage_hand_euclid_m_v1",
+      "title": "Height above nearest drainage, straight-line approximation (m)",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "AURA: Water Hydrography",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "aura-siting-crafter-geolibre-app",
+      "source_agency": "AURA Siting Crafter (derived from HydroSHEDS project data)",
+      "service_type": "derived_raster",
+      "endpoint": "https://services.ga.gov.au",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "AURA Siting Crafter (derived from HydroSHEDS project data)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Raster",
+      "primary_key": null,
+      "required_fields": [],
+      "schema_mapping": {},
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/aura_drainage_hand_euclid_m_v1/hand_euclid_m.tif",
+      "latest_retrieval_utc": null
+    },
+    "aura_drainage_streams_mask_v1": {
+      "dataset_key": "aura_drainage_streams_mask_v1",
+      "title": "Derived stream network mask (flow accumulation threshold)",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "AURA: Water Hydrography",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "aura-siting-crafter-geolibre-app",
+      "source_agency": "AURA Siting Crafter (derived from HydroSHEDS project data)",
+      "service_type": "derived_raster",
+      "endpoint": "https://services.ga.gov.au",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "AURA Siting Crafter (derived from HydroSHEDS project data)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Raster",
+      "primary_key": null,
+      "required_fields": [],
+      "schema_mapping": {},
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/aura_drainage_streams_mask_v1/streams_mask.tif",
+      "latest_retrieval_utc": null
+    },
+    "aura_drainage_s_drainage_v1": {
+      "dataset_key": "aura_drainage_s_drainage_v1",
+      "title": "S_drainage experimental drainage hazard score (0..1, uncalibrated)",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "AURA: Water Hydrography",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "aura-siting-crafter-geolibre-app",
+      "source_agency": "AURA Siting Crafter (derived from HydroSHEDS project data)",
+      "service_type": "derived_raster",
+      "endpoint": "https://services.ga.gov.au",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "AURA Siting Crafter (derived from HydroSHEDS project data)",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "Raster",
+      "primary_key": null,
+      "required_fields": [],
+      "schema_mapping": {},
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/processed/aura_drainage_s_drainage_v1/s_drainage.tif",
+      "latest_retrieval_utc": null
+    },
+    "datacenter_candidates_v2": {
+      "dataset_key": "datacenter_candidates_v2",
+      "title": "AURA Candidate Siting & Multi-Criteria Ranking Table",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "AURA: Commercial Yield",
+      "scale": "national",
+      "jurisdiction": "NATIONAL",
+      "provider": "aura-siting-crafter-geolibre-app",
+      "source_agency": "AURA Siting Crafter Engine",
+      "service_type": "table_json",
+      "endpoint": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/exports_v2/datacenter_candidates_v2.json",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": null,
+        "attribution": "AURA Siting Crafter Engine",
+        "redistribution_permitted": true,
+        "verified_on": null
+      },
+      "source_publication_date": null,
+      "source_vintage": "AURA-v2",
+      "refresh_policy": "on_demand_link",
+      "original_crs": "EPSG:7844",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "None",
+      "primary_key": null,
+      "required_fields": [],
+      "schema_mapping": {},
+      "known_limitations": [
+        "Linked directly from AURA Siting Crafter v2 catalogue."
+      ],
+      "operational_suitability": "Suitable for multi-hazard emergency planning and critical asset exposure.",
+      "default_bbox": null,
+      "qa_status": "PASS",
+      "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/exports_v2/datacenter_candidates_v2.json",
+      "latest_retrieval_utc": null
     }
   }
 }

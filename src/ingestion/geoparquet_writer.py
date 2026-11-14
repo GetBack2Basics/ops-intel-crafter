@@ -54,8 +54,11 @@ def normalize_and_write_geoparquet(
     work["_sort_y"] = ((bounds["miny"] + bounds["maxy"]) * 0.5).round(3)
     work = work.sort_values(by=["_sort_y", "_sort_x"]).drop(columns=["_sort_x", "_sort_y"]).reset_index(drop=True)
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    is_filelike = not isinstance(output_path, (str, Path))
+    if not is_filelike:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
     # Write GeoParquet 1.1.0 with WKB encoding and embedded PROJJSON CRS
+    # (output_path may be a file-like buffer for cloud-first writes with zero local staging)
     work.to_parquet(
         output_path,
         index=False,

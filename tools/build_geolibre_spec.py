@@ -1,6 +1,7 @@
 """Build GeoLibre 0.2.0 Project Specification for Operational Intelligence Crafter."""
 
 import json
+import os
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -8,10 +9,25 @@ DOCS_DIR = PROJECT_ROOT / "docs"
 QA_SUMMARY_PATH = DOCS_DIR / "qa" / "data" / "qa_summary.json"
 
 
-def build_spec():
-    qa_data = {}
+def load_qa_summary() -> dict:
+    """Loads the canonical QA summary from GCS (cloud-first), local docs mirror as fallback."""
+    try:
+        from google.cloud import storage
+        bucket = os.environ.get("OIC_GCS_BUCKET", "operational-intelligence-crafter-lake")
+        project = os.environ.get("OIC_GCP_PROJECT", "operational-intelligence-crafter")
+        client = storage.Client(project=project)
+        blob = client.bucket(bucket).blob("qa/data/qa_summary.json")
+        if blob.exists(client):
+            return json.loads(blob.download_as_text())
+    except Exception as exc:
+        print(f"[WARN] GCS QA summary unavailable ({exc.__class__.__name__}); using local mirror.")
     if QA_SUMMARY_PATH.exists():
-        qa_data = json.loads(QA_SUMMARY_PATH.read_text(encoding="utf-8"))
+        return json.loads(QA_SUMMARY_PATH.read_text(encoding="utf-8"))
+    return {}
+
+
+def build_spec():
+    qa_data = load_qa_summary()
 
     qa_by_key = {d["dataset_key"]: d for d in qa_data.get("datasets", [])}
 
@@ -327,8 +343,8 @@ def build_spec():
         if key in qa_by_key:
             layer["metadata"].update({
                 "source_agency": qa_by_key[key].get("source_agency", ""),
-                "features_stored": qa_by_key[key].get("stored_feature_count", 0),
-                "qa_status": qa_by_key[key].get("overall_status", "PASS")
+                "features_stored": qa_by_key[key].get("feature_count") or qa_by_key[key].get("stored_count") or 0,
+                "qa_status": qa_by_key[key].get("overall_qa_status", "PASS")
             })
 
     spec = {

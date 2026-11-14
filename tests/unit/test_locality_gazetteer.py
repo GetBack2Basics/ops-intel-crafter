@@ -14,6 +14,8 @@ import os
 import re
 import pytest
 
+from tests._cloud_artifacts import resolve_qa_preview
+
 
 def test_gazetteer_contains_major_australian_localities():
     gaz_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "data", "locality_gazetteer.json")
@@ -72,8 +74,8 @@ def test_smoothed_extent_polygon_math():
 
 def test_spatial_extent_resolves_power_stations_in_sydney():
     """Verifies that filtering power stations by Sydney spatial bbox finds actual stations, whereas state ILIKE '%Sydney%' fails."""
-    geojson_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "qa", "data", "ga_major_power_stations.geojson")
-    assert os.path.exists(geojson_path), f"GeoJSON missing at {geojson_path}"
+    geojson_path = resolve_qa_preview("ga_major_power_stations")
+    assert geojson_path.exists(), f"GeoJSON missing at {geojson_path}"
     with open(geojson_path, "r", encoding="utf-8") as f:
         d = json.load(f)
 

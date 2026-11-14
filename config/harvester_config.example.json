@@ -1,0 +1,72 @@
+{
+  "_comment": "Zero-AI portal harvester configuration. Credentials are referenced by ENVIRONMENT VARIABLE NAME only - never put secret values in this file (Zero-Secret Policy; .env holds the values).",
+
+  "gcs": {
+    "bucket": "operational-intelligence-crafter-lake",
+    "project": "operational-intelligence-crafter",
+    "credentials_env": "GOOGLE_APPLICATION_CREDENTIALS"
+  },
+
+  "wherobots": {
+    "api_key_env": "WHEROBOTS_API_KEY",
+    "runtime": "tiny",
+    "catalog": "org_catalog",
+    "database": "ops_intel",
+    "remote_ingest_script": "tools/wherobots_batch_ingest.py"
+  },
+
+  "qa": {
+    "dataset_manifest": "config/dataset_manifest.json",
+    "register_in_manifest": true,
+    "refresh_qa_summary": true
+  },
+
+  "dataset_defaults": {
+    "key_prefix": "",
+    "stored_crs": "EPSG:7844",
+    "original_crs": "EPSG:4326",
+    "metric_crs": "EPSG:3112",
+    "category": "periodically_refreshed_authoritative",
+    "scale": "local",
+    "jurisdiction": "QLD",
+    "refresh_policy": "portal_snapshot",
+    "theme_rules": {
+      "flood": "Flood & Hydrography",
+      "storm tide": "Flood & Hydrography",
+      "inundation": "Flood & Hydrography",
+      "river": "Flood & Hydrography",
+      "creek": "Flood & Hydrography",
+      "cyclone": "Emergency Management & Natural Hazards",
+      "bushfire": "Emergency Management & Natural Hazards",
+      "fire": "Emergency Management & Natural Hazards",
+      "hazard": "Emergency Management & Natural Hazards",
+      "hospital": "Emergency & Health Facilities",
+      "school": "Emergency & Health Facilities",
+      "evacuation": "Emergency Management & Natural Hazards",
+      "road": "Transport",
+      "transport": "Transport",
+      "rail": "Transport",
+      "boundary": "Administrative Boundaries",
+      "cadastr": "Administrative Boundaries",
+      "vegetation": "Environment",
+      "koala": "Environment",
+      "tree": "Environment",
+      "park": "Environment"
+    },
+    "theme_fallback": "Portal Harvested Datasets"
+  },
+
+  "portals": {
+    "jurisdiction_by_host": {
+      "www.data.qld.gov.au": "QLD",
+      "data.qld.gov.au": "QLD",
+      "data.brisbane.qld.gov.au": "QLD",
+      "www.data.nsw.gov.au": "NSW",
+      "data.nsw.gov.au": "NSW"
+    },
+    "follow_ckan_explore_links": true,
+    "max_features": null,
+    "http_timeout_s": 120,
+    "user_agent": "OperationalIntelligenceCrafter/0.2 (PortalHarvester; zero-AI)"
+  }
+}

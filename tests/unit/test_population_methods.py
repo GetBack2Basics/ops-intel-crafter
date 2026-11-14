@@ -1,22 +1,15 @@
 """Unit and integration tests for NExT Population Representation Comparison (Methods A, B, C)."""
 
-from pathlib import Path
 from src.analysis.population_methods import (
     METHOD_C_ASSUMPTION_LABEL,
     compare_population_methods_on_footprint,
 )
 from src.engines.duckdb_engine import DuckDBSpatialEngine
+from tests._cloud_artifacts import resolve_geoparquet
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-GRID_PARQUET = (
-    PROJECT_ROOT
-    / "data"
-    / "lake"
-    / "geoparquet"
-    / "derived_hunter_1km_population_grid"
-    / "ASGS2021-FOI-v1"
-    / "20261109T003500Z"
-    / "part-00000.parquet"
+# Canonical cloud snapshot of the derived 1 km² evaluation grid (no local staging).
+GRID_PARQUET = resolve_geoparquet(
+    "geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T003500Z/part-00000.parquet"
 )
 
 
@@ -25,8 +18,6 @@ def test_population_methods_a_b_c_distinction_and_straddling_cells() -> None:
     Method C (area-weighted proportional estimate) execute on the 1 km² evaluation grid and
     explicitly separate fully contained vs boundary-straddling edge cases.
     """
-    assert GRID_PARQUET.exists(), f"Expected 1 km² evaluation grid at {GRID_PARQUET}"
-
     # Narrow polygon crossing several 1 km² cells in the Lower Hunter
     narrow_wkt = "POLYGON ((151.552 -32.736, 151.584 -32.736, 151.584 -32.733, 151.552 -32.733, 151.552 -32.736))"
 

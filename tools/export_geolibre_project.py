@@ -29,12 +29,16 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from typing import Any, Dict
+
+import dotenv
 import duckdb
 from google.cloud import storage
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+dotenv.load_dotenv(PROJECT_ROOT / ".env")
 BUCKET = os.environ.get("OIC_GCS_BUCKET", "operational-intelligence-crafter-lake")
-PROJECT = os.environ.get("OIC_GCP_PROJECT", "ops-intelligence-crafter")
+PROJECT = os.environ.get("OIC_GCP_PROJECT", "operational-intelligence-crafter")
 HTTPS_BASE = f"https://storage.googleapis.com/{BUCKET}"
 PUBLIC_OUT = PROJECT_ROOT / "docs" / "operational-intelligence-crafter.gcs.geolibre.json"
 PRIVATE_DIR = PROJECT_ROOT / "exports" / "geolibre"
@@ -101,6 +105,21 @@ def sign_url(client: storage.Client, object_name: str, days: int) -> str:
     return blob.generate_signed_url(version="v4", expiration=timedelta(days=days), method="GET")
 
 
+def load_qa_summary(client: storage.Client) -> Dict[str, Dict[str, Any]]:
+    """Loads the canonical QA summary from GCS, falling back to the local docs mirror."""
+    try:
+        blob = client.bucket(BUCKET).blob("qa/data/qa_summary.json")
+        if blob.exists(client):
+            payload = json.loads(blob.download_as_text())
+            return {d["dataset_key"]: d for d in payload.get("datasets", [])}
+    except Exception as exc:
+        print(f"[WARN] Could not read qa/data/qa_summary.json from GCS ({exc.__class__.__name__}); using local mirror.")
+    if QA_SUMMARY.exists():
+        payload = json.loads(QA_SUMMARY.read_text(encoding="utf-8"))
+        return {d["dataset_key"]: d for d in payload.get("datasets", [])}
+    return {}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--auth", choices=["public", "signed", "hmac"], default="public")
@@ -122,9 +141,7 @@ def main() -> int:
     if not latest:
         sys.exit(f"FAIL: no GeoParquet objects found under gs://{BUCKET}/geoparquet/")
 
-    qa = {}
-    if QA_SUMMARY.exists():
-        qa = {d["dataset_key"]: d for d in json.loads(QA_SUMMARY.read_text(encoding="utf-8")).get("datasets", [])}
+    qa = load_qa_summary(client)
 
     con = duckdb.connect()
     con.execute("INSTALL httpfs; LOAD httpfs;")
@@ -170,7 +187,7 @@ def main() -> int:
                 "features_stored": rows,
                 "object_bytes": info["size"],
                 "object_updated_utc": info["updated"],
-                "qa_status": q.get("overall_status"),
+                "qa_status": q.get("overall_qa_status") or q.get("overall_status"),
                 "read_parquet_check": read_status,
                 "crs": "EPSG:4326 / EPSG:7844",
             },

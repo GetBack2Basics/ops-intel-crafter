@@ -91,7 +91,10 @@ def run_batch_ingestion():
     for item in datasets:
         ds_key = item["key"]
         parquet_url = item["url"]
-        table_name = f"{db_name}.{ds_key}"
+        # Config-driven library target (falls back to the default catalog.database)
+        item_db = item.get("database") or db_name
+        table_name = item.get("target_table") or f"{item_db}.{ds_key}"
+        spark.sql(f"CREATE DATABASE IF NOT EXISTS {item_db}")
         print(f"\n[WHEROBOTS_INGEST] Processing '{ds_key}' -> {table_name}")
         t0 = time.perf_counter()
         local_file = f"/tmp/{ds_key}.parquet"

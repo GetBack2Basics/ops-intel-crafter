@@ -2,17 +2,20 @@
 
 import json
 import re
-from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-PACK_DIR = PROJECT_ROOT / "data" / "lake" / "map_packages" / "hunter_flood_emergency_pack"
+from tests._cloud_artifacts import resolve_map_package
+
+PACKAGE_NAME = "hunter_flood_emergency_pack"
 
 
 def test_offline_map_package_completeness_and_zero_external_urls() -> None:
     """Verifies that the Map-in-a-Box package contains all required assets, GeoJSON layers,
     manifest provenance, and zero external CDN/tile/font HTTP requests in index.html.
+
+    The package is resolved from the local publish mirror when present, otherwise from
+    its canonical GCS location (`gs://operational-intelligence-crafter-lake/map_packages/`).
     """
-    assert PACK_DIR.exists(), f"Offline package directory missing: {PACK_DIR}"
+    PACK_DIR = resolve_map_package(PACKAGE_NAME)
     index_html = PACK_DIR / "index.html"
     manifest_json = PACK_DIR / "manifest.json"
     readme_txt = PACK_DIR / "README.txt"

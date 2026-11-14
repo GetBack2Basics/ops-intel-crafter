@@ -135,7 +135,7 @@
         "provider": "NSW Rural Fire Service (RFS)",
         "crs": "EPSG:7844 (GDA2020)",
         "source_agency": "NSW Rural Fire Service",
-        "features_stored": 0,
+        "features_stored": 20,
         "qa_status": "PASS"
       }
     },
@@ -161,7 +161,7 @@
         "provider": "NSW Department of Customer Service / Spatial Services",
         "crs": "EPSG:7844 (GDA2020)",
         "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
-        "features_stored": 0,
+        "features_stored": 880,
         "qa_status": "PASS"
       }
     },
@@ -185,7 +185,7 @@
         "provider": "Geoscience Australia",
         "crs": "EPSG:7844 (GDA2020)",
         "source_agency": "Commonwealth of Australia (Geoscience Australia)",
-        "features_stored": 0,
+        "features_stored": 3147,
         "qa_status": "PASS"
       }
     },
@@ -211,7 +211,7 @@
         "provider": "Geoscience Australia",
         "crs": "EPSG:7844 (GDA2020)",
         "source_agency": "Commonwealth of Australia (Geoscience Australia)",
-        "features_stored": 0,
+        "features_stored": 1866,
         "qa_status": "PASS"
       }
     },
@@ -237,7 +237,7 @@
         "provider": "Geoscience Australia",
         "crs": "EPSG:7844 (GDA2020)",
         "source_agency": "Commonwealth of Australia (Geoscience Australia)",
-        "features_stored": 0,
+        "features_stored": 430,
         "qa_status": "PASS"
       }
     },
@@ -263,7 +263,7 @@
         "provider": "NSW Spatial Services Features of Interest",
         "crs": "EPSG:7844 (GDA2020)",
         "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
-        "features_stored": 0,
+        "features_stored": 76629,
         "qa_status": "PASS"
       }
     },
@@ -288,8 +288,8 @@
         "provider": "Australian Bureau of Statistics (ABS)",
         "crs": "EPSG:7844 (GDA2020)",
         "source_agency": "Australian Bureau of Statistics (ABS)",
-        "features_stored": 0,
-        "qa_status": "PASS"
+        "features_stored": 567,
+        "qa_status": "WARNING"
       }
     },
     {
@@ -316,7 +316,7 @@
         "provider": "Geoscience Australia (NSHA 2018)",
         "crs": "EPSG:7844 (GDA2020)",
         "source_agency": "Commonwealth of Australia (Geoscience Australia)",
-        "features_stored": 0,
+        "features_stored": 100,
         "qa_status": "PASS"
       }
     },
@@ -340,7 +340,10 @@
       },
       "metadata": {
         "provider": "National Health Services Directory (NHSD) / AURA",
-        "crs": "EPSG:7844 (GDA2020)"
+        "crs": "EPSG:7844 (GDA2020)",
+        "source_agency": "Australian Digital Health Agency / Healthdirect",
+        "features_stored": 0,
+        "qa_status": "LINKED"
       }
     },
     {
@@ -363,7 +366,10 @@
       },
       "metadata": {
         "provider": "Australian Curriculum, Assessment and Reporting Authority (ACARA)",
-        "crs": "EPSG:7844 (GDA2020)"
+        "crs": "EPSG:7844 (GDA2020)",
+        "source_agency": "Australian Curriculum, Assessment and Reporting Authority (ACARA)",
+        "features_stored": 0,
+        "qa_status": "LINKED"
       }
     },
     {
@@ -388,7 +394,10 @@
       },
       "metadata": {
         "provider": "Geoscience Australia (TCHA)",
-        "crs": "EPSG:7844 (GDA2020)"
+        "crs": "EPSG:7844 (GDA2020)",
+        "source_agency": "Geoscience Australia / BoM",
+        "features_stored": 0,
+        "qa_status": "LINKED"
       }
     }
   ],

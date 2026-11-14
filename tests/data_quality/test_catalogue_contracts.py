@@ -51,9 +51,10 @@ def test_ingested_geoparquet_artifacts_and_failed_source_contract():
         rec = by_key[k]
         assert rec["overall_qa_status"] in (QAStatus.PASS.value, QAStatus.WARNING.value), f"{k} failed: {rec}"
         assert rec["feature_count"] > 0
-        pq_path = PROJECT_ROOT / rec["local_parquet_path"]
-        assert pq_path.exists()
-        info = inspect_parquet_schema_and_geo_metadata(pq_path)
+        # Cloud-first: canonical artifacts live in GCS, not in local staging.
+        gs_uri = rec.get("gs_uri")
+        assert gs_uri and str(gs_uri).startswith("gs://"), f"{k} missing canonical gs_uri: {gs_uri}"
+        info = inspect_parquet_schema_and_geo_metadata(gs_uri)
         assert info["has_geo_metadata"] is True
         assert info["num_rows"] == rec["feature_count"]
 

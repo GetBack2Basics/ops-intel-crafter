@@ -1657,6 +1657,21 @@
     "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
     "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet"
   },
+  "flood_awareness_storm_tide": {
+    "name": "Flood — Awareness — Storm Tide",
+    "state": "wa",
+    "kind": "vector",
+    "endpoint": "https://data.brisbane.qld.gov.au/api/explore/v2.1/catalog/datasets/flood-awareness-storm-tide/exports/geojson",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
+    "service_type": "geojson_feed",
+    "type": "polygon",
+    "base_count": 34808,
+    "hash": "d1b6be97611d2e0a471ff2ac1fa5852b6ba9dc585529b0739e37832dac877bed",
+    "sync_date": "2026-11-14T00:25:59Z",
+    "geojson_url": "data/flood_awareness_storm_tide.geojson",
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet"
+  },
   "ga_electricity_substations": {
     "name": "National Electricity Infrastructure — Power Substations",
     "state": "national",
@@ -1779,15 +1794,15 @@
     "state": "nsw",
     "kind": "vector",
     "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Administrative_Boundaries_Theme/FeatureServer/8",
-    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet",
     "service_type": "arcgis_featureserver",
     "type": "polygon",
     "base_count": 132,
-    "hash": "ea89196886922a2d95645bcd434b680364af0d9ad15c66117b39ab926c3ba13a",
-    "sync_date": "2026-11-09T07:32:49Z",
+    "hash": "139fb8e48ff7249caf0e3b13f059655fb8cfb0d5b17bc103391d794c721a1322",
+    "sync_date": "2026-11-14T00:42:39Z",
     "geojson_url": "data/nsw_lga_boundaries.geojson",
-    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
-    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet"
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet"
   },
   "nsw_rfs_major_incidents_live": {
     "name": "NSW Rural Fire Service — Current Major Bushfire & Emergency Incidents Feed",
@@ -1824,45 +1839,45 @@
     "state": "qld",
     "kind": "vector",
     "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
-    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "point",
     "base_count": 260,
-    "hash": "authoritative_lake_hash",
-    "sync_date": "2026-11-13 05:29 UTC",
+    "hash": "ee38e35c57768ac932ee9e8386f6817ac4dc0f6177105e351e3f497916eedc0e",
+    "sync_date": "2026-11-14T00:28:40Z",
     "geojson_url": "data/qld_cyclones_historical_fixes.geojson",
-    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
   },
   "qld_cyclones_historical_tracks": {
     "name": "Queensland Historical Tropical Cyclone Tracks",
     "state": "qld",
     "kind": "vector",
     "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
-    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "linestring",
     "base_count": 23,
-    "hash": "authoritative_lake_hash",
-    "sync_date": "2026-11-13 05:29 UTC",
+    "hash": "ead0185deead22d3e4dcbd369e8e630582a454afe1e3c99158502e0e4c2f96fd",
+    "sync_date": "2026-11-14T00:28:40Z",
     "geojson_url": "data/qld_cyclones_historical_tracks.geojson",
-    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
   },
   "qld_cyclones_historical_wind_areas": {
     "name": "Queensland Historical Tropical Cyclone Wind Swaths & Hazard Areas",
     "state": "qld",
     "kind": "vector",
     "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
-    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
+    "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
     "service_type": "arcgis_mapserver",
     "type": "polygon",
     "base_count": 900,
-    "hash": "authoritative_lake_hash",
-    "sync_date": "2026-11-13 05:29 UTC",
+    "hash": "c619e84fe1a3360a94211e811a548b73899ae6e4953c7d2e019f0fc6aabd7085",
+    "sync_date": "2026-11-14T00:28:40Z",
     "geojson_url": "data/qld_cyclones_historical_wind_areas.geojson",
-    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+    "gcs_parquet_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+    "gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
   }
 };
 

@@ -2,12 +2,15 @@
 
 import os
 from pathlib import Path
+import dotenv
 from google.cloud import storage
 
-BUCKET_NAME = os.environ.get("OIC_GCS_BUCKET", "operational-intelligence-crafter-lake")
-PROJECT_ID = os.environ.get("OIC_GCP_PROJECT", "ops-intelligence-crafter")
-
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+dotenv.load_dotenv(PROJECT_ROOT / ".env")
+
+BUCKET_NAME = os.environ.get("OIC_GCS_BUCKET", "operational-intelligence-crafter-lake")
+PROJECT_ID = os.environ.get("OIC_GCP_PROJECT", "operational-intelligence-crafter")
+
 DOCS_DIR = PROJECT_ROOT / "docs"
 
 def upload_web_assets():
@@ -22,6 +25,7 @@ def upload_web_assets():
         ("index.html", "text/html; charset=utf-8"),
         ("style.css", "text/css; charset=utf-8"),
         ("operational-intelligence-crafter.geolibre.json", "application/json; charset=utf-8"),
+        ("operational-intelligence-crafter.gcs.geolibre.json", "application/json; charset=utf-8"),
         ("js/geolibre-qa-layer-registry.js", "application/javascript; charset=utf-8"),
         ("qa/js/geolibre-qa-layer-registry.js", "application/javascript; charset=utf-8"),
         ("qa/index.html", "text/html; charset=utf-8"),
@@ -35,14 +39,9 @@ def upload_web_assets():
         ("data/locality_gazetteer.json", "application/json; charset=utf-8"),
     ]
 
-    # Also include qa/data parquet and geojson assets
-    qa_data_dir = DOCS_DIR / "qa" / "data"
-    if qa_data_dir.exists():
-        for p in sorted(qa_data_dir.rglob("*")):
-            if p.is_file():
-                rel = p.relative_to(DOCS_DIR).as_posix()
-                ct = "application/octet-stream" if p.suffix == ".parquet" else "application/geo+json; charset=utf-8" if p.suffix == ".geojson" else "application/json; charset=utf-8"
-                files_to_upload.append((rel, ct))
+    # qa/data artifacts (GeoJSON previews + parquet samples) are published directly by
+    # the cloud-first ingestion/harvest pipelines. Local docs/qa/data mirrors are stale by
+    # design, so they must never overwrite the canonical GCS copies here.
 
     # Also include js directory (geolibre limiter & registry)
     js_dir = DOCS_DIR / "js"

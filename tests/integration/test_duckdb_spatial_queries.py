@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from src.ai.spatial_agent import AISpatialAgent
 from src.engines.duckdb_engine import DuckDBSpatialEngine
+from tests._cloud_artifacts import resolve_export_artifact
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
@@ -37,13 +38,12 @@ def test_ai_spatial_agent_end_to_end() -> None:
 
 def test_rfc7946_geojson_exports_valid() -> None:
     for exp_name in ("hunter_population_grid_comparison", "hunter_substation_flood_dependency"):
-        gj_path = PROJECT_ROOT / "data" / "lake" / "exports" / exp_name / "result.geojson"
-        mf_path = PROJECT_ROOT / "data" / "lake" / "exports" / exp_name / "analysis_manifest.json"
-        if gj_path.exists():
-            fc = json.loads(gj_path.read_text(encoding="utf-8"))
-            assert fc["type"] == "FeatureCollection"
-            assert isinstance(fc.get("bbox"), list) and len(fc["bbox"]) == 4
-            assert len(fc["features"]) > 0
-            assert "oic_provenance" in fc
-            assert mf_path.exists()
+        gj_path = resolve_export_artifact(exp_name, "result.geojson")
+        mf_path = resolve_export_artifact(exp_name, "analysis_manifest.json")
+        fc = json.loads(gj_path.read_text(encoding="utf-8"))
+        assert fc["type"] == "FeatureCollection"
+        assert isinstance(fc.get("bbox"), list) and len(fc["bbox"]) == 4
+        assert len(fc["features"]) > 0
+        assert "oic_provenance" in fc
+        assert mf_path.exists()
 

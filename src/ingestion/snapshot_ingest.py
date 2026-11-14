@@ -1,6 +1,10 @@
 """Immutable Versioned Snapshot Ingestion Pipeline (Levels 1, 2, and 3 Integrated)."""
 
+import hashlib
+import io
 import json
+import os
+import tempfile
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -31,6 +35,42 @@ from src.validation.reconciliation import (
 from src.validation.source_contracts import verify_level1_source_contract
 
 
+def build_qa_geojson_preview(
+    gdf: gpd.GeoDataFrame,
+    max_features: int = 100000,
+) -> tuple[bytes, Dict[str, Any]]:
+    """Builds an RFC 7946 WGS84 (EPSG:4326) GeoJSON preview payload IN MEMORY.
+
+    Cloud-first: callers can upload the returned bytes directly to GCS without
+    staging anything on local disk. Intended for the MapLibre QA Inspector.
+    """
+    work = gdf.copy()
+    total_count = len(work)
+    if work.crs and str(work.crs).upper() != "EPSG:4326":
+        work = work.to_crs("EPSG:4326")
+
+    # Drop internal helper columns for clean inspector table display
+    drop_cols = [c for c in work.columns if c.startswith("_bbox_")]
+    if drop_cols:
+        work = work.drop(columns=drop_cols)
+
+    # For heavy polygon layers, apply lightweight simplification for the web preview
+    # so MapLibre stays snappy in browser, while GeoParquet preserves full raw precision.
+    if any(gt in ("Polygon", "MultiPolygon") for gt in work.geom_type.unique()):
+        work["geometry"] = work.geometry.simplify(0.0005, preserve_topology=True)
+
+    # Convert any datetime columns to string for clean GeoJSON serialization
+    for col in work.select_dtypes(include=["datetime64", "datetimetz"]).columns:
+        work[col] = work[col].astype(str)
+
+    preview_gdf = work.head(max_features) if total_count > max_features else work
+    payload = preview_gdf.to_json(drop_id=True)
+    return payload.encode("utf-8"), {
+        "preview_feature_count": int(len(preview_gdf)),
+        "total_feature_count": int(total_count),
+    }
+
+
 def _export_qa_geojson_preview(
     parquet_path: Path,
     dataset_key: str,
@@ -39,34 +79,41 @@ def _export_qa_geojson_preview(
 ) -> Dict[str, Any]:
     """Exports an RFC 7946 WGS84 (EPSG:4326) GeoJSON file for the MapLibre QA Inspector and Workbench."""
     gdf = gpd.read_parquet(parquet_path)
-    total_count = len(gdf)
-    if gdf.crs and str(gdf.crs).upper() != "EPSG:4326":
-        gdf = gdf.to_crs("EPSG:4326")
-
-    # Drop internal helper columns for clean inspector table display
-    drop_cols = [c for c in gdf.columns if c.startswith("_bbox_")]
-    if drop_cols:
-        gdf = gdf.drop(columns=drop_cols)
-
-    # For heavy polygon layers, apply lightweight simplification for the web preview
-    # so MapLibre stays snappy in browser, while GeoParquet preserves full raw precision.
-    if any(gt in ("Polygon", "MultiPolygon") for gt in gdf.geom_type.unique()):
-        gdf["geometry"] = gdf.geometry.simplify(0.0005, preserve_topology=True)
-
-    # Convert any datetime columns to string for clean GeoJSON serialization
-    for col in gdf.select_dtypes(include=["datetime64", "datetimetz"]).columns:
-        gdf[col] = gdf[col].astype(str)
-
-    preview_gdf = gdf.head(max_features) if total_count > max_features else gdf
+    payload, counts = build_qa_geojson_preview(gdf, max_features=max_features)
     qa_data_dir = project_root / "docs" / "qa" / "data"
     qa_data_dir.mkdir(parents=True, exist_ok=True)
-    geojson_path = qa_data_dir / f"{dataset_key}.geojson"
-    preview_gdf.to_file(geojson_path, driver="GeoJSON")
+    (qa_data_dir / f"{dataset_key}.geojson").write_bytes(payload)
     return {
         "preview_geojson_path": f"data/{dataset_key}.geojson",
-        "preview_feature_count": int(len(preview_gdf)),
-        "total_feature_count": int(total_count),
+        **counts,
     }
+
+
+def _persist_dataset_json(
+    store: GCSLakeStorage,
+    object_key: str,
+    payload: Dict[str, Any],
+    entry: DatasetEntry,
+    upload_cloud: bool,
+    overwrite: bool = False,
+) -> None:
+    """Persists a QA/manifest JSON record cloud-first (memory -> GCS) or locally in offline mode."""
+    payload_bytes = json.dumps(payload, indent=2, ensure_ascii=False).encode("utf-8")
+    if upload_cloud:
+        store.upload_bytes_cloud(
+            object_key,
+            payload_bytes,
+            dataset_entry=entry.model_dump(mode="json"),
+            content_type="application/json; charset=utf-8",
+        )
+    else:
+        store.write_json(
+            object_key,
+            payload,
+            dataset_entry=entry.model_dump(mode="json"),
+            upload_cloud=False,
+            overwrite=overwrite,
+        )
 
 
 def ingest_dataset_snapshot(
@@ -74,11 +121,16 @@ def ingest_dataset_snapshot(
     registry: Optional[DatasetRegistry] = None,
     storage: Optional[GCSLakeStorage] = None,
     bbox: Optional[List[float]] = None,
-    upload_cloud: bool = False,
+    upload_cloud: bool = True,
+    persist_records: bool = True,
     max_pages: int = 100,
 ) -> Dict[str, Any]:
-    """Ingests a single dataset into an immutable timestamped GeoParquet snapshot with full 3-level QA."""
-    reg = registry or DatasetRegistry()
+    """Ingests a single dataset into an immutable timestamped GeoParquet snapshot with full 3-level QA.
+
+    Cloud-first by default: normalization happens in memory, the artifact is uploaded
+    straight to GCS, and Level 2 validates by reading it back from `gs://`.
+    """
+    reg = registry or DatasetRegistry(include_aura=False)
     store = storage or GCSLakeStorage()
     entry: DatasetEntry = reg.get(dataset_key)
 
@@ -136,21 +188,17 @@ def ingest_dataset_snapshot(
             "telemetry": telemetry.finalize(),
         }
         qa_key = store.dataset_qa_object_key(dataset_key, retrieval_compact)
-        store.write_json(qa_key, qa_payload, dataset_entry=entry.model_dump(mode="json"), upload_cloud=False)
+        if persist_records:
+            _persist_dataset_json(store, qa_key, qa_payload, entry, upload_cloud)
 
-        manifest_key = store.dataset_manifest_object_key(dataset_key)
-        store.write_json(
-            manifest_key,
-            qa_payload,
-            dataset_entry=entry.model_dump(mode="json"),
-            upload_cloud=False,
-            overwrite=True,
-        )
+            manifest_key = store.dataset_manifest_object_key(dataset_key)
+            _persist_dataset_json(store, manifest_key, qa_payload, entry, upload_cloud, overwrite=True)
 
-        entry.qa_status = QAStatus.FAIL
-        entry.latest_retrieval_utc = retrieval_iso
-        reg.manifest.updated_at_utc = retrieval_iso
-        save_manifest(reg.manifest, reg.manifest_path)
+        if persist_records:
+            entry.qa_status = QAStatus.FAIL
+            entry.latest_retrieval_utc = retrieval_iso
+            reg.manifest.updated_at_utc = retrieval_iso
+            save_manifest(reg.manifest, reg.manifest_path)
         return qa_payload
 
     # ------------------------------------------------------------------
@@ -171,15 +219,27 @@ def ingest_dataset_snapshot(
     telemetry.bytes_downloaded = conn_meta.get("bytes_downloaded", len(raw_bytes))
 
     raw_key = store.raw_object_key(dataset_key, retrieval_compact, ext="json")
-    raw_storage_meta = store.write_bytes(
-        object_key=raw_key,
-        data=raw_bytes,
-        dataset_entry=entry.model_dump(mode="json"),
-        upload_cloud=upload_cloud,
-    )
+    if upload_cloud:
+        raw_storage_meta = store.upload_bytes_cloud(
+            raw_key,
+            raw_bytes,
+            dataset_entry=entry.model_dump(mode="json"),
+            content_type="application/json; charset=utf-8",
+        )
+    else:
+        # Ephemeral dry-run: fingerprint only, nothing written locally or to cloud.
+        raw_storage_meta = {
+            "object_key": raw_key,
+            "gs_uri": store.gs_uri(raw_key),
+            "local_path": None,
+            "file_size_bytes": len(raw_bytes),
+            "sha256": hashlib.sha256(raw_bytes).hexdigest(),
+            "storage_mode": "dry_run_ephemeral",
+            "gcs_generation": "dry-run-not-uploaded",
+        }
 
     # ------------------------------------------------------------------
-    # Step 3: GeoParquet 1.1.0 Normalization & Immutable Storage
+    # Step 3: GeoParquet 1.1.0 Normalization & Immutable Storage (in memory)
     # ------------------------------------------------------------------
     t_norm0 = time.perf_counter()
     gpq_key = store.geoparquet_object_key(
@@ -188,36 +248,60 @@ def ingest_dataset_snapshot(
         retrieval_ts=retrieval_compact,
         part=0,
     )
-    gpq_local_path = store.local_path(gpq_key)
+    pq_buffer = io.BytesIO()
     write_info = normalize_and_write_geoparquet(
         gdf=gdf,
         entry=entry,
-        output_path=gpq_local_path,
+        output_path=pq_buffer,
         retrieval_timestamp_utc=retrieval_iso,
     )
+    pq_bytes = pq_buffer.getvalue()
     telemetry.parquet_write_ms = round((time.perf_counter() - t_norm0) * 1000.0, 2)
 
-    gpq_storage_meta = store.register_local_parquet(
-        parquet_file=gpq_local_path,
-        object_key=gpq_key,
-        dataset_entry=entry.model_dump(mode="json"),
-        upload_cloud=upload_cloud,
-    )
+    if upload_cloud:
+        gpq_storage_meta = store.upload_bytes_cloud(
+            gpq_key,
+            pq_bytes,
+            dataset_entry=entry.model_dump(mode="json"),
+            content_type="application/vnd.apache.parquet",
+        )
+        validation_source: Any = gpq_storage_meta["gs_uri"]
+    else:
+        tmp = tempfile.NamedTemporaryFile(suffix=".parquet", delete=False)
+        tmp.write(pq_bytes)
+        tmp.close()
+        validation_source = tmp.name
+        gpq_storage_meta = {
+            "object_key": gpq_key,
+            "gs_uri": store.gs_uri(gpq_key),
+            "local_path": None,
+            "file_size_bytes": len(pq_bytes),
+            "sha256": hashlib.sha256(pq_bytes).hexdigest(),
+            "storage_mode": "dry_run_ephemeral",
+            "gcs_generation": "dry-run-not-uploaded",
+        }
     telemetry.bytes_written = gpq_storage_meta["file_size_bytes"]
 
-    # Export WGS84 GeoJSON preview for the MapLibre QA Inspector
-    preview_meta = _export_qa_geojson_preview(
-        parquet_path=gpq_local_path,
-        dataset_key=dataset_key,
-        project_root=store.project_root,
-    )
+    # Export WGS84 GeoJSON preview for the MapLibre QA Inspector from the exact bytes written
+    preview_gdf = gpd.read_parquet(io.BytesIO(pq_bytes))
+    preview_bytes, preview_counts = build_qa_geojson_preview(preview_gdf)
+    preview_meta = {"preview_geojson_path": f"data/{dataset_key}.geojson", **preview_counts}
+    if upload_cloud:
+        store.upload_bytes_cloud(
+            f"qa/data/{dataset_key}.geojson",
+            preview_bytes,
+            content_type="application/geo+json; charset=utf-8",
+        )
+    else:
+        (store.project_root / "docs" / "qa" / "data").mkdir(parents=True, exist_ok=True)
+        (store.project_root / "docs" / "qa" / "data" / f"{dataset_key}.geojson").write_bytes(preview_bytes)
 
     # ------------------------------------------------------------------
     # Step 4: Level 2 (Stored Artifact) & Level 3 (Reconciliation) QA
     # ------------------------------------------------------------------
     t_val2 = time.perf_counter()
     level2_report = verify_level2_stored_artifact(
-        parquet_path=gpq_local_path,
+        parquet_path=validation_source,
         entry=entry,
         storage_meta=gpq_storage_meta,
     )
@@ -228,6 +312,8 @@ def ingest_dataset_snapshot(
         connector_meta=conn_meta,
     )
     telemetry.validation_ms += round((time.perf_counter() - t_val2) * 1000.0, 2)
+    if not upload_cloud:
+        os.unlink(validation_source)
 
     overall_status = compute_overall_dataset_qa_status(level1_report, level2_report, level3_report)
     final_telemetry = telemetry.finalize()
@@ -274,29 +360,19 @@ def ingest_dataset_snapshot(
     }
 
     # Write immutable QA snapshot and update latest dataset manifest pointer
-    qa_key = store.dataset_qa_object_key(dataset_key, retrieval_compact)
-    store.write_json(
-        qa_key,
-        dataset_version_record,
-        dataset_entry=entry.model_dump(mode="json"),
-        upload_cloud=upload_cloud,
-    )
+    if persist_records:
+        qa_key = store.dataset_qa_object_key(dataset_key, retrieval_compact)
+        _persist_dataset_json(store, qa_key, dataset_version_record, entry, upload_cloud)
 
-    manifest_key = store.dataset_manifest_object_key(dataset_key)
-    store.write_json(
-        manifest_key,
-        dataset_version_record,
-        dataset_entry=entry.model_dump(mode="json"),
-        upload_cloud=upload_cloud,
-        overwrite=True,
-    )
+        manifest_key = store.dataset_manifest_object_key(dataset_key)
+        _persist_dataset_json(store, manifest_key, dataset_version_record, entry, upload_cloud, overwrite=True)
 
-    # Update top-level catalogue manifest
-    entry.qa_status = QAStatus(overall_status)
-    entry.latest_snapshot_path = gpq_storage_meta["local_path"]
-    entry.latest_retrieval_utc = retrieval_iso
-    reg.manifest.updated_at_utc = retrieval_iso
-    save_manifest(reg.manifest, reg.manifest_path)
+        # Update top-level catalogue manifest
+        entry.qa_status = QAStatus(overall_status)
+        entry.latest_snapshot_path = gpq_storage_meta["gs_uri"]
+        entry.latest_retrieval_utc = retrieval_iso
+        reg.manifest.updated_at_utc = retrieval_iso
+        save_manifest(reg.manifest, reg.manifest_path)
 
     return dataset_version_record
 

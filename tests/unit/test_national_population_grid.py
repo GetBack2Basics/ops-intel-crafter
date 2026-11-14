@@ -1,24 +1,22 @@
 """Unit tests for the National ABS 1 km² Population Grid."""
 
 import json
-from pathlib import Path
+
 import geopandas as gpd
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+from tests._cloud_artifacts import resolve_export_artifact
+
+EXPORT_NAME = "australia_population_grid"
 
 
 def test_national_population_grid_exports_exist_and_valid():
     """Verifies that the national population grid export files exist and meet schema invariants."""
-    exp_dir = PROJECT_ROOT / "data" / "lake" / "exports" / "australia_population_grid"
-    manifest_file = exp_dir / "analysis_manifest.json"
-    parquet_file = exp_dir / "result.parquet"
-    geojson_file = exp_dir / "result.geojson"
+    manifest = json.loads(
+        resolve_export_artifact(EXPORT_NAME, "analysis_manifest.json").read_text(encoding="utf-8")
+    )
+    assert resolve_export_artifact(EXPORT_NAME, "result.parquet").exists()
+    assert resolve_export_artifact(EXPORT_NAME, "result.geojson").exists()
 
-    assert manifest_file.exists(), "analysis_manifest.json must exist"
-    assert parquet_file.exists(), "result.parquet must exist"
-    assert geojson_file.exists(), "result.geojson must exist"
-
-    manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
     assert manifest["analysis_id"] == "australia_population_grid"
     assert manifest["feature_count"] == 286827
     assert manifest["total_population"] > 25000000.0
@@ -29,8 +27,7 @@ def test_national_population_grid_exports_exist_and_valid():
 
 def test_national_population_grid_parquet_crs_and_columns():
     """Verifies stored GeoParquet CRS is EPSG:7844 and primary columns exist."""
-    exp_parquet = PROJECT_ROOT / "data" / "lake" / "exports" / "australia_population_grid" / "result.parquet"
-    gdf = gpd.read_parquet(exp_parquet)
+    gdf = gpd.read_parquet(resolve_export_artifact(EXPORT_NAME, "result.parquet"))
     assert len(gdf) == 286827
     assert gdf.crs.to_epsg() == 7844 or "7844" in str(gdf.crs)
     assert "cell_id" in gdf.columns

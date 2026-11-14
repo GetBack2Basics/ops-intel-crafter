@@ -1,11 +1,11 @@
 {
-  "report_id": "qa-report-20261111T215548Z",
-  "generated_at_utc": "2026-11-11T21:55:48Z",
+  "report_id": "qa-report-20261114T004338Z",
+  "generated_at_utc": "2026-11-14T00:43:38Z",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
-  "total_datasets": 48,
+  "total_datasets": 52,
   "status_counts": {
-    "PASS": 9,
+    "PASS": 13,
     "WARNING": 2,
     "FAIL": 1,
     "NOT TESTED": 0,
@@ -14,8 +14,9 @@
   },
   "coverage_by_scale": {
     "national": 20,
+    "local": 1,
     "nsw": 9,
-    "state": 5,
+    "state": 8,
     "qld": 5,
     "sa": 1,
     "tas": 1,
@@ -26,6 +27,7 @@
     "NExT Population & Geography": 2,
     "AURA: Water Hydrography": 8,
     "AURA: Commercial Yield": 1,
+    "Flood & Hydrography": 2,
     "Critical Infrastructure": 3,
     "Hazards": 1,
     "AURA: Cadastre Parcels": 2,
@@ -45,14 +47,14 @@
     "AURA: Landslide Hazard": 3,
     "Administrative Boundaries": 1,
     "Live Hazard Feeds": 1,
-    "Flood & Hydrography": 1
+    "Emergency Management & Natural Hazards": 3
   },
-  "total_features_stored": 86244,
-  "total_bytes_stored": 175403669,
+  "total_features_stored": 122235,
+  "total_bytes_stored": 233268399,
   "datasets": [
     {
       "dataset_key": "abs_australia_1km_population_grid",
-      "title": "ABS 2025 \u2014 Australian Population Grid 1 km\u00b2 (National Modeled ERP Grid)",
+      "title": "ABS 2025 — Australian Population Grid 1 km² (National Modeled ERP Grid)",
       "provider": "Australian Bureau of Statistics",
       "source_agency": "Australian Bureau of Statistics (ABS)",
       "category": "periodically_refreshed_authoritative",
@@ -64,7 +66,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 Commonwealth of Australia (Australian Bureau of Statistics 2025) \u2014 CC-BY 4.0",
+        "attribution": "© Commonwealth of Australia (Australian Bureau of Statistics 2025) — CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-10"
       },
@@ -117,14 +119,14 @@
         ]
       },
       "known_limitations": [
-        "Official ABS modeled 1 km\u00b2 Estimated Resident Population (ERP) grid based on the National Nested Grid Standard.",
+        "Official ABS modeled 1 km² Estimated Resident Population (ERP) grid based on the National Nested Grid Standard.",
         "Population counts are disaggregated from SA1 using ABS Address Register and ICP points; modelled proxy, not a direct headcount."
       ],
       "refresh_policy": "annual_release",
       "gcs_https_url": "data/lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
       "source_count": null,
       "stored_count": 0,
-      "sync_status": "\u2014"
+      "sync_status": "—"
     },
     {
       "dataset_key": "aura_drainage_hand_euclid_m_v1",
@@ -477,8 +479,295 @@
       "sync_status": "Linked"
     },
     {
+      "dataset_key": "flood_awareness_storm_tide",
+      "title": "Flood — Awareness — Storm Tide",
+      "provider": "Brisbane City Council",
+      "source_agency": "Brisbane City Council",
+      "category": "periodically_refreshed_authoritative",
+      "scale": "local",
+      "jurisdiction": "QLD",
+      "theme": "Flood & Hydrography",
+      "endpoint": "https://data.brisbane.qld.gov.au/api/explore/v2.1/catalog/datasets/flood-awareness-storm-tide/exports/geojson",
+      "licence": {
+        "name": "CC BY 4.0",
+        "url": null,
+        "attribution": "© Brisbane City Council — CC BY 4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-14"
+      },
+      "source_publication_date": "2025-06-09",
+      "source_vintage": "2025-BRISBANE",
+      "retrieval_timestamp_utc": "2026-11-14T00:25:59Z",
+      "retrieval_id": "20261114T002559Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "MultiPolygon, Polygon",
+      "feature_count": 34808,
+      "bbox": [
+        152.785121,
+        -27.606276,
+        153.202425,
+        -27.274587
+      ],
+      "file_size_bytes": 48878280,
+      "sha256": "d1b6be97611d2e0a471ff2ac1fa5852b6ba9dc585529b0739e37832dac877bed",
+      "gcs_generation": "1794616031589444",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
+      "local_parquet_path": null,
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/flood_awareness_storm_tide/20261114T002559Z/source_payload.json",
+      "raw_payload_sha256": "9352f025b8c3bcbbac9de96c99c9d29be8aa61c30ba990c662e9ea536f7e01ba",
+      "preview_geojson": {
+        "preview_geojson_path": "data/flood_awareness_storm_tide.geojson",
+        "preview_feature_count": 34808,
+        "total_feature_count": 34808
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "PASS",
+        "endpoint": "https://data.brisbane.qld.gov.au/api/explore/v2.1/catalog/datasets/flood-awareness-storm-tide/exports/geojson",
+        "layer_name": "Flood — Awareness — Storm Tide",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 15673.9,
+        "max_record_count": null,
+        "source_feature_count": 34808,
+        "query_bbox": null,
+        "available_fields": [
+          "objectid",
+          "flood_risk",
+          "flood_type",
+          "shape_area",
+          "shape_length",
+          "geo_shape",
+          "geo_point_2d"
+        ],
+        "error_message": null,
+        "harvested_sublayers": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (15673.9 ms) from https://data.brisbane.qld.gov.au/api/explore/v2.1/catalog/datasets/flood-awareness-storm-tide/exports/geojson"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Payload parsed as valid spatial data (no embedded error object, no HTML block page)."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "Harvested geometry types ['MultiPolygon', 'Polygon'] vs catalogue 'Geometry'"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "ODS records API total_count=34808; harvested 34808, probed 34808"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
+        "gcs_generation": "1794616031589444",
+        "file_size_bytes": 48878280,
+        "sha256": "d1b6be97611d2e0a471ff2ac1fa5852b6ba9dc585529b0739e37832dac877bed",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "MultiPolygon",
+          "Polygon"
+        ],
+        "feature_count": 34808,
+        "bbox": [
+          152.785121,
+          -27.606276,
+          153.202425,
+          -27.274587
+        ],
+        "geometry_validation": {
+          "total_rows": 34808,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 34808,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "objectid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "MultiPolygon",
+            "Polygon"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "objectid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "flood_risk",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "flood_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "shape_area",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "shape_length",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 34808 rows in 1 row group(s) (48878280 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['MultiPolygon', 'Polygon']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [152.78512, -27.60628, 153.20242, -27.27459] within declared catalogue extent [152.535, -27.856, 153.452, -27.025] (±0.5°)"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'objectid': 0 duplicates across 34808 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=d1b6be97611d2e0a... | generation=1794616031589444"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 34808,
+        "stored_feature_count": 34808,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "CRS reprojection from EPSG:4326 to canonical EPSG:7844",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 34808 stored / 34808 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 0 required native fields and 0 mapped aliases (13 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Full dataset extent recorded: [152.785121, -27.606276, 153.202425, -27.274587]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Harvested from data.brisbane.qld.gov.au open-data portal via deterministic zero-AI pipeline (ods).",
+        "default_bbox declared from the first verified harvest extent (+/-0.25 deg); re-harvests outside it will flag at Level 2.",
+        "Source licence: CC BY 4.0. Native source columns preserved; no attribute synthesis."
+      ],
+      "refresh_policy": "portal_snapshot",
+      "operational_suitability": "Suitable for flood & hydrography exposure analysis and emergency planning overlays.",
+      "telemetry": {
+        "dataset_key": "flood_awareness_storm_tide",
+        "retrieval_timestamp_utc": "2026-11-14T00:25:59Z",
+        "http_requests_count": 1,
+        "source_download_ms": 15673.9,
+        "normalization_ms": 763.85,
+        "validation_ms": 7667.03,
+        "bytes_written": 48878280,
+        "notes": [
+          "Zero-AI deterministic portal harvest (no LLM credits used)."
+        ]
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
+      "source_count": 34808,
+      "stored_count": 34808,
+      "sync_status": "100.0%"
+    },
+    {
       "dataset_key": "ga_electricity_substations",
-      "title": "National Electricity Infrastructure \u2014 Power Substations",
+      "title": "National Electricity Infrastructure — Power Substations",
       "provider": "Geoscience Australia",
       "source_agency": "Commonwealth of Australia (Geoscience Australia)",
       "category": "static_authoritative",
@@ -489,7 +778,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) \u2014 Creative Commons Attribution 4.0 International",
+        "attribution": "© Commonwealth of Australia (Geoscience Australia) — Creative Commons Attribution 4.0 International",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -859,7 +1148,7 @@
     },
     {
       "dataset_key": "ga_electricity_transmission_lines",
-      "title": "National Electricity Infrastructure \u2014 High-Voltage Transmission Lines",
+      "title": "National Electricity Infrastructure — High-Voltage Transmission Lines",
       "provider": "Geoscience Australia",
       "source_agency": "Commonwealth of Australia (Geoscience Australia)",
       "category": "static_authoritative",
@@ -870,7 +1159,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) \u2014 Creative Commons Attribution 4.0 International",
+        "attribution": "© Commonwealth of Australia (Geoscience Australia) — Creative Commons Attribution 4.0 International",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -1238,7 +1527,7 @@
     },
     {
       "dataset_key": "ga_major_power_stations",
-      "title": "National Electricity Infrastructure \u2014 Major Power Stations",
+      "title": "National Electricity Infrastructure — Major Power Stations",
       "provider": "Geoscience Australia",
       "source_agency": "Commonwealth of Australia (Geoscience Australia)",
       "category": "static_authoritative",
@@ -1249,7 +1538,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) \u2014 Creative Commons Attribution 4.0 International",
+        "attribution": "© Commonwealth of Australia (Geoscience Australia) — Creative Commons Attribution 4.0 International",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -1659,7 +1948,7 @@
     },
     {
       "dataset_key": "ga_seismic_hazard_pga_10pct",
-      "title": "National Seismic Hazard Assessment 2018 \u2014 PGA Contours (10% in 50 Years)",
+      "title": "National Seismic Hazard Assessment 2018 — PGA Contours (10% in 50 Years)",
       "provider": "Geoscience Australia",
       "source_agency": "Commonwealth of Australia (Geoscience Australia)",
       "category": "static_authoritative",
@@ -1670,7 +1959,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 Commonwealth of Australia (Geoscience Australia) NSHA 2018 \u2014 CC-BY 4.0",
+        "attribution": "© Commonwealth of Australia (Geoscience Australia) NSHA 2018 — CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -2504,7 +2793,7 @@
     },
     {
       "dataset_key": "next_lga_boundaries_asgs2025",
-      "title": "ABS ASGS Edition 3 (2025) \u2014 Local Government Areas (NExT Administrative Baseline)",
+      "title": "ABS ASGS Edition 3 (2025) — Local Government Areas (NExT Administrative Baseline)",
       "provider": "Australian Bureau of Statistics",
       "source_agency": "Australian Bureau of Statistics (ABS)",
       "category": "periodically_refreshed_authoritative",
@@ -2515,7 +2804,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 Australian Bureau of Statistics (ASGS 2025) \u2014 CC-BY 4.0",
+        "attribution": "© Australian Bureau of Statistics (ASGS 2025) — CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -2847,7 +3136,7 @@
     },
     {
       "dataset_key": "next_sa2_boundaries_asgs2021",
-      "title": "ABS ASGS 2021 \u2014 Statistical Areas Level 2 (SA2 Population & Vulnerability Baseline)",
+      "title": "ABS ASGS 2021 — Statistical Areas Level 2 (SA2 Population & Vulnerability Baseline)",
       "provider": "Australian Bureau of Statistics",
       "source_agency": "Australian Bureau of Statistics (ABS)",
       "category": "periodically_refreshed_authoritative",
@@ -2858,7 +3147,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 Australian Bureau of Statistics (ASGS 2021) \u2014 CC-BY 4.0",
+        "attribution": "© Australian Bureau of Statistics (ASGS 2021) — CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -3664,17 +3953,17 @@
     },
     {
       "dataset_key": "nsw_emergency_management_restricted",
-      "title": "NSW Spatial Services \u2014 Emergency Management Restricted Service (Failed Source Contract Test)",
+      "title": "NSW Spatial Services — Emergency Management Restricted Service (Failed Source Contract Test)",
       "category": "live_operational_feed",
       "scale": "state",
       "jurisdiction": "NSW",
       "provider": "NSW Spatial Services (DCS)",
-      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
+      "source_agency": "NSW Department of Customer Service — Spatial Services",
       "endpoint": "https://portal.spatial.nsw.gov.au/server/rest/services/NSW_Emergency_Management_Category/FeatureServer/0",
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 State of New South Wales (Spatial Services, DCS)",
+        "attribution": "© State of New South Wales (Spatial Services, DCS)",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -3755,13 +4044,13 @@
       "gcs_https_url": null,
       "source_count": null,
       "stored_count": 0,
-      "sync_status": "\u2014"
+      "sync_status": "—"
     },
     {
       "dataset_key": "nsw_foi_building_complexes",
-      "title": "NSW Features of Interest \u2014 Emergency, Health, Education & Community Facilities",
+      "title": "NSW Features of Interest — Emergency, Health, Education & Community Facilities",
       "provider": "NSW Spatial Services (DCS)",
-      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
+      "source_agency": "NSW Department of Customer Service — Spatial Services",
       "category": "periodically_refreshed_authoritative",
       "scale": "state",
       "jurisdiction": "NSW",
@@ -3770,7 +4059,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 State of New South Wales (Spatial Services, DCS) \u2014 CC-BY 4.0",
+        "attribution": "© State of New South Wales (Spatial Services, DCS) — CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -4262,9 +4551,9 @@
     },
     {
       "dataset_key": "nsw_lga_boundaries",
-      "title": "NSW Spatial Services \u2014 Local Government Area Boundaries",
+      "title": "NSW Spatial Services — Local Government Area Boundaries",
       "provider": "NSW Spatial Services (DCS)",
-      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
+      "source_agency": "NSW Department of Customer Service — Spatial Services",
       "category": "periodically_refreshed_authoritative",
       "scale": "state",
       "jurisdiction": "NSW",
@@ -4273,14 +4562,14 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 State of New South Wales (Spatial Services, a business unit of the Department of Customer Service NSW) \u2014 CC-BY 4.0",
+        "attribution": "© State of New South Wales (Spatial Services, a business unit of the Department of Customer Service NSW) — CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
       "source_publication_date": "2026-01-01",
       "source_vintage": "2026-NSW-DCS",
-      "retrieval_timestamp_utc": "2026-11-09T07:32:49Z",
-      "retrieval_id": "20261109T073249Z",
+      "retrieval_timestamp_utc": "2026-11-14T00:42:39Z",
+      "retrieval_id": "20261114T004239Z",
       "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
       "transformation_version": "geoparquet-1.1.0-gda2020-v1",
       "original_crs": "EPSG:7844",
@@ -4293,13 +4582,13 @@
         159.281638,
         -28.157021
       ],
-      "file_size_bytes": 26510856,
-      "sha256": "ea89196886922a2d95645bcd434b680364af0d9ad15c66117b39ab926c3ba13a",
-      "gcs_generation": "1794274749328896",
-      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
-      "local_parquet_path": "data/lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
-      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_lga_boundaries/20261109T073249Z/source_payload.json",
-      "raw_payload_sha256": "3f86b17483fe9942f839597a85aabe38e5c59eb8c3b64a648d0f94dd25ed82ff",
+      "file_size_bytes": 26511108,
+      "sha256": "139fb8e48ff7249caf0e3b13f059655fb8cfb0d5b17bc103391d794c721a1322",
+      "gcs_generation": "1794617006268966",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet",
+      "local_parquet_path": null,
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_lga_boundaries/20261114T004239Z/source_payload.json",
+      "raw_payload_sha256": "79837c2ffa25181ececcd6141d71117de10348288ce24d3607253bf9b98747ad",
       "preview_geojson": {
         "preview_geojson_path": "data/nsw_lga_boundaries.geojson",
         "preview_feature_count": 132,
@@ -4314,7 +4603,7 @@
         "layer_name": "LocalGovernmentArea",
         "http_status": 200,
         "content_type": "application/json;charset=UTF-8",
-        "latency_ms": 244.95,
+        "latency_ms": 243.37,
         "max_record_count": 2000,
         "source_feature_count": 132,
         "query_bbox": null,
@@ -4346,7 +4635,7 @@
           {
             "check": "endpoint_reachable",
             "status": "PASS",
-            "detail": "HTTP 200 (126.13 ms)"
+            "detail": "HTTP 200 (142.46 ms)"
           },
           {
             "check": "not_embedded_error_or_html",
@@ -4374,11 +4663,11 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "PASS",
-        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_lga_boundaries\\2026-NSW-DCS\\20261109T073249Z\\part-00000.parquet",
-        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
-        "gcs_generation": "1794274749328896",
-        "file_size_bytes": 26510856,
-        "sha256": "ea89196886922a2d95645bcd434b680364af0d9ad15c66117b39ab926c3ba13a",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet",
+        "gcs_generation": "1794617006268966",
+        "file_size_bytes": 26511108,
+        "sha256": "139fb8e48ff7249caf0e3b13f059655fb8cfb0d5b17bc103391d794c721a1322",
         "geoparquet_version": "1.1.0",
         "geometry_encoding": "WKB",
         "stored_crs": "EPSG:7844",
@@ -4578,7 +4867,7 @@
           {
             "check": "parquet_footer_and_magic",
             "status": "PASS",
-            "detail": "PAR1 header/footer valid; 132 rows in 1 row group(s) (26510856 bytes)"
+            "detail": "PAR1 header/footer valid; 132 rows in 1 row group(s) (26511108 bytes)"
           },
           {
             "check": "geoparquet_metadata_valid",
@@ -4608,7 +4897,7 @@
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=ea89196886922a2d... | generation=1794274749328896"
+            "detail": "sha256=139fb8e48ff7249c... | generation=1794617006268966"
           }
         ]
       },
@@ -4647,18 +4936,18 @@
       "operational_suitability": "Authoritative NSW state emergency management LGA boundary layer.",
       "telemetry": {
         "dataset_key": "nsw_lga_boundaries",
-        "retrieval_timestamp_utc": "2026-11-09T07:32:49Z",
+        "retrieval_timestamp_utc": "2026-11-14T00:42:39Z",
         "http_requests_count": 3,
-        "source_download_ms": 16144.97,
+        "source_download_ms": 12603.05,
         "normalization_ms": 0.0,
-        "parquet_write_ms": 382.45,
-        "validation_ms": 496.49,
-        "total_elapsed_ms": 20433.73,
-        "bytes_downloaded": 69812396,
-        "bytes_written": 26510856,
+        "parquet_write_ms": 230.0,
+        "validation_ms": 4858.679999999999,
+        "total_elapsed_ms": 55477.24,
+        "bytes_downloaded": 69811994,
+        "bytes_written": 26511108,
         "notes": []
       },
-      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet",
       "source_count": 132,
       "stored_count": 132,
       "sync_status": "100.0%"
@@ -4735,7 +5024,7 @@
     },
     {
       "dataset_key": "nsw_rfs_major_incidents_live",
-      "title": "NSW Rural Fire Service \u2014 Current Major Bushfire & Emergency Incidents Feed",
+      "title": "NSW Rural Fire Service — Current Major Bushfire & Emergency Incidents Feed",
       "provider": "NSW Rural Fire Service (RFS)",
       "source_agency": "NSW Rural Fire Service",
       "category": "live_operational_feed",
@@ -4746,7 +5035,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 State of New South Wales (NSW Rural Fire Service) \u2014 CC-BY 4.0",
+        "attribution": "© State of New South Wales (NSW Rural Fire Service) — CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -4784,7 +5073,7 @@
         "level_name": "Source Contract",
         "status": "PASS",
         "endpoint": "https://www.rfs.nsw.gov.au/feeds/majorIncidents.json",
-        "layer_name": "NSW Rural Fire Service \u2014 Current Major Bushfire & Emergency Incidents Feed",
+        "layer_name": "NSW Rural Fire Service — Current Major Bushfire & Emergency Incidents Feed",
         "http_status": 200,
         "content_type": "application/json",
         "latency_ms": 275.55,
@@ -5123,9 +5412,9 @@
     },
     {
       "dataset_key": "nsw_water_inundation_areas",
-      "title": "NSW Spatial Services \u2014 Fuzzy Extent Water & Flood Inundation Areas",
+      "title": "NSW Spatial Services — Fuzzy Extent Water & Flood Inundation Areas",
       "provider": "NSW Spatial Services (DCS)",
-      "source_agency": "NSW Department of Customer Service \u2014 Spatial Services",
+      "source_agency": "NSW Department of Customer Service — Spatial Services",
       "category": "periodically_refreshed_authoritative",
       "scale": "state",
       "jurisdiction": "NSW",
@@ -5134,7 +5423,7 @@
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
-        "attribution": "\u00a9 State of New South Wales (Spatial Services, DCS) \u2014 CC-BY 4.0",
+        "attribution": "© State of New South Wales (Spatial Services, DCS) — CC-BY 4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-09"
       },
@@ -5634,81 +5923,1488 @@
     },
     {
       "dataset_key": "qld_cyclones_historical_fixes",
-      "title": "Queensland Historical Tropical Cyclone Fixes & Observations",
-      "theme": "Emergency Management & Natural Hazards",
+      "title": "Queensland Historical Cyclone Observations & Fixes (Points)",
+      "provider": "Queensland Government (DESI)",
+      "source_agency": "State of Queensland (Department of Environment, Science and Innovation)",
+      "category": "static_authoritative",
       "scale": "state",
       "jurisdiction": "QLD",
-      "source_agency": "State of Queensland (DESI)",
-      "source_vintage": "QLD-HISTORICAL",
-      "stored_feature_count": 260,
-      "feature_count": 260,
-      "overall_status": "PASS",
-      "level1_source_contract": {
-        "status": "PASS",
-        "source_feature_count": 260
+      "theme": "Emergency Management & Natural Hazards",
+      "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© State of Queensland (DESI) — Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-13"
       },
-      "level2_geoparquet_artifact": {
+      "source_publication_date": "2026-04-01",
+      "source_vintage": "QLD-HISTORICAL",
+      "retrieval_timestamp_utc": "2026-11-14T00:28:40Z",
+      "retrieval_id": "20261114T002840Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "Point",
+      "feature_count": 260,
+      "bbox": [
+        119.600009,
+        -28.299988,
+        161.200005,
+        -7.599988
+      ],
+      "file_size_bytes": 42903,
+      "sha256": "ee38e35c57768ac932ee9e8386f6817ac4dc0f6177105e351e3f497916eedc0e",
+      "gcs_generation": "1794616142485014",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+      "local_parquet_path": null,
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/qld_cyclones_historical_fixes/20261114T002840Z/source_payload.json",
+      "raw_payload_sha256": "d797c2ce64ea63eb144a67338a59a4970c78ee6f15c6a56f312b504a8db3e227",
+      "preview_geojson": {
+        "preview_geojson_path": "data/qld_cyclones_historical_fixes.geojson",
+        "preview_feature_count": 260,
+        "total_feature_count": 260
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
         "status": "PASS",
-        "stored_feature_count": 260
+        "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
+        "layer_name": "Queensland Historical Tropical Cyclone Fixes & Observations",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 12471.54,
+        "max_record_count": null,
+        "source_feature_count": 260,
+        "query_bbox": null,
+        "available_fields": [
+          "_cyclone_group",
+          "_cyclone_year",
+          "_source_layer_id",
+          "_source_layer_name",
+          "category",
+          "dist_id",
+          "dist_name",
+          "expiry_hrs",
+          "fcast_time",
+          "fix_time",
+          "fix_type",
+          "issue_time",
+          "objectid",
+          "symbol",
+          "time_offset"
+        ],
+        "error_message": null,
+        "harvested_sublayers": [
+          {
+            "layer_id": 26031,
+            "name": "[Maila] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 8
+          },
+          {
+            "layer_id": 26021,
+            "name": "[Narelle] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 21
+          },
+          {
+            "layer_id": 26011,
+            "name": "[Koji] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 8
+          },
+          {
+            "layer_id": 25011,
+            "name": "[Alfred] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 24
+          },
+          {
+            "layer_id": 24031,
+            "name": "[Megan] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 11
+          },
+          {
+            "layer_id": 24021,
+            "name": "[Lincoln] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 6
+          },
+          {
+            "layer_id": 24011,
+            "name": "[Kirrily] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 19
+          },
+          {
+            "layer_id": 23011,
+            "name": "[Jasper] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 21
+          },
+          {
+            "layer_id": 22011,
+            "name": "[Tiffany] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 9
+          },
+          {
+            "layer_id": 21021,
+            "name": "[Niran] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 12
+          },
+          {
+            "layer_id": 21011,
+            "name": "[Kimi] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 7
+          },
+          {
+            "layer_id": 20011,
+            "name": "[Esther] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 8
+          },
+          {
+            "layer_id": 19041,
+            "name": "[Ann] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 7
+          },
+          {
+            "layer_id": 19031,
+            "name": "[Trevor] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 19
+          },
+          {
+            "layer_id": 19021,
+            "name": "[Oma] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 4
+          },
+          {
+            "layer_id": 19011,
+            "name": "[Tropical low 13U] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 5
+          },
+          {
+            "layer_id": 18051,
+            "name": "[Penny] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 18
+          },
+          {
+            "layer_id": 18041,
+            "name": "[Owen, part 2] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 5
+          },
+          {
+            "layer_id": 18031,
+            "name": "[Owen, part 1] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 9
+          },
+          {
+            "layer_id": 18021,
+            "name": "[Nora] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 12
+          },
+          {
+            "layer_id": 18011,
+            "name": "[Iris] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 13
+          },
+          {
+            "layer_id": 17011,
+            "name": "[Debbie] Fix",
+            "esri_geometry_type": "esriGeometryPoint",
+            "features": 14
+          }
+        ],
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 MapServer metadata (88 layer/group definitions)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS MapServer JSON metadata and GeoJSON feature payloads returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "22 harvested sublayers match expected geometry 'Point' (e.g. esriGeometryPoint -> Point)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 3 required fields verified (dist_name, category, symbol)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Independent returnCountOnly probe across 22 sublayers reports 260 features (harvested 260)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+        "gcs_generation": "1794616142485014",
+        "file_size_bytes": 42903,
+        "sha256": "ee38e35c57768ac932ee9e8386f6817ac4dc0f6177105e351e3f497916eedc0e",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "Point"
+        ],
+        "feature_count": 260,
+        "bbox": [
+          119.600009,
+          -28.299988,
+          161.200005,
+          -7.599988
+        ],
+        "geometry_validation": {
+          "total_rows": 260,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 260,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "feature_uid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "Point"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "objectid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "fix_time",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "time_offset",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "fix_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "category",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "symbol",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "fcast_time",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "issue_time",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "expiry_hrs",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "dist_id",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "dist_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "cyclone_group",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "cyclone_year",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "source_layer_id",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "source_layer_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_uid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "cyclone_category",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 260 rows in 1 row group(s) (42903 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['Point']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [119.60001, -28.29999, 161.20001, -7.59999] within declared catalogue extent [105.0, -35.0, 170.0, -5.0] (±0.5°)"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'feature_uid': 0 duplicates across 260 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=ee38e35c57768ac9... | generation=1794616142485014"
+          }
+        ]
       },
       "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
         "status": "PASS",
-        "reconciliation_ratio": 1.0
+        "source_feature_count": 260,
+        "stored_feature_count": 260,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "CRS reprojection from EPSG:4326 to canonical EPSG:7844",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 260 stored / 260 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 3 required native fields and 3 mapped aliases (26 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Full dataset extent recorded: [119.600009, -28.299988, 161.200005, -7.599988]"
+          }
+        ]
       },
-      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+      "known_limitations": [
+        "Point observations along cyclone trajectories with intensity category."
+      ],
+      "refresh_policy": "annual_snapshot",
+      "operational_suitability": "Suitable for cyclone intensity progression and landfall timing analysis.",
+      "telemetry": {
+        "dataset_key": "qld_cyclones_historical_fixes",
+        "retrieval_timestamp_utc": "2026-11-14T00:28:40Z",
+        "http_requests_count": 44,
+        "normalization_ms": 7.87,
+        "validation_ms": 505.68,
+        "total_elapsed_ms": 18486.54,
+        "bytes_written": 42903,
+        "notes": [
+          "Multi-layer MapServer harvest aggregated across per-cyclone event sublayers.",
+          "Level 1 recorded from live harvest evidence; source counts independently re-probed via returnCountOnly."
+        ]
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+      "source_count": 260,
+      "stored_count": 260,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "qld_cyclones_historical_tracks",
-      "title": "Queensland Historical Tropical Cyclone Tracks",
-      "theme": "Emergency Management & Natural Hazards",
+      "title": "Queensland Historical Cyclone Tracks (Lines)",
+      "provider": "Queensland Government (DESI)",
+      "source_agency": "State of Queensland (Department of Environment, Science and Innovation)",
+      "category": "static_authoritative",
       "scale": "state",
       "jurisdiction": "QLD",
-      "source_agency": "State of Queensland (DESI)",
-      "source_vintage": "QLD-HISTORICAL",
-      "stored_feature_count": 23,
-      "feature_count": 23,
-      "overall_status": "PASS",
-      "level1_source_contract": {
-        "status": "PASS",
-        "source_feature_count": 23
+      "theme": "Emergency Management & Natural Hazards",
+      "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© State of Queensland (DESI) — Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-13"
       },
-      "level2_geoparquet_artifact": {
+      "source_publication_date": "2026-04-01",
+      "source_vintage": "QLD-HISTORICAL",
+      "retrieval_timestamp_utc": "2026-11-14T00:28:40Z",
+      "retrieval_id": "20261114T002840Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "LineString",
+      "feature_count": 23,
+      "bbox": [
+        119.600009,
+        -28.299988,
+        165.000008,
+        -7.379988
+      ],
+      "file_size_bytes": 40453,
+      "sha256": "ead0185deead22d3e4dcbd369e8e630582a454afe1e3c99158502e0e4c2f96fd",
+      "gcs_generation": "1794616124350410",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+      "local_parquet_path": null,
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/qld_cyclones_historical_tracks/20261114T002840Z/source_payload.json",
+      "raw_payload_sha256": "b39036a1f37e0df68ebd0488037d32303552d9c99b4e18178846676b3ef8311b",
+      "preview_geojson": {
+        "preview_geojson_path": "data/qld_cyclones_historical_tracks.geojson",
+        "preview_feature_count": 23,
+        "total_feature_count": 23
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
         "status": "PASS",
-        "stored_feature_count": 23
+        "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
+        "layer_name": "Queensland Historical Tropical Cyclone Tracks",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 6837.18,
+        "max_record_count": null,
+        "source_feature_count": 23,
+        "query_bbox": null,
+        "available_fields": [
+          "_cyclone_group",
+          "_cyclone_year",
+          "_source_layer_id",
+          "_source_layer_name",
+          "dist_id",
+          "dist_name",
+          "end_time",
+          "expiry_hrs",
+          "fcast_time",
+          "issue_time",
+          "objectid",
+          "st_length(shape)",
+          "start_time",
+          "track_type"
+        ],
+        "error_message": null,
+        "harvested_sublayers": [
+          {
+            "layer_id": 26032,
+            "name": "[Maila] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 26022,
+            "name": "[Narelle] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 26012,
+            "name": "[Koji] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 25012,
+            "name": "[Alfred] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 2
+          },
+          {
+            "layer_id": 24032,
+            "name": "[Megan] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 24022,
+            "name": "[Lincoln] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 24012,
+            "name": "[Kirrily] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 23012,
+            "name": "[Jasper] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 22012,
+            "name": "[Tiffany] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 21022,
+            "name": "[Niran] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 21012,
+            "name": "[Kimi] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 20012,
+            "name": "[Esther] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 19042,
+            "name": "[Ann] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 19032,
+            "name": "[Trevor] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 19022,
+            "name": "[Oma] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 19012,
+            "name": "[Tropical low 13U] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 18052,
+            "name": "[Penny] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 18042,
+            "name": "[Owen, part 2] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 18032,
+            "name": "[Owen, part 1] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 18022,
+            "name": "[Nora] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 18012,
+            "name": "[Iris] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          },
+          {
+            "layer_id": 17012,
+            "name": "[Debbie] Track",
+            "esri_geometry_type": "esriGeometryPolyline",
+            "features": 1
+          }
+        ],
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 MapServer metadata (88 layer/group definitions)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS MapServer JSON metadata and GeoJSON feature payloads returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "22 harvested sublayers match expected geometry 'LineString' (e.g. esriGeometryPolyline -> LineString)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 3 required fields verified (dist_name, dist_id, track_type)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Independent returnCountOnly probe across 22 sublayers reports 23 features (harvested 23)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+        "gcs_generation": "1794616124350410",
+        "file_size_bytes": 40453,
+        "sha256": "ead0185deead22d3e4dcbd369e8e630582a454afe1e3c99158502e0e4c2f96fd",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "LineString"
+        ],
+        "feature_count": 23,
+        "bbox": [
+          119.600009,
+          -28.299988,
+          165.000008,
+          -7.379988
+        ],
+        "geometry_validation": {
+          "total_rows": 23,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 23,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "feature_uid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "LineString"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "objectid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "track_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "start_time",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "end_time",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "fcast_time",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "issue_time",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "expiry_hrs",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "dist_id",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "dist_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "st_length_shape",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "cyclone_group",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "cyclone_year",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "source_layer_id",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "source_layer_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_uid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "cyclone_id",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 23 rows in 1 row group(s) (40453 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['LineString']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [119.60001, -28.29999, 165.00001, -7.37999] within declared catalogue extent [105.0, -35.0, 170.0, -5.0] (±0.5°)"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'feature_uid': 0 duplicates across 23 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=ead0185deead22d3... | generation=1794616124350410"
+          }
+        ]
       },
       "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
         "status": "PASS",
-        "reconciliation_ratio": 1.0
+        "source_feature_count": 23,
+        "stored_feature_count": 23,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "CRS reprojection from EPSG:4326 to canonical EPSG:7844",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 23 stored / 23 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 3 required native fields and 3 mapped aliases (26 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Full dataset extent recorded: [119.600009, -28.299988, 165.000008, -7.379988]"
+          }
+        ]
       },
-      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+      "known_limitations": [
+        "Covers 22 historical tropical cyclones impacting Queensland waters and coastline from 2006 to 2026."
+      ],
+      "refresh_policy": "annual_snapshot",
+      "operational_suitability": "Suitable for historical hazard overlay, track trajectory analysis, and emergency planning.",
+      "telemetry": {
+        "dataset_key": "qld_cyclones_historical_tracks",
+        "retrieval_timestamp_utc": "2026-11-14T00:28:40Z",
+        "http_requests_count": 44,
+        "normalization_ms": 23.03,
+        "validation_ms": 2144.3,
+        "total_elapsed_ms": 14823.16,
+        "bytes_written": 40453,
+        "notes": [
+          "Multi-layer MapServer harvest aggregated across per-cyclone event sublayers.",
+          "Level 1 recorded from live harvest evidence; source counts independently re-probed via returnCountOnly."
+        ]
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+      "source_count": 23,
+      "stored_count": 23,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "qld_cyclones_historical_wind_areas",
-      "title": "Queensland Historical Tropical Cyclone Wind Swaths & Hazard Areas",
-      "theme": "Emergency Management & Natural Hazards",
+      "title": "Queensland Historical Cyclone Wind Swaths & Hazard Areas (Polygons)",
+      "provider": "Queensland Government (DESI)",
+      "source_agency": "State of Queensland (Department of Environment, Science and Innovation)",
+      "category": "static_authoritative",
       "scale": "state",
       "jurisdiction": "QLD",
-      "source_agency": "State of Queensland (DESI)",
-      "source_vintage": "QLD-HISTORICAL",
-      "stored_feature_count": 900,
-      "feature_count": 900,
-      "overall_status": "PASS",
-      "level1_source_contract": {
-        "status": "PASS",
-        "source_feature_count": 900
+      "theme": "Emergency Management & Natural Hazards",
+      "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "© State of Queensland (DESI) — Creative Commons Attribution 4.0 International",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-13"
       },
-      "level2_geoparquet_artifact": {
+      "source_publication_date": "2026-04-01",
+      "source_vintage": "QLD-HISTORICAL",
+      "retrieval_timestamp_utc": "2026-11-14T00:28:40Z",
+      "retrieval_id": "20261114T002840Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "Polygon",
+      "feature_count": 900,
+      "bbox": [
+        110.991686,
+        -31.846902,
+        163.926337,
+        -6.328392
+      ],
+      "file_size_bytes": 8902842,
+      "sha256": "c619e84fe1a3360a94211e811a548b73899ae6e4953c7d2e019f0fc6aabd7085",
+      "gcs_generation": "1794616174166791",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+      "local_parquet_path": null,
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/qld_cyclones_historical_wind_areas/20261114T002840Z/source_payload.json",
+      "raw_payload_sha256": "9762c8146730102b386d36ff9b197814a96fccb26d5d9669d240db6e5cf5c8ab",
+      "preview_geojson": {
+        "preview_geojson_path": "data/qld_cyclones_historical_wind_areas.geojson",
+        "preview_feature_count": 900,
+        "total_feature_count": 900
+      },
+      "overall_qa_status": "PASS",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
         "status": "PASS",
-        "stored_feature_count": 900
+        "endpoint": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/EventsIncidents/CycloneHistorical/MapServer",
+        "layer_name": "Queensland Historical Tropical Cyclone Wind Swaths & Hazard Areas",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 5619.22,
+        "max_record_count": null,
+        "source_feature_count": 900,
+        "query_bbox": null,
+        "available_fields": [
+          "_cyclone_group",
+          "_cyclone_year",
+          "_source_layer_id",
+          "_source_layer_name",
+          "dist_id",
+          "dist_name",
+          "expiry_hrs",
+          "fcast_time",
+          "fix_time",
+          "fix_type",
+          "issue_time",
+          "marine_type",
+          "objectid",
+          "st_area(shape)",
+          "st_perimeter(shape)",
+          "wind_type"
+        ],
+        "error_message": null,
+        "harvested_sublayers": [
+          {
+            "layer_id": 26033,
+            "name": "[Maila] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 69
+          },
+          {
+            "layer_id": 26023,
+            "name": "[Narelle] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 244
+          },
+          {
+            "layer_id": 26013,
+            "name": "[Koji] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 9
+          },
+          {
+            "layer_id": 25013,
+            "name": "[Alfred] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 158
+          },
+          {
+            "layer_id": 24033,
+            "name": "[Megan] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 39
+          },
+          {
+            "layer_id": 24023,
+            "name": "[Lincoln] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 3
+          },
+          {
+            "layer_id": 24013,
+            "name": "[Kirrily] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 52
+          },
+          {
+            "layer_id": 23013,
+            "name": "[Jasper] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 39
+          },
+          {
+            "layer_id": 22013,
+            "name": "[Tiffany] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 12
+          },
+          {
+            "layer_id": 21023,
+            "name": "[Niran] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 3
+          },
+          {
+            "layer_id": 21013,
+            "name": "[Kimi] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 11
+          },
+          {
+            "layer_id": 20013,
+            "name": "[Esther] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 6
+          },
+          {
+            "layer_id": 19043,
+            "name": "[Ann] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 0
+          },
+          {
+            "layer_id": 19033,
+            "name": "[Trevor] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 95
+          },
+          {
+            "layer_id": 19023,
+            "name": "[Oma] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 25
+          },
+          {
+            "layer_id": 19013,
+            "name": "[Tropical low 13U] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 0
+          },
+          {
+            "layer_id": 18053,
+            "name": "[Penny] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 20
+          },
+          {
+            "layer_id": 18043,
+            "name": "[Owen, part 2] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 0
+          },
+          {
+            "layer_id": 18033,
+            "name": "[Owen, part 1] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 2
+          },
+          {
+            "layer_id": 18023,
+            "name": "[Nora] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 35
+          },
+          {
+            "layer_id": 18013,
+            "name": "[Iris] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 12
+          },
+          {
+            "layer_id": 17013,
+            "name": "[Debbie] Wind areas",
+            "esri_geometry_type": "esriGeometryPolygon",
+            "features": 66
+          }
+        ],
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 MapServer metadata (88 layer/group definitions)"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Valid ArcGIS MapServer JSON metadata and GeoJSON feature payloads returned."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "22 harvested sublayers match expected geometry 'MultiPolygon' (e.g. esriGeometryPolygon -> Polygon)"
+          },
+          {
+            "check": "required_fields_present",
+            "status": "PASS",
+            "detail": "All 3 required fields verified (dist_name, wind_type, marine_type)"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "PASS",
+            "detail": "Independent returnCountOnly probe across 22 sublayers reports 900 features (harvested 900)"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+        "gcs_generation": "1794616174166791",
+        "file_size_bytes": 8902842,
+        "sha256": "c619e84fe1a3360a94211e811a548b73899ae6e4953c7d2e019f0fc6aabd7085",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "Polygon"
+        ],
+        "feature_count": 900,
+        "bbox": [
+          110.991686,
+          -31.846902,
+          163.926337,
+          -6.328392
+        ],
+        "geometry_validation": {
+          "total_rows": 900,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 900,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "feature_uid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "Polygon"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "objectid",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "wind_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "marine_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "fix_time",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "fix_type",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "fcast_time",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "issue_time",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "expiry_hrs",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "dist_id",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "dist_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "st_area_shape",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "st_perimeter_shape",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "cyclone_group",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "cyclone_year",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "source_layer_id",
+            "type": "int64",
+            "nullable": true
+          },
+          {
+            "name": "source_layer_name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "feature_uid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "name",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 900 rows in 1 row group(s) (8902842 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['Polygon']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [110.99169, -31.8469, 163.92634, -6.32839] within declared catalogue extent [105.0, -35.0, 170.0, -5.0] (±0.5°)"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'feature_uid': 0 duplicates across 900 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=c619e84fe1a3360a... | generation=1794616174166791"
+          }
+        ]
       },
       "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
         "status": "PASS",
-        "reconciliation_ratio": 1.0
+        "source_feature_count": 900,
+        "stored_feature_count": 900,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "CRS reprojection from EPSG:4326 to canonical EPSG:7844",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 900 stored / 900 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 3 required native fields and 3 mapped aliases (26 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Full dataset extent recorded: [110.991686, -31.846902, 163.926337, -6.328392]"
+          }
+        ]
       },
-      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+      "known_limitations": [
+        "Wind hazard polygons representing gale, storm, and hurricane force wind swaths."
+      ],
+      "refresh_policy": "annual_snapshot",
+      "operational_suitability": "Suitable for wind damage exposure estimation and multi-hazard buffer intersections.",
+      "telemetry": {
+        "dataset_key": "qld_cyclones_historical_wind_areas",
+        "retrieval_timestamp_utc": "2026-11-14T00:28:40Z",
+        "http_requests_count": 41,
+        "normalization_ms": 73.64,
+        "validation_ms": 1202.56,
+        "total_elapsed_ms": 22401.14,
+        "bytes_written": 8902842,
+        "notes": [
+          "Multi-layer MapServer harvest aggregated across per-cyclone event sublayers.",
+          "Level 1 recorded from live harvest evidence; source counts independently re-probed via returnCountOnly."
+        ]
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+      "source_count": 900,
+      "stored_count": 900,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "qld_landslide_susceptibility_v2",

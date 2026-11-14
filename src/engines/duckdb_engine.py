@@ -176,11 +176,24 @@ class DuckDBSpatialEngine:
                 pass
 
     def register_geoparquet_view(self, view_name: str, parquet_path: Path) -> None:
-        """Registers a GeoParquet file as a DuckDB view exposing `geom` and `geom_wkb`."""
-        posix_path = str(Path(parquet_path).resolve()).replace("\\", "/")
+        """Registers a GeoParquet file (local path, gs:// or https://) as a DuckDB view exposing `geom` and `geom_wkb`."""
+        raw_ref = str(parquet_path)
+        is_remote = raw_ref.startswith(("gs://", "https://", "http://"))
+        if raw_ref.startswith("gs://"):
+            posix_path = raw_ref.replace("gs://", "https://storage.googleapis.com/")
+        elif is_remote:
+            posix_path = raw_ref
+        else:
+            posix_path = str(Path(raw_ref).resolve()).replace("\\", "/")
+        safe_sql_path = posix_path.replace("'", "''")
         if self.native_spatial_loaded:
+            if is_remote:
+                try:
+                    self.conn.execute("LOAD httpfs;")
+                except Exception:
+                    pass
             col_info = self.conn.execute(
-                f"DESCRIBE SELECT * FROM read_parquet('{posix_path}')"
+                f"DESCRIBE SELECT * FROM read_parquet('{safe_sql_path}')"
             ).fetchall()
             geom_col_type = ""
             for cname, ctype, *_ in col_info:
@@ -194,14 +207,20 @@ class DuckDBSpatialEngine:
             view_sql = (
                 f"CREATE OR REPLACE VIEW {view_name} AS "
                 f"SELECT * EXCLUDE (geometry), {geom_expr} "
-                f"FROM read_parquet('{posix_path}');"
+                f"FROM read_parquet('{safe_sql_path}');"
             )
             self.conn.execute(view_sql)
         else:
             import pyarrow as pa
             import pyarrow.parquet as pq
 
-            tbl = pq.read_table(parquet_path)
+            if is_remote:
+                import fsspec
+
+                with fsspec.open(posix_path, "rb") as f:
+                    tbl = pq.read_table(f)
+            else:
+                tbl = pq.read_table(Path(raw_ref))
             if "geometry" in tbl.column_names:
                 idx = tbl.column_names.index("geometry")
                 raw_bin = tbl.column(idx).cast(pa.binary())
@@ -215,21 +234,37 @@ class DuckDBSpatialEngine:
             )
             self.conn.execute(view_sql)
 
+    def _resolve_snapshot_ref(self, snapshot_path: str):
+        """Resolves a manifest snapshot pointer to (readable_ref | None, gs_uri)."""
+        s = str(snapshot_path)
+        if s.startswith("gs://"):
+            return s.replace("gs://", "https://storage.googleapis.com/"), s
+        if s.startswith(("http://", "https://")):
+            return s, s
+        pq_file = self.storage.project_root / s
+        if not pq_file.exists():
+            # Cloud-first: fall back to the canonical GCS object at the same object key.
+            gs_uri = self.storage.gs_uri(s)
+            if self.storage.cloud_object_exists(s):
+                return gs_uri.replace("gs://", "https://storage.googleapis.com/"), gs_uri
+            return None, gs_uri
+        return pq_file, self.storage.gs_uri(s)
+
     def register_catalogue_views(self, keys: Optional[List[str]] = None) -> Dict[str, Dict[str, Any]]:
-        """Registers a DuckDB view for each catalogued dataset that has a verified GeoParquet snapshot."""
+        """Registers a DuckDB view for each catalogued dataset that has a verified GeoParquet snapshot (local or gs://)."""
         target_keys = keys or self.registry.list_keys()
         for k in target_keys:
             entry = self.registry.get(k)
             if not entry.latest_snapshot_path:
                 continue
-            pq_file = self.storage.project_root / entry.latest_snapshot_path
-            if not pq_file.exists():
+            ref, gs_uri = self._resolve_snapshot_ref(entry.latest_snapshot_path)
+            if ref is None:
                 continue
-            self.register_geoparquet_view(k, pq_file)
+            self.register_geoparquet_view(k, ref)
             self.registered_views[k] = {
                 "dataset_key": k,
-                "parquet_path": entry.latest_snapshot_path,
-                "gs_uri": self.storage.gs_uri(entry.latest_snapshot_path),
+                "parquet_path": str(entry.latest_snapshot_path),
+                "gs_uri": gs_uri,
                 "source_vintage": entry.source_vintage,
                 "retrieval_utc": entry.latest_retrieval_utc,
                 "stored_crs": entry.stored_crs,

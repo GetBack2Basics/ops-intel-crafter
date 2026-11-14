@@ -82,7 +82,7 @@
         "features_stored": 286827,
         "object_bytes": 32380819,
         "object_updated_utc": "2026-11-10T02:27:09.169000+00:00",
-        "qa_status": null,
+        "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -112,7 +112,7 @@
         "features_stored": 17,
         "object_bytes": 34186,
         "object_updated_utc": "2026-11-13T01:07:37.801000+00:00",
-        "qa_status": null,
+        "qa_status": "LINKED",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -148,6 +148,34 @@
       }
     },
     {
+      "id": "flood_awareness_storm_tide",
+      "name": "Flood — Awareness — Storm Tide",
+      "groupId": "grp_hazards",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet"
+      },
+      "style": {
+        "strokeColor": "#64748b",
+        "strokeWidth": 1
+      },
+      "metadata": {
+        "source_agency": "Brisbane City Council",
+        "features_stored": 34808,
+        "object_bytes": 48878280,
+        "object_updated_utc": "2026-11-14T00:27:11.594000+00:00",
+        "qa_status": "PASS",
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
       "id": "ga_electricity_substations",
       "name": "National Electricity Infrastructure — Power Substations",
       "groupId": "grp_infrastructure",
@@ -172,7 +200,7 @@
         "features_stored": 1866,
         "object_bytes": 323389,
         "object_updated_utc": "2026-11-10T01:38:37.524000+00:00",
-        "qa_status": null,
+        "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -200,7 +228,7 @@
         "features_stored": 3147,
         "object_bytes": 6374729,
         "object_updated_utc": "2026-11-10T01:38:38.958000+00:00",
-        "qa_status": null,
+        "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -230,7 +258,7 @@
         "features_stored": 430,
         "object_bytes": 108601,
         "object_updated_utc": "2026-11-10T01:38:39.266000+00:00",
-        "qa_status": null,
+        "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -258,7 +286,7 @@
         "features_stored": 100,
         "object_bytes": 224737,
         "object_updated_utc": "2026-11-10T01:38:39.739000+00:00",
-        "qa_status": null,
+        "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -288,7 +316,7 @@
         "features_stored": 9,
         "object_bytes": 158771,
         "object_updated_utc": "2026-11-13T01:07:54.556000+00:00",
-        "qa_status": null,
+        "qa_status": "LINKED",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -318,7 +346,7 @@
         "features_stored": 297,
         "object_bytes": 20979,
         "object_updated_utc": "2026-11-13T01:07:41.449000+00:00",
-        "qa_status": null,
+        "qa_status": "LINKED",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -348,7 +376,7 @@
         "features_stored": 3578,
         "object_bytes": 121111,
         "object_updated_utc": "2026-11-13T01:07:48.121000+00:00",
-        "qa_status": null,
+        "qa_status": "LINKED",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -378,7 +406,7 @@
         "features_stored": 567,
         "object_bytes": 53870639,
         "object_updated_utc": "2026-11-10T01:38:49.698000+00:00",
-        "qa_status": null,
+        "qa_status": "WARNING",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -408,7 +436,7 @@
         "features_stored": 2473,
         "object_bytes": 69056426,
         "object_updated_utc": "2026-11-10T01:39:01.854000+00:00",
-        "qa_status": null,
+        "qa_status": "WARNING",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -438,7 +466,7 @@
         "features_stored": 880,
         "object_bytes": 6867718,
         "object_updated_utc": "2026-11-13T01:08:03.388000+00:00",
-        "qa_status": null,
+        "qa_status": "LINKED",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -468,7 +496,7 @@
         "features_stored": 76629,
         "object_bytes": 11977228,
         "object_updated_utc": "2026-11-10T01:39:04.333000+00:00",
-        "qa_status": null,
+        "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -484,8 +512,8 @@
         "type": "geoparquet",
         "format": "parquet",
         "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261109T073249Z/part-00000.parquet"
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet"
       },
       "style": {
         "fillColor": "#94a3b8",
@@ -496,9 +524,9 @@
       "metadata": {
         "source_agency": "NSW Department of Customer Service — Spatial Services",
         "features_stored": 132,
-        "object_bytes": 26510856,
-        "object_updated_utc": "2026-11-10T01:39:09.338000+00:00",
-        "qa_status": null,
+        "object_bytes": 26511108,
+        "object_updated_utc": "2026-11-14T00:43:26.272000+00:00",
+        "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -528,7 +556,7 @@
         "features_stored": 20,
         "object_bytes": 25113,
         "object_updated_utc": "2026-11-10T01:39:09.744000+00:00",
-        "qa_status": null,
+        "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -556,7 +584,7 @@
         "features_stored": 6575,
         "object_bytes": 3865140,
         "object_updated_utc": "2026-11-13T01:13:57.466000+00:00",
-        "qa_status": null,
+        "qa_status": "LINKED",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
@@ -586,14 +614,14 @@
         "features_stored": 880,
         "object_bytes": 6931951,
         "object_updated_utc": "2026-11-10T01:39:11.658000+00:00",
-        "qa_status": null,
+        "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
     },
     {
       "id": "qld_cyclones_historical_fixes",
-      "name": "Queensland Historical Tropical Cyclone Fixes & Observations",
+      "name": "Queensland Historical Cyclone Observations & Fixes (Points)",
       "groupId": "grp_emergency",
       "type": "geoparquet",
       "visible": true,
@@ -602,8 +630,8 @@
         "type": "geoparquet",
         "format": "parquet",
         "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
       },
       "style": {
         "circleRadius": 5,
@@ -612,10 +640,10 @@
         "strokeWidth": 1
       },
       "metadata": {
-        "source_agency": "State of Queensland (DESI)",
+        "source_agency": "State of Queensland (Department of Environment, Science and Innovation)",
         "features_stored": 260,
-        "object_bytes": 29551,
-        "object_updated_utc": "2026-11-13T05:29:31.204000+00:00",
+        "object_bytes": 42903,
+        "object_updated_utc": "2026-11-14T00:29:02.490000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
@@ -623,7 +651,7 @@
     },
     {
       "id": "qld_cyclones_historical_tracks",
-      "name": "Queensland Historical Tropical Cyclone Tracks",
+      "name": "Queensland Historical Cyclone Tracks (Lines)",
       "groupId": "grp_emergency",
       "type": "geoparquet",
       "visible": true,
@@ -632,18 +660,18 @@
         "type": "geoparquet",
         "format": "parquet",
         "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
       },
       "style": {
         "strokeColor": "#f43f5e",
         "strokeWidth": 2.5
       },
       "metadata": {
-        "source_agency": "State of Queensland (DESI)",
+        "source_agency": "State of Queensland (Department of Environment, Science and Innovation)",
         "features_stored": 23,
-        "object_bytes": 38274,
-        "object_updated_utc": "2026-11-13T05:29:27.673000+00:00",
+        "object_bytes": 40453,
+        "object_updated_utc": "2026-11-14T00:28:44.355000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
@@ -651,7 +679,7 @@
     },
     {
       "id": "qld_cyclones_historical_wind_areas",
-      "name": "Queensland Historical Tropical Cyclone Wind Swaths & Hazard Areas",
+      "name": "Queensland Historical Cyclone Wind Swaths & Hazard Areas (Polygons)",
       "groupId": "grp_hazards",
       "type": "geoparquet",
       "visible": true,
@@ -660,8 +688,8 @@
         "type": "geoparquet",
         "format": "parquet",
         "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261113T052910Z/part-00000.parquet"
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
       },
       "style": {
         "fillColor": "#f59e0b",
@@ -670,10 +698,10 @@
         "strokeWidth": 1
       },
       "metadata": {
-        "source_agency": "State of Queensland (DESI)",
+        "source_agency": "State of Queensland (Department of Environment, Science and Innovation)",
         "features_stored": 900,
-        "object_bytes": 8861127,
-        "object_updated_utc": "2026-11-13T05:29:37.717000+00:00",
+        "object_bytes": 8902842,
+        "object_updated_utc": "2026-11-14T00:29:34.170000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
@@ -702,16 +730,16 @@
         "features_stored": 26132,
         "object_bytes": 2605925,
         "object_updated_utc": "2026-11-13T01:14:12.010000+00:00",
-        "qa_status": null,
+        "qa_status": "LINKED",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
       }
     }
   ],
   "metadata": {
-    "generated_utc": "2026-11-13T06:50:05Z",
+    "generated_utc": "2026-11-14T01:11:18Z",
     "generator": "tools/export_geolibre_project.py",
-    "datasets_on_gcs": 22,
+    "datasets_on_gcs": 23,
     "read_failures": [],
     "zero_mock": true,
     "disclaimer": "Engineering proof of concept only. Not for operational emergency warning, dispatch, or life-safety decisions."

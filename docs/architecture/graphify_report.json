@@ -1,5 +1,5 @@
 {
-  "files_scanned": 58,
+  "files_scanned": 61,
   "secret_leaks_detected": 0,
   "mock_violations_detected": 0,
   "secret_hits": [],
@@ -93,6 +93,7 @@
       "typing"
     ],
     "src/catalogue/schema_inspector.py": [
+      "fsspec",
       "json",
       "pathlib",
       "pyarrow.parquet",
@@ -110,6 +111,7 @@
     ],
     "src/engines/duckdb_engine.py": [
       "duckdb",
+      "fsspec",
       "functools",
       "hashlib",
       "json",
@@ -168,6 +170,8 @@
     "src/exports/__init__.py": [],
     "src/ingestion/gcs_storage.py": [
       "google.cloud",
+      "hashlib",
+      "io",
       "json",
       "os",
       "pathlib",
@@ -183,7 +187,9 @@
       "typing"
     ],
     "src/ingestion/live_fetch.py": [
+      "fsspec",
       "geopandas",
+      "pathlib",
       "src.catalogue.dataset_registry",
       "src.catalogue.manifest_loader",
       "src.ingestion.gcs_storage",
@@ -192,7 +198,10 @@
     ],
     "src/ingestion/snapshot_ingest.py": [
       "geopandas",
+      "hashlib",
+      "io",
       "json",
+      "os",
       "pathlib",
       "src.catalogue.dataset_registry",
       "src.catalogue.manifest_loader",
@@ -203,6 +212,7 @@
       "src.validation.geoparquet_validation",
       "src.validation.reconciliation",
       "src.validation.source_contracts",
+      "tempfile",
       "time",
       "typing"
     ],
@@ -299,7 +309,9 @@
       "sys"
     ],
     "tools/build_geolibre_spec.py": [
+      "google.cloud",
       "json",
+      "os",
       "pathlib"
     ],
     "tools/build_locality_gazetteer.py": [
@@ -327,6 +339,26 @@
       "src.ingestion.telemetry",
       "sys"
     ],
+    "tools/dispatch_new_datasets_wherobots.py": [
+      "json",
+      "pathlib",
+      "src.ingestion.gcs_storage",
+      "sys",
+      "tools.harvest_portal_dataset"
+    ],
+    "tools/export_geolibre_project.py": [
+      "__future__",
+      "argparse",
+      "datetime",
+      "dotenv",
+      "duckdb",
+      "google.cloud",
+      "json",
+      "os",
+      "pathlib",
+      "sys",
+      "typing"
+    ],
     "tools/git_sync.py": [
       "pathlib",
       "subprocess",
@@ -341,26 +373,72 @@
       "sys",
       "typing"
     ],
-    "tools/harvest_qld_cyclone_history.py": [
+    "tools/harvest_portal_dataset.py": [
+      "__future__",
+      "argparse",
+      "datetime",
       "dotenv",
       "geopandas",
-      "google.cloud",
+      "hashlib",
+      "io",
       "json",
       "os",
       "pandas",
       "pathlib",
       "re",
       "requests",
+      "shapely.geometry",
+      "src.catalogue.dataset_registry",
+      "src.catalogue.manifest_loader",
       "src.engines.wherobots_engine",
+      "src.ingestion.gcs_storage",
+      "src.ingestion.geoparquet_writer",
+      "src.ingestion.snapshot_ingest",
+      "src.ingestion.telemetry",
+      "src.validation.geoparquet_validation",
+      "src.validation.qa_report",
+      "src.validation.reconciliation",
       "sys",
+      "tempfile",
       "time",
       "typing",
-      "urllib.request",
+      "urllib.parse",
+      "wherobots",
+      "wherobots.db",
+      "zipfile"
+    ],
+    "tools/harvest_qld_cyclone_history.py": [
+      "argparse",
+      "datetime",
+      "dotenv",
+      "geopandas",
+      "hashlib",
+      "io",
+      "json",
+      "os",
+      "pathlib",
+      "re",
+      "requests",
+      "src.catalogue.dataset_registry",
+      "src.catalogue.manifest_loader",
+      "src.engines.wherobots_engine",
+      "src.ingestion.gcs_storage",
+      "src.ingestion.geoparquet_writer",
+      "src.ingestion.snapshot_ingest",
+      "src.ingestion.telemetry",
+      "src.validation.geoparquet_validation",
+      "src.validation.qa_report",
+      "src.validation.reconciliation",
+      "sys",
+      "tempfile",
+      "time",
+      "typing",
       "wherobots",
       "wherobots.db"
     ],
     "tools/ingest_dataset.py": [
       "argparse",
+      "dotenv",
       "pathlib",
       "src.catalogue.dataset_registry",
       "src.ingestion.gcs_storage",
@@ -412,11 +490,13 @@
       "zipfile"
     ],
     "tools/publish_docs_to_gcs.py": [
+      "dotenv",
       "google.cloud",
       "os",
       "pathlib"
     ],
     "tools/publish_to_gcs.py": [
+      "dotenv",
       "google.auth",
       "google.auth.transport.requests",
       "google.cloud",

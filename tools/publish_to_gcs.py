@@ -1,4 +1,4 @@
-"""Provision GCS Bucket (`gs://operational-intelligence-crafter-lake` in `ops-intelligence-crafter`),
+"""Provision GCS Bucket (`gs://operational-intelligence-crafter-lake` in `operational-intelligence-crafter`),
 Sync All Lakehouse GeoParquet/Manifest/QA Artifacts, and Verify Live HTTPS Endpoints.
 
 Enforces:
@@ -16,6 +16,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List
 
+import dotenv
 from google.cloud import storage
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -31,7 +32,11 @@ from src.validation.publish_gate import (
 )
 from src.validation.qa_report import build_qa_summary, render_qa_html_pages
 
-GCP_PROJECT = os.environ.get("OIC_GCP_PROJECT", "ops-intelligence-crafter")
+# Local .env is the documented credential/config store; without this the defaults
+# below silently diverge from the actual bucket project.
+dotenv.load_dotenv(PROJECT_ROOT / ".env")
+
+GCP_PROJECT = os.environ.get("OIC_GCP_PROJECT", "operational-intelligence-crafter")
 BUCKET_NAME = os.environ.get("OIC_GCS_BUCKET", "operational-intelligence-crafter-lake")
 BUCKET_LOCATION = "AUSTRALIA-SOUTHEAST1"
 
@@ -99,7 +104,7 @@ def ensure_project_billing_linked(project_id: str) -> None:
 
 
 def ensure_bucket_provisioned(bucket_name: str) -> tuple[storage.Client, storage.Bucket]:
-    """Ensures the canonical GCS bucket exists in ops-intelligence-crafter with versioning, CORS, and public reader access."""
+    """Ensures the canonical GCS bucket exists in operational-intelligence-crafter with versioning, CORS, and public reader access."""
     ensure_project_billing_linked(GCP_PROJECT)
     client = storage.Client(project=GCP_PROJECT)
     bucket = client.bucket(bucket_name)

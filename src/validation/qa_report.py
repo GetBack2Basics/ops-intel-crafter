@@ -85,8 +85,14 @@ STITCH_TAILWIND_HEAD = """
 def build_qa_summary(
     registry: Optional[DatasetRegistry] = None,
     storage: Optional[GCSLakeStorage] = None,
+    upload_cloud: bool = False,
+    write_local: bool = True,
 ) -> Dict[str, Any]:
-    """Aggregates all per-dataset manifests and 3-level QA records into a single QA summary object."""
+    """Aggregates all per-dataset manifests and 3-level QA records into a single QA summary object.
+
+    Cloud-first: canonical dataset records are read back from GCS first (they may
+    never exist locally), and the summary itself can be published straight to GCS.
+    """
     reg = registry or DatasetRegistry()
     store = storage or GCSLakeStorage()
     report_ts = utc_now_iso()
@@ -106,12 +112,19 @@ def build_qa_summary(
     total_features_stored = 0
     total_bytes_stored = 0
 
+    # Cloud-first: GCS is the canonical source of truth for dataset records.
+    # One list call resolves every record; local staged mirrors are a fallback only.
+    cloud_records = store.read_json_prefix_cloud("manifests/datasets/")
+
     for key in sorted(reg.manifest.datasets.keys()):
         entry = reg.get(key)
-        manifest_file = store.local_path(store.dataset_manifest_object_key(key))
-        if manifest_file.exists():
-            record = json.loads(manifest_file.read_text(encoding="utf-8"))
-        else:
+        object_key = store.dataset_manifest_object_key(key)
+        record = cloud_records.get(object_key)
+        if record is None:
+            manifest_file = store.local_path(object_key)
+            if manifest_file.exists():
+                record = json.loads(manifest_file.read_text(encoding="utf-8"))
+        if record is None:
             is_linked = bool(entry.theme and "AURA" in entry.theme)
             status_val = "LINKED" if is_linked else entry.qa_status.value
             has_endpoint = bool(entry.endpoint and entry.endpoint.startswith("http"))
@@ -203,25 +216,45 @@ def build_qa_summary(
         "datasets": datasets_out,
     }
 
-    # Persist in lakehouse QA reports and docs/qa/data
-    store.write_json(
-        store.qa_report_object_key(report_id, "qa_summary.json"),
-        summary,
-        overwrite=True,
-    )
-    docs_qa_data = store.project_root / "docs" / "qa" / "data"
-    docs_qa_data.mkdir(parents=True, exist_ok=True)
-    (docs_qa_data / "qa_summary.json").write_text(
-        json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    # Persist the QA summary. Cloud-first callers publish straight to GCS; local
+    # staging remains opt-in for offline verification and docs/ mirroring.
+    summary_bytes = json.dumps(summary, indent=2, ensure_ascii=False).encode("utf-8")
+    if write_local:
+        store.write_json(
+            store.qa_report_object_key(report_id, "qa_summary.json"),
+            summary,
+            overwrite=True,
+            upload_cloud=False,
+        )
+        docs_qa_data = store.project_root / "docs" / "qa" / "data"
+        docs_qa_data.mkdir(parents=True, exist_ok=True)
+        (docs_qa_data / "qa_summary.json").write_bytes(summary_bytes)
+    if upload_cloud:
+        store.upload_bytes_cloud(
+            store.qa_report_object_key(report_id, "qa_summary.json"),
+            summary_bytes,
+            content_type="application/json; charset=utf-8",
+        )
+        store.upload_bytes_cloud(
+            "qa/data/qa_summary.json",
+            summary_bytes,
+            content_type="application/json; charset=utf-8",
+        )
+        print(f"QA summary published to GCS: qa/reports/{report_id}/qa_summary.json + qa/data/qa_summary.json")
     return summary
 
 
 def render_qa_html_pages(
     summary: Dict[str, Any],
     output_dir: Optional[Path] = None,
+    storage: Optional[GCSLakeStorage] = None,
+    upload_cloud: bool = False,
 ) -> Dict[str, str]:
-    """Renders `docs/qa/index.html` and `docs/qa/inspect.html` using the Google Stitch design architecture."""
+    """Renders `docs/qa/index.html` and `docs/qa/inspect.html` using the Google Stitch design architecture.
+
+    When `upload_cloud` is set the rendered pages are also published to the
+    canonical GCS QA paths, so web QA never depends on local disk.
+    """
     out_dir = output_dir or (Path(__file__).resolve().parent.parent.parent / "docs" / "qa")
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1112,6 +1145,21 @@ def render_qa_html_pages(
         inspect_path.write_text(geolibre_inspect_path.read_text(encoding="utf-8"), encoding="utf-8")
     else:
         inspect_path.write_text(inspect_html, encoding="utf-8")
+
+    if upload_cloud:
+        store = storage or GCSLakeStorage()
+        for local_page, object_key in (
+            (index_path, "qa/index.html"),
+            (geolibre_inspect_path, "qa/geolibre_qa_inspect.html"),
+            (inspect_path, "qa/inspect.html"),
+        ):
+            if local_page.exists():
+                store.upload_bytes_cloud(
+                    object_key,
+                    local_page.read_bytes(),
+                    content_type="text/html; charset=utf-8",
+                )
+        print("QA web pages published to GCS: qa/index.html, qa/geolibre_qa_inspect.html, qa/inspect.html")
 
     return {"index_html": str(index_path), "inspect_html": str(inspect_path), "geolibre_inspect_html": str(geolibre_inspect_path)}
 

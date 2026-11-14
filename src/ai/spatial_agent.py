@@ -35,14 +35,13 @@ class AISpatialAgent:
         )
 
     def _register_dataset_views(self, dataset_keys: list[str]) -> None:
-        for ds_key in dataset_keys:
-            ds_dir = self.lake_geoparquet_dir / ds_key
-            files = sorted(ds_dir.glob("*/*/part-*.parquet"))
-            if not files:
-                raise FileNotFoundError(
-                    f"Dataset '{ds_key}' has no stored GeoParquet snapshot under {ds_dir}."
-                )
-            self.engine.register_geoparquet_view(ds_key, files[-1])
+        """Registers query views from canonical gs:// snapshots (cloud-first, no local staging)."""
+        registered = self.engine.register_catalogue_views(list(dataset_keys))
+        missing = [k for k in dataset_keys if k not in registered]
+        if missing:
+            raise FileNotFoundError(
+                "Dataset(s) have no stored GeoParquet snapshot (local or GCS): " + ", ".join(missing)
+            )
 
     def ask(
         self,

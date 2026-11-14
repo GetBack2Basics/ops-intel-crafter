@@ -49,7 +49,7 @@ class GCSLakeStorage:
             "OIC_GCS_BUCKET", "operational-intelligence-crafter-lake"
         )
         self.gcp_project = gcp_project or os.environ.get(
-            "OIC_GCP_PROJECT", "ops-intelligence-crafter"
+            "OIC_GCP_PROJECT", "operational-intelligence-crafter"
         )
         self.local_root = local_root or (self.project_root / "data" / "lake")
         if stage_local is None:
@@ -216,4 +216,89 @@ class GCSLakeStorage:
             "gcs_md5_hash": blob.md5_hash,
             "gcs_updated_utc": blob.updated.isoformat() if blob.updated else None,
         }
+
+    # ------------------------------------------------------------------
+    # Cloud-First Operations (zero local staging)
+    # ------------------------------------------------------------------
+    def upload_bytes_cloud(
+        self,
+        object_key: str,
+        data: bytes,
+        dataset_entry: Optional[Dict[str, Any]] = None,
+        content_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Uploads bytes directly from memory to GCS — no local lake staging (cloud-first)."""
+        assert_safe_object_name(object_key)
+        if dataset_entry is not None:
+            assert_publishable_dataset(dataset_entry)
+        try:
+            self._scan_text_for_secrets(data.decode("utf-8"), object_key)
+        except UnicodeDecodeError:
+            pass  # binary payload
+
+        import hashlib
+        import io as _io
+        from google.cloud import storage
+
+        client = storage.Client(project=self.gcp_project or None)
+        blob = client.bucket(self.bucket_name).blob(object_key)
+        blob.cache_control = "public, max-age=300"
+        blob.upload_from_file(
+            _io.BytesIO(data),
+            size=len(data),
+            content_type=content_type or "application/octet-stream",
+        )
+        blob.reload()
+        return {
+            "object_key": object_key,
+            "gs_uri": self.gs_uri(object_key),
+            "gcs_https_url": f"https://storage.googleapis.com/{self.bucket_name}/{object_key}",
+            "local_path": None,
+            "file_size_bytes": len(data),
+            "sha256": hashlib.sha256(data).hexdigest(),
+            "storage_mode": "gcs_canonical_cloud_first",
+            "gcs_generation": str(blob.generation),
+            "gcs_md5_hash": blob.md5_hash,
+        }
+
+    def read_json_cloud(self, object_key: str) -> Optional[Dict[str, Any]]:
+        """Reads a JSON record directly from GCS. Returns None when absent/unreadable."""
+        try:
+            from google.cloud import storage
+            client = storage.Client(project=self.gcp_project or None)
+            blob = client.bucket(self.bucket_name).blob(object_key)
+            if not blob.exists(client):
+                return None
+            return json.loads(blob.download_as_text())
+        except Exception:
+            return None
+
+    def cloud_object_exists(self, object_key: str) -> bool:
+        """Checks whether a canonical object exists in GCS (returns False when unreachable)."""
+        try:
+            from google.cloud import storage
+            client = storage.Client(project=self.gcp_project or None)
+            return client.bucket(self.bucket_name).blob(object_key.lstrip("/")).exists(client)
+        except Exception:
+            return False
+
+    def read_json_prefix_cloud(self, prefix: str) -> Dict[str, Dict[str, Any]]:
+        """Bulk-reads JSON records under a GCS prefix, keyed by full object name.
+
+        Used by the QA summary so a single list call resolves every canonical
+        dataset record instead of issuing per-dataset existence/download round
+        trips. Returns an empty mapping when GCS is unavailable.
+        """
+        try:
+            from google.cloud import storage
+            client = storage.Client(project=self.gcp_project or None)
+            bucket = client.bucket(self.bucket_name)
+            records: Dict[str, Dict[str, Any]] = {}
+            for blob in client.list_blobs(bucket, prefix=prefix):
+                if not blob.name.endswith(".json"):
+                    continue
+                records[blob.name] = json.loads(blob.download_as_text())
+            return records
+        except Exception:
+            return {}
 
