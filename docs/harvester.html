@@ -34,8 +34,9 @@
         <input id="apiKey" type="password" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" placeholder="paste HARVESTER_API_KEY" />
       </div>
       <div>
-        <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Portal dataset URL</label>
-        <input id="portalUrl" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" placeholder="https://www.data.qld.gov.au/dataset/flood-awareness-storm-tide" />
+        <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Data URL (portal page or direct file)</label>
+        <input id="portalUrl" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" placeholder="https://www.data.qld.gov.au/dataset/flood-awareness-storm-tide  OR  https://host/path/data.zip" />
+        <p class="text-xs text-slate-500 mt-1">Accepts CKAN/ODS portal pages and direct data URLs (.zip, .gpkg, .geojson, .csv). Search-result pages are not supported.</p>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
@@ -74,7 +75,7 @@
         <label class="flex items-center gap-2"><input id="dryRun" type="checkbox" checked /> Dry-run (no GCS/Wherobots writes)</label>
         <label class="flex items-center gap-2"><input id="skipWb" type="checkbox" checked /> Skip Wherobots</label>
         <label class="flex items-center gap-2"><input id="refreshGl" type="checkbox" /> Refresh GeoLibre (live only)</label>
-        <label class="flex items-center gap-2"><input id="useJob" type="checkbox" /> Use Cloud Run Job (large datasets)</label>
+        <label class="flex items-center gap-2"><input id="useJob" type="checkbox" checked /> Use Cloud Run Job (recommended for all datasets)</label>
       </div>
       <button id="submitBtn" class="btn">Run harvest</button>
       <span id="status" class="mono text-sm text-slate-400"></span>

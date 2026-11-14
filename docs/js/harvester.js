@@ -105,7 +105,14 @@ function poll(jobId, useJob = false) {
         $("resultBody").textContent = JSON.stringify(d, null, 2);
       }
     } catch (e) {
-      $("status").textContent = "Poll error: " + e.message;
+      if (e.message.includes('unknown job_id')) {
+        $("status").textContent = "Job state lost (instance recycled). Use 'Cloud Run Job' checkbox for reliable execution.";
+        clearInterval(pollTimer);
+        pollTimer = null;
+        $("submitBtn").disabled = false;
+      } else {
+        $("status").textContent = "Poll error: " + e.message;
+      }
     }
   }, useJob ? 10000 : 5000);
 }
