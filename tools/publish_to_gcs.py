@@ -183,7 +183,7 @@ def audit_cloud_inventory(bucket: storage.Bucket) -> Dict[str, Any]:
     total_bytes = 0
     for prefix in CANONICAL_PREFIXES:
         count = 0
-        for blob in bucket.list_blobs(prefix=prefix, fields="name,size"):
+        for blob in bucket.list_blobs(prefix=prefix):
             count += 1
             total_bytes += int(blob.size or 0)
         prefix_counts[prefix] = count
