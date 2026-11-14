@@ -23,6 +23,7 @@ def upload_web_assets():
         ("layers.js", "application/javascript; charset=utf-8"),
         ("geolibre_catalog_engine.js", "application/javascript; charset=utf-8"),
         ("index.html", "text/html; charset=utf-8"),
+        ("harvester.html", "text/html; charset=utf-8"),
         ("style.css", "text/css; charset=utf-8"),
         ("operational-intelligence-crafter.geolibre.json", "application/json; charset=utf-8"),
         ("operational-intelligence-crafter.gcs.geolibre.json", "application/json; charset=utf-8"),

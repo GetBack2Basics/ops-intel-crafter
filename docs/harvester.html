@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Harvester Console — Operational Intelligence Crafter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0a0f1d; color: #f8fafc; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .card { background: #131a2c; border: 1px solid rgba(59,130,246,0.22); border-radius: 0.75rem; padding: 1.25rem; }
+    .btn { background: #0284c7; color: #fff; padding: 0.6rem 1.2rem; border-radius: 0.5rem; font-weight: 600; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .log { background: #050810; border: 1px solid rgba(59,130,246,0.22); border-radius: 0.5rem; padding: 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: pre-wrap; max-height: 420px; overflow: auto; }
+  </style>
+</head>
+<body class="p-6">
+  <div class="max-w-4xl mx-auto space-y-6">
+    <header>
+      <h1 class="text-2xl font-bold text-sky-300">Harvester Console</h1>
+      <p class="text-sm text-slate-400">Deterministic portal → GeoParquet → GCS → QA → (Wherobots) pipeline. Dry-run only in v1.</p>
+    </header>
+
+    <div class="card space-y-4">
+      <div>
+        <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Backend URL (Cloud Run)</label>
+        <input id="backendUrl" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" value="https://oic-harvester-482213551331.australia-southeast1.run.app" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono uppercase text-slate-400 mb-1">API Key</label>
+        <input id="apiKey" type="password" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" placeholder="paste HARVESTER_API_KEY" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Portal dataset URL</label>
+        <input id="portalUrl" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" placeholder="https://www.data.qld.gov.au/dataset/flood-awareness-storm-tide" />
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Dataset key override</label>
+          <input id="keyOverride" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Theme override</label>
+          <input id="themeOverride" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" />
+        </div>
+      </div>
+      <div class="flex items-center gap-4 text-sm">
+        <label class="flex items-center gap-2"><input id="dryRun" type="checkbox" checked /> Dry-run (no GCS/Wherobots writes)</label>
+        <label class="flex items-center gap-2"><input id="skipWb" type="checkbox" checked /> Skip Wherobots</label>
+        <label class="flex items-center gap-2"><input id="refreshGl" type="checkbox" /> Refresh GeoLibre (live only)</label>
+      </div>
+      <button id="submitBtn" class="btn">Run harvest</button>
+      <span id="status" class="mono text-sm text-slate-400"></span>
+    </div>
+
+    <div class="card">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="font-bold">Live log</h2>
+        <span id="jobId" class="mono text-xs text-slate-500"></span>
+      </div>
+      <div id="log" class="log">—</div>
+    </div>
+
+    <div id="result" class="card hidden">
+      <h2 class="font-bold mb-2">Result</h2>
+      <div id="resultBody" class="mono text-sm"></div>
+    </div>
+  </div>
+
+  <script src="js/harvester.js"></script>
+</body>
+</html>

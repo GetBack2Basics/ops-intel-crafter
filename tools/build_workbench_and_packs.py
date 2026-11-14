@@ -161,6 +161,10 @@ def build_workbench_html(bundle: dict, output_html_path: Path) -> None:
             <span class="material-symbols-outlined text-base">travel_explore</span>
             MapLibre Source Inspector
           </a>
+          <a href="harvester.html" class="flex items-center gap-2.5 px-3 py-2 rounded hover:bg-slate-800/70 text-cyan-300">
+            <span class="material-symbols-outlined text-base">cloud_upload</span>
+            Harvester Console (Cloud Run)
+          </a>
           <a href="map_packages/hunter_flood_emergency_pack/index.html" class="flex items-center gap-2.5 px-3 py-2 rounded hover:bg-slate-800/70 text-amber-300">
             <span class="material-symbols-outlined text-base">inventory_2</span>
             Offline Map-in-a-Box Pack
