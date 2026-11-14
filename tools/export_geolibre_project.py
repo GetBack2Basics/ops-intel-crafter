@@ -177,8 +177,9 @@ def main() -> int:
             "opacity": 0.9,
             "source": {
                 "type": "geojson",
-                "format": "geojson",
-                "url": gcs_geojson_url,
+                "s3_path": f"gs://{BUCKET}/{info['name']}",
+                "format": "parquet",
+                "spatial_engine": "DuckDB-WASM",
             },
             "style": style,
             "metadata": {
@@ -189,7 +190,6 @@ def main() -> int:
                 "qa_status": q.get("overall_qa_status") or q.get("overall_status"),
                 "read_parquet_check": read_status,
                 "crs": "EPSG:7844 (GDA2020)",
-                "geoparquet_gcs_uri": f"gs://{BUCKET}/{info['name']}",
             },
         })
 
