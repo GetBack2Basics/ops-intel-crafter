@@ -3,8 +3,10 @@ const BACKEND_KEY = "oic_backend_url";
 const APIKEY_KEY = "oic_api_key";
 
 // Restore saved settings
-$("backendUrl").value = localStorage.getItem(BACKEND_KEY) || "";
-$("apiKey").value = localStorage.getItem(APIKEY_KEY) || "";
+const savedBackend = localStorage.getItem(BACKEND_KEY);
+if (savedBackend) $("backendUrl").value = savedBackend;
+const savedKey = localStorage.getItem(APIKEY_KEY);
+if (savedKey) $("apiKey").value = savedKey;
 
 let pollTimer = null;
 let currentJobId = null;
