@@ -46,6 +46,15 @@
           <input id="themeOverride" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" />
         </div>
       </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Max features (cap)</label>
+          <input id="maxFeatures" type="number" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" placeholder="e.g. 5000" />
+        </div>
+        <div class="flex items-end">
+          <button id="cancelBtn" class="btn bg-rose-600" disabled>Cancel job</button>
+        </div>
+      </div>
       <div class="flex items-center gap-4 text-sm">
         <label class="flex items-center gap-2"><input id="dryRun" type="checkbox" checked /> Dry-run (no GCS/Wherobots writes)</label>
         <label class="flex items-center gap-2"><input id="skipWb" type="checkbox" checked /> Skip Wherobots</label>

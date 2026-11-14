@@ -7,6 +7,7 @@ $("backendUrl").value = localStorage.getItem(BACKEND_KEY) || "";
 $("apiKey").value = localStorage.getItem(APIKEY_KEY) || "";
 
 let pollTimer = null;
+let currentJobId = null;
 
 function saveSettings() {
   localStorage.setItem(BACKEND_KEY, $("backendUrl").value.trim());
@@ -32,7 +33,15 @@ async function api(path, opts = {}) {
   return data;
 }
 
-$("submitBtn").addEventListener("click", async () => {
+$("cancelBtn").addEventListener("click", async () => {
+  if (!currentJobId) return;
+  try {
+    await api(`/harvest/${currentJobId}/cancel`, { method: "POST" });
+    $("status").textContent = "Cancel requested";
+  } catch (e) {
+    $("status").textContent = "Cancel error: " + e.message;
+  }
+});
   const url = $("portalUrl").value.trim();
   if (!url) { alert("Portal URL is required"); return; }
   $("submitBtn").disabled = true;
@@ -45,12 +54,15 @@ $("submitBtn").addEventListener("click", async () => {
       url,
       key: $("keyOverride").value.trim() || null,
       theme: $("themeOverride").value.trim() || null,
+      max_features: $("maxFeatures").value ? parseInt($("maxFeatures").value, 10) : null,
       dry_run: $("dryRun").checked,
       skip_wherobots: $("skipWb").checked,
       refresh_geolibre: $("refreshGl").checked,
     };
     const r = await api("/harvest", { method: "POST", body: JSON.stringify(body) });
     $("jobId").textContent = `job: ${r.job_id}`;
+    currentJobId = r.job_id;
+    $("cancelBtn").disabled = false;
     $("status").textContent = "Running...";
     poll(r.job_id);
   } catch (e) {
@@ -70,6 +82,7 @@ function poll(jobId) {
         clearInterval(pollTimer);
         pollTimer = null;
         $("submitBtn").disabled = false;
+        $("cancelBtn").disabled = true;
         $("status").textContent = d.status === "succeeded" ? "Succeeded" : "Failed";
         if (d.status === "succeeded") {
           $("result").classList.remove("hidden");

@@ -1044,10 +1044,12 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="Ephemeral in-memory validation only (no GCS, no local data staging)")
     parser.add_argument("--skip-gcs", action="store_true", help="Alias for --dry-run (nothing persists locally or in cloud)")
     parser.add_argument("--skip-wherobots", action="store_true", help="Skip Iceberg dispatch")
-    parser.add_argument("--no-register", action="store_true", help="Do not touch the catalogue manifest")
+    parser.add_argument("--max-features", type=int, default=None, help="Cap harvested features (ODS limit= param)")
     args = parser.parse_args()
 
     cfg = load_config(Path(args.config))
+    if args.max_features is not None:
+        cfg.setdefault("portals", {})["max_features"] = int(args.max_features)
     record = harvest_portal_dataset(args.url, cfg, args)
     print("\n" + "=" * 70)
     print(f"DONE: {record['dataset_key']} | {record['overall_qa_status']} | {record['feature_count']} features | {record['stored_crs']}")

@@ -1,14 +1,17 @@
 """Cloud Run service wrapping tools/harvest_portal_dataset.py.
 
 Exposes:
-  POST /harvest  -> {job_id} (202)
-  GET  /harvest/{job_id} -> {status, log_tail, result}
+  POST /harvest              -> {job_id} (202)
+  GET  /harvest/{job_id}     -> {status, log_tail, result}
+  POST /harvest/{job_id}/cancel -> {status}
   GET  /healthz
 
 Auth: X-API-Key header must match the HARVESTER_API_KEY env/secret.
+
+Job state is persisted to GCS (harvest_jobs/{job_id}.json) so polling
+survives instance restarts.
 """
 
-# v2 - PY artifact removed
 from __future__ import annotations
 
 import json
@@ -30,7 +33,7 @@ CONFIG = PROJECT_ROOT / "config" / "harvester_config.json"
 
 API_KEY = os.environ.get("HARVESTER_API_KEY", "")
 
-app = FastAPI(title="OIC Harvester Console", version="0.1.0")
+app = FastAPI(title="OIC Harvester Console", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,7 +42,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-JOBS: Dict[str, Dict[str, Any]] = {}
+# Lazy GCS store (imported after path setup)
+def _store():
+    from src.ingestion.gcs_storage import GCSLakeStorage
+    return GCSLakeStorage()
+
+JOB_PREFIX = "harvest_jobs/"
+PROCS: Dict[str, subprocess.Popen] = {}
 LOCK = threading.Lock()
 
 
@@ -49,7 +58,8 @@ class HarvestRequest(BaseModel):
     theme: Optional[str] = None
     scale: Optional[str] = None
     jurisdiction: Optional[str] = None
-    dry_run: bool = True  # v1: dry-run only by default
+    max_features: Optional[int] = None
+    dry_run: bool = True
     skip_wherobots: bool = True
     refresh_geolibre: bool = False
 
@@ -59,7 +69,29 @@ def _check_key(x_api_key: Optional[str]) -> None:
         raise HTTPException(status_code=401, detail="Invalid or missing X-API-Key")
 
 
-def _tail(path: Path, n: int = 80) -> str:
+def _job_key(job_id: str) -> str:
+    return f"{JOB_PREFIX}{job_id}.json"
+
+
+def _read_job(job_id: str) -> Optional[Dict[str, Any]]:
+    try:
+        return _store().read_json_cloud(_job_key(job_id))
+    except Exception:
+        return None
+
+
+def _write_job(job_id: str, data: Dict[str, Any]) -> None:
+    try:
+        _store().upload_bytes_cloud(
+            _job_key(job_id),
+            json.dumps(data, ensure_ascii=False).encode("utf-8"),
+            content_type="application/json; charset=utf-8",
+        )
+    except Exception:
+        pass
+
+
+def _tail(path: Path, n: int = 200) -> str:
     try:
         lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
     except FileNotFoundError:
@@ -68,16 +100,21 @@ def _tail(path: Path, n: int = 80) -> str:
 
 
 def _run_job(job_id: str, req: HarvestRequest) -> None:
-    JOBS[job_id]["status"] = "running"
-    log_path = Path(JOBS[job_id]["log_path"])
-    args = [
-        "python",
-        str(HARVESTER),
-        "--config",
-        str(CONFIG),
-        "--url",
-        req.url,
-    ]
+    log_path = Path(f"/tmp/oic_harvest_{job_id}.log")
+    state = {
+        "job_id": job_id,
+        "status": "running",
+        "log_path": str(log_path),
+        "started_at": time.time(),
+        "request": req.model_dump(),
+        "returncode": None,
+        "error": None,
+        "cancel_requested": False,
+        "finished_at": None,
+    }
+    _write_job(job_id, state)
+
+    args = ["python", str(HARVESTER), "--config", str(CONFIG), "--url", req.url]
     if req.key:
         args += ["--key", req.key]
     if req.theme:
@@ -86,51 +123,65 @@ def _run_job(job_id: str, req: HarvestRequest) -> None:
         args += ["--scale", req.scale]
     if req.jurisdiction:
         args += ["--jurisdiction", req.jurisdiction]
+    if req.max_features:
+        args += ["--max-features", str(req.max_features)]
     if req.dry_run:
         args += ["--dry-run"]
     if req.skip_wherobots:
         args += ["--skip-wherobots"]
-    if req.refresh_geolibre:
-        # live harvest only; ignored in dry-run
-        pass
 
-    try:
-        with open(log_path, "w", encoding="utf-8") as lf:
-            proc = subprocess.run(
-                args,
-                cwd=str(PROJECT_ROOT),
-                stdout=lf,
-                stderr=subprocess.STDOUT,
-                text=True,
-                timeout=int(os.environ.get("OIC_JOB_TIMEOUT_SEC", "540")),
-            )
-        JOBS[job_id]["returncode"] = proc.returncode
-        if proc.returncode == 0:
-            JOBS[job_id]["status"] = "succeeded"
-            # Optional GeoLibre refresh (only meaningful for live runs)
-            if (not req.dry_run) and req.refresh_geolibre:
-                refresh = PROJECT_ROOT / "tools" / "refresh_geolibre_library.py"
-                if refresh.exists():
-                    with open(log_path, "a", encoding="utf-8") as lf:
-                        lf.write("\n[GEOLIBRE] refreshing library...\n")
-                        subprocess.run(
-                            ["python", str(refresh)],
-                            cwd=str(PROJECT_ROOT),
-                            stdout=lf,
-                            stderr=subprocess.STDOUT,
-                            text=True,
-                            timeout=300,
-                        )
-        else:
-            JOBS[job_id]["status"] = "failed"
-    except subprocess.TimeoutExpired:
-        JOBS[job_id]["status"] = "failed"
-        JOBS[job_id]["error"] = "timeout"
-    except Exception as exc:  # noqa: BLE001
-        JOBS[job_id]["status"] = "failed"
-        JOBS[job_id]["error"] = str(exc)
-    finally:
-        JOBS[job_id]["finished_at"] = time.time()
+    proc = subprocess.Popen(
+        args,
+        cwd=str(PROJECT_ROOT),
+        stdout=open(log_path, "w", encoding="utf-8"),
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    PROCS[job_id] = proc
+
+    last_write = time.time()
+    while True:
+        # check cancel
+        cur = _read_job(job_id) or state
+        if cur.get("cancel_requested"):
+            try:
+                proc.terminate()
+            except Exception:
+                pass
+            state["status"] = "cancelled"
+            break
+        rc = proc.poll()
+        now = time.time()
+        if now - last_write >= 5:
+            state["log_tail"] = _tail(log_path)
+            state["status"] = "running"
+            _write_job(job_id, state)
+            last_write = now
+        if rc is not None:
+            state["returncode"] = rc
+            state["status"] = "succeeded" if rc == 0 else "failed"
+            break
+        time.sleep(2)
+
+    # post-success refresh
+    if state["status"] == "succeeded" and (not req.dry_run) and req.refresh_geolibre:
+        refresh = PROJECT_ROOT / "tools" / "refresh_geolibre_library.py"
+        if refresh.exists():
+            with open(log_path, "a", encoding="utf-8") as lf:
+                lf.write("\n[GEOLIBRE] refreshing library...\n")
+                subprocess.run(
+                    ["python", str(refresh)],
+                    cwd=str(PROJECT_ROOT),
+                    stdout=lf,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    timeout=300,
+                )
+
+    state["log_tail"] = _tail(log_path)
+    state["finished_at"] = time.time()
+    _write_job(job_id, state)
+    PROCS.pop(job_id, None)
 
 
 @app.get("/healthz")
@@ -144,17 +195,22 @@ def harvest(req: HarvestRequest, x_api_key: Optional[str] = Header(default=None)
     if not req.url.lower().startswith(("http://", "https://")):
         raise HTTPException(status_code=400, detail="url must be http(s)")
     with LOCK:
-        # refuse if a job is still running
-        if any(j.get("status") == "running" for j in JOBS.values()):
+        # refuse if a job is still running (best-effort, single instance)
+        running = False
+        for jid in list(PROCS.keys()):
+            if PROCS[jid].poll() is None:
+                running = True
+                break
+        if running:
             raise HTTPException(status_code=409, detail="Another harvest is running; try again later")
         job_id = uuid.uuid4().hex[:12]
-        log_path = Path("/tmp") / f"oic_harvest_{job_id}.log"
-        JOBS[job_id] = {
+        state = {
+            "job_id": job_id,
             "status": "queued",
-            "log_path": str(log_path),
             "started_at": time.time(),
             "request": req.model_dump(),
         }
+        _write_job(job_id, state)
         threading.Thread(target=_run_job, args=(job_id, req), daemon=True).start()
     return {"job_id": job_id}
 
@@ -162,15 +218,28 @@ def harvest(req: HarvestRequest, x_api_key: Optional[str] = Header(default=None)
 @app.get("/harvest/{job_id}")
 def harvest_status(job_id: str, x_api_key: Optional[str] = Header(default=None)) -> Dict[str, Any]:
     _check_key(x_api_key)
-    job = JOBS.get(job_id)
+    job = _read_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="unknown job_id")
-    return {
-        "job_id": job_id,
-        "status": job["status"],
-        "returncode": job.get("returncode"),
-        "error": job.get("error"),
-        "log_tail": _tail(Path(job["log_path"])),
-        "started_at": job["started_at"],
-        "finished_at": job.get("finished_at"),
-    }
+    if "log_tail" not in job:
+        lp = job.get("log_path")
+        if lp:
+            job["log_tail"] = _tail(Path(lp))
+    return job
+
+
+@app.post("/harvest/{job_id}/cancel")
+def cancel(job_id: str, x_api_key: Optional[str] = Header(default=None)) -> Dict[str, Any]:
+    _check_key(x_api_key)
+    job = _read_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="unknown job_id")
+    job["cancel_requested"] = True
+    _write_job(job_id, job)
+    proc = PROCS.get(job_id)
+    if proc is not None and proc.poll() is None:
+        try:
+            proc.terminate()
+        except Exception:
+            pass
+    return {"job_id": job_id, "status": "cancel_requested"}
