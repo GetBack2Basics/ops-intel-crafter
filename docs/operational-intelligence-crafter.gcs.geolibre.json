@@ -61,15 +61,13 @@
       "id": "abs_australia_1km_population_grid",
       "name": "ABS 2025 — Australian Population Grid 1 km² (National Modeled ERP Grid)",
       "groupId": "grp_population",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/abs_australia_1km_population_grid.geojson"
       },
       "style": {
         "circleRadius": 3,
@@ -84,22 +82,21 @@
         "object_updated_utc": "2026-11-14T01:41:12.684000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet"
       }
     },
     {
       "id": "datacenter_candidates_v2",
       "name": "AURA Candidate Siting & Multi-Criteria Ranking Table",
       "groupId": "grp_infrastructure",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/datacenter_candidates_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/datacenter_candidates_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/datacenter_candidates_v2.geojson"
       },
       "style": {
         "circleRadius": 6,
@@ -114,22 +111,21 @@
         "object_updated_utc": "2026-11-13T01:07:37.801000+00:00",
         "qa_status": "LINKED",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/datacenter_candidates_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
       }
     },
     {
       "id": "derived_hunter_1km_population_grid",
       "name": "Derived Hunter 1Km Population Grid",
       "groupId": "grp_population",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T003500Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T003500Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/derived_hunter_1km_population_grid.geojson"
       },
       "style": {
         "circleRadius": 3,
@@ -144,22 +140,21 @@
         "object_updated_utc": "2026-11-10T01:38:37.201000+00:00",
         "qa_status": null,
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T003500Z/part-00000.parquet"
       }
     },
     {
       "id": "flood_awareness_storm_tide",
       "name": "Flood — Awareness — Storm Tide",
       "groupId": "grp_hazards",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T083721Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T083721Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/flood_awareness_storm_tide.geojson"
       },
       "style": {
         "strokeColor": "#64748b",
@@ -172,22 +167,21 @@
         "object_updated_utc": "2026-11-14T08:37:25.908000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T083721Z/part-00000.parquet"
       }
     },
     {
       "id": "ga_electricity_substations",
       "name": "National Electricity Infrastructure — Power Substations",
       "groupId": "grp_infrastructure",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_electricity_substations.geojson"
       },
       "style": {
         "circleRadius": 5,
@@ -202,22 +196,21 @@
         "object_updated_utc": "2026-11-10T01:38:37.524000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet"
       }
     },
     {
       "id": "ga_electricity_transmission_lines",
       "name": "National Electricity Infrastructure — High-Voltage Transmission Lines",
       "groupId": "grp_infrastructure",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_electricity_transmission_lines.geojson"
       },
       "style": {
         "strokeColor": "#f97316",
@@ -230,22 +223,21 @@
         "object_updated_utc": "2026-11-10T01:38:38.958000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet"
       }
     },
     {
       "id": "ga_major_power_stations",
       "name": "National Electricity Infrastructure — Major Power Stations",
       "groupId": "grp_infrastructure",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_major_power_stations.geojson"
       },
       "style": {
         "circleRadius": 6,
@@ -260,22 +252,21 @@
         "object_updated_utc": "2026-11-10T01:38:39.266000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet"
       }
     },
     {
       "id": "ga_seismic_hazard_pga_10pct",
       "name": "National Seismic Hazard Assessment 2018 — PGA Contours (10% in 50 Years)",
       "groupId": "grp_hazards",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_seismic_hazard_pga_10pct.geojson"
       },
       "style": {
         "strokeColor": "#8b5cf6",
@@ -288,22 +279,21 @@
         "object_updated_utc": "2026-11-10T01:38:39.739000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet"
       }
     },
     {
       "id": "national_cyclone_hazard_tcha_v2",
       "name": "Tropical Cyclone Hazard Assessment (TCHA) & AS/NZS 1170.2 Wind Regions",
       "groupId": "grp_hazards",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/national_cyclone_hazard_tcha_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_cyclone_hazard_tcha_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_cyclone_hazard_tcha_v2.geojson"
       },
       "style": {
         "fillColor": "#fb7185",
@@ -318,22 +308,21 @@
         "object_updated_utc": "2026-11-13T01:07:54.556000+00:00",
         "qa_status": "LINKED",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/national_cyclone_hazard_tcha_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
       }
     },
     {
       "id": "national_healthcare_nhsd_v2",
       "name": "National Health Services Directory (NHSD) Hospitals & Health Facilities",
       "groupId": "grp_receptors",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/national_healthcare_nhsd_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_healthcare_nhsd_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_healthcare_nhsd_v2.geojson"
       },
       "style": {
         "circleRadius": 5,
@@ -348,22 +337,21 @@
         "object_updated_utc": "2026-11-13T01:07:41.449000+00:00",
         "qa_status": "LINKED",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/national_healthcare_nhsd_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
       }
     },
     {
       "id": "national_schools_acara_v2",
       "name": "ACARA National Schools Directory",
       "groupId": "grp_receptors",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/national_schools_acara_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_schools_acara_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_schools_acara_v2.geojson"
       },
       "style": {
         "circleRadius": 4,
@@ -378,22 +366,21 @@
         "object_updated_utc": "2026-11-13T01:07:48.121000+00:00",
         "qa_status": "LINKED",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/national_schools_acara_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
       }
     },
     {
       "id": "next_lga_boundaries_asgs2025",
       "name": "ABS ASGS Edition 3 (2025) — Local Government Areas (NExT Administrative Baseline)",
       "groupId": "grp_boundaries",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": false,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/next_lga_boundaries_asgs2025.geojson"
       },
       "style": {
         "fillColor": "#94a3b8",
@@ -408,22 +395,21 @@
         "object_updated_utc": "2026-11-10T01:38:49.698000+00:00",
         "qa_status": "WARNING",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet"
       }
     },
     {
       "id": "next_sa2_boundaries_asgs2021",
       "name": "ABS ASGS 2021 — Statistical Areas Level 2 (SA2 Population & Vulnerability Baseline)",
       "groupId": "grp_boundaries",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": false,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/next_sa2_boundaries_asgs2021.geojson"
       },
       "style": {
         "fillColor": "#94a3b8",
@@ -438,22 +424,21 @@
         "object_updated_utc": "2026-11-10T01:39:01.854000+00:00",
         "qa_status": "WARNING",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet"
       }
     },
     {
       "id": "nsw_coastal_inundation_hazard_v2",
       "name": "NSW Coastal Inundation, Storm Surge and Tidal Extent",
       "groupId": "grp_hazards",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_coastal_inundation_hazard_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_coastal_inundation_hazard_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_coastal_inundation_hazard_v2.geojson"
       },
       "style": {
         "fillColor": "#3b82f6",
@@ -468,22 +453,21 @@
         "object_updated_utc": "2026-11-13T01:08:03.388000+00:00",
         "qa_status": "LINKED",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_coastal_inundation_hazard_v2/AURA-v2/20261113T010735Z/part-00000.parquet"
       }
     },
     {
       "id": "nsw_foi_building_complexes",
       "name": "NSW Features of Interest — Emergency, Health, Education & Community Facilities",
       "groupId": "grp_receptors",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_foi_building_complexes.geojson"
       },
       "style": {
         "fillColor": "#10b981",
@@ -498,22 +482,21 @@
         "object_updated_utc": "2026-11-10T01:39:04.333000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet"
       }
     },
     {
       "id": "nsw_lga_boundaries",
       "name": "NSW Spatial Services — Local Government Area Boundaries",
       "groupId": "grp_boundaries",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": false,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_lga_boundaries.geojson"
       },
       "style": {
         "fillColor": "#94a3b8",
@@ -528,22 +511,21 @@
         "object_updated_utc": "2026-11-14T00:43:26.272000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet"
       }
     },
     {
       "id": "nsw_rfs_major_incidents_live",
       "name": "NSW Rural Fire Service — Current Major Bushfire & Emergency Incidents Feed",
       "groupId": "grp_emergency",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_rfs_major_incidents_live.geojson"
       },
       "style": {
         "circleRadius": 7,
@@ -558,22 +540,21 @@
         "object_updated_utc": "2026-11-10T01:39:09.744000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet"
       }
     },
     {
       "id": "nsw_transmission_grid_v2",
       "name": "High-Voltage Transmission Network and Terminal Substations (>=132kV)",
       "groupId": "grp_infrastructure",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_transmission_grid_v2.geojson"
       },
       "style": {
         "strokeColor": "#f97316",
@@ -586,22 +567,21 @@
         "object_updated_utc": "2026-11-13T01:13:57.466000+00:00",
         "qa_status": "LINKED",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet"
       }
     },
     {
       "id": "nsw_water_inundation_areas",
       "name": "NSW Spatial Services — Fuzzy Extent Water & Flood Inundation Areas",
       "groupId": "grp_hazards",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_water_inundation_areas.geojson"
       },
       "style": {
         "fillColor": "#3b82f6",
@@ -616,22 +596,21 @@
         "object_updated_utc": "2026-11-10T01:39:11.658000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet"
       }
     },
     {
       "id": "qld_cyclones_historical_fixes",
       "name": "Queensland Historical Cyclone Observations & Fixes (Points)",
       "groupId": "grp_emergency",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_fixes.geojson"
       },
       "style": {
         "circleRadius": 5,
@@ -646,22 +625,21 @@
         "object_updated_utc": "2026-11-14T00:29:02.490000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
       }
     },
     {
       "id": "qld_cyclones_historical_tracks",
       "name": "Queensland Historical Cyclone Tracks (Lines)",
       "groupId": "grp_emergency",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_tracks.geojson"
       },
       "style": {
         "strokeColor": "#f43f5e",
@@ -674,22 +652,21 @@
         "object_updated_utc": "2026-11-14T00:28:44.355000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
       }
     },
     {
       "id": "qld_cyclones_historical_wind_areas",
       "name": "Queensland Historical Cyclone Wind Swaths & Hazard Areas (Polygons)",
       "groupId": "grp_hazards",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_wind_areas.geojson"
       },
       "style": {
         "fillColor": "#f59e0b",
@@ -704,22 +681,21 @@
         "object_updated_utc": "2026-11-14T00:29:34.170000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet"
       }
     },
     {
       "id": "qld_flood_awareness_storm_tide",
       "name": "Flood — Awareness — Storm Tide",
       "groupId": "grp_hazards",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_flood_awareness_storm_tide/2025-BRISBANE/20261114T131245Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_flood_awareness_storm_tide/2025-BRISBANE/20261114T131245Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_flood_awareness_storm_tide.geojson"
       },
       "style": {
         "strokeColor": "#64748b",
@@ -732,22 +708,21 @@
         "object_updated_utc": "2026-11-14T13:12:48.540000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_flood_awareness_storm_tide/2025-BRISBANE/20261114T131245Z/part-00000.parquet"
       }
     },
     {
       "id": "qld_storm_tide_high_hazard",
       "name": "Storm Tide High Hazard",
       "groupId": "grp_hazards",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T125013Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T125013Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_storm_tide_high_hazard.geojson"
       },
       "style": {
         "strokeColor": "#64748b",
@@ -760,22 +735,21 @@
         "object_updated_utc": "2026-11-14T12:50:26.746000+00:00",
         "qa_status": "WARNING",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T125013Z/part-00000.parquet"
       }
     },
     {
       "id": "qsc_extracted_data_20261114_174311037395_8872",
       "name": "Qsc Extracted Data 20261114 174311037395 8872",
       "groupId": "grp_hazards",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qsc_extracted_data_20261114_174311037395_8872/2026-INFORMATION/20261114T090011Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qsc_extracted_data_20261114_174311037395_8872/2026-INFORMATION/20261114T090011Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qsc_extracted_data_20261114_174311037395_8872.geojson"
       },
       "style": {
         "strokeColor": "#64748b",
@@ -788,22 +762,21 @@
         "object_updated_utc": "2026-11-14T09:00:37.388000+00:00",
         "qa_status": null,
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qsc_extracted_data_20261114_174311037395_8872/2026-INFORMATION/20261114T090011Z/part-00000.parquet"
       }
     },
     {
       "id": "wa_transmission_grid_v2",
       "name": "Western Power SWIS & Horizon Power Transmission Network (>=66kV)",
       "groupId": "grp_infrastructure",
-      "type": "geoparquet",
+      "type": "geojson",
       "visible": true,
       "opacity": 0.9,
       "source": {
-        "type": "geoparquet",
-        "format": "parquet",
-        "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/wa_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/wa_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet"
+        "type": "geojson",
+        "format": "geojson",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/wa_transmission_grid_v2.geojson"
       },
       "style": {
         "strokeColor": "#f97316",
@@ -816,12 +789,13 @@
         "object_updated_utc": "2026-11-13T01:14:12.010000+00:00",
         "qa_status": "LINKED",
         "read_parquet_check": "PASS",
-        "crs": "EPSG:4326 / EPSG:7844"
+        "crs": "EPSG:7844 (GDA2020)",
+        "geoparquet_gcs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/wa_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet"
       }
     }
   ],
   "metadata": {
-    "generated_utc": "2026-11-14T20:26:15Z",
+    "generated_utc": "2026-11-14T20:51:57Z",
     "generator": "tools/export_geolibre_project.py",
     "datasets_on_gcs": 26,
     "read_failures": [],

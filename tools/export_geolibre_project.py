@@ -167,19 +167,18 @@ def main() -> int:
 
         group, style = classify(key)
         q = qa.get(key, {})
+        gcs_geojson_url = f"https://storage.googleapis.com/{BUCKET}/qa/data/{key}.geojson"
         layers.append({
             "id": key,
             "name": q.get("dataset_name") or q.get("title") or key.replace("_", " ").title(),
             "groupId": group,
-            "type": "geoparquet",
+            "type": "geojson",
             "visible": group != "grp_boundaries",
             "opacity": 0.9,
             "source": {
-                "type": "geoparquet",
-                "format": "parquet",
-                "spatialEngine": "DuckDB-WASM",
-                "gcsUri": f"gs://{BUCKET}/{info['name']}",
-                "url": url,
+                "type": "geojson",
+                "format": "geojson",
+                "url": gcs_geojson_url,
             },
             "style": style,
             "metadata": {
@@ -189,7 +188,8 @@ def main() -> int:
                 "object_updated_utc": info["updated"],
                 "qa_status": q.get("overall_qa_status") or q.get("overall_status"),
                 "read_parquet_check": read_status,
-                "crs": "EPSG:4326 / EPSG:7844",
+                "crs": "EPSG:7844 (GDA2020)",
+                "geoparquet_gcs_uri": f"gs://{BUCKET}/{info['name']}",
             },
         })
 
