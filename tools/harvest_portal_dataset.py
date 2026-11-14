@@ -1193,6 +1193,28 @@ def harvest_portal_dataset(url: str, cfg: Dict[str, Any], args: argparse.Namespa
     else:
         print("Wherobots dispatch skipped (--dry-run/--skip-wherobots).")
 
+    import json as _json
+    _result = {
+        "dataset_key": record["dataset_key"],
+        "feature_count": record["feature_count"],
+        "qa_status": record["overall_qa_status"],
+        "gs_uri": record["gs_uri"],
+        "gcs_https_url": record.get("gcs_https_url"),
+        "qa_inspector_url": f"https://storage.googleapis.com/{cfg['gcs']['bucket']}/qa/geolibre_qa_inspect.html?dataset={record['dataset_key']}",
+        "qa_summary_url": f"https://storage.googleapis.com/{cfg['gcs']['bucket']}/qa/data/qa_summary.json",
+        "wherobots_table": f"org_catalog.ops_intel.{record['dataset_key']}" if not args.skip_wherobots else None,
+    }
+    print("OIC_RESULT_JSON: " + _json.dumps(_result))
+    # Persist result to GCS for the console to read after completion
+    if upload_cloud:
+        try:
+            store.upload_bytes_cloud(
+                "harvest_results/latest.json",
+                ("OIC_RESULT_JSON: " + _json.dumps(_result)).encode("utf-8"),
+                content_type="application/json; charset=utf-8",
+            )
+        except Exception:
+            pass
     return record
 
 
@@ -1228,28 +1250,6 @@ def main() -> int:
     print(f"DONE: {record['dataset_key']} | {record['overall_qa_status']} | {record['feature_count']} features | {record['stored_crs']}")
     print(f"  snapshot: {record['gs_uri']}")
     print("=" * 70)
-    import json as _json
-    _result = {
-        "dataset_key": record["dataset_key"],
-        "feature_count": record["feature_count"],
-        "qa_status": record["overall_qa_status"],
-        "gs_uri": record["gs_uri"],
-        "gcs_https_url": record.get("gcs_https_url"),
-        "qa_inspector_url": f"https://storage.googleapis.com/{cfg['gcs']['bucket']}/qa/geolibre_qa_inspect.html?dataset={record['dataset_key']}",
-        "qa_summary_url": f"https://storage.googleapis.com/{cfg['gcs']['bucket']}/qa/data/qa_summary.json",
-        "wherobots_table": f"org_catalog.ops_intel.{record['dataset_key']}" if not args.skip_wherobots else None,
-    }
-    print("OIC_RESULT_JSON: " + _json.dumps(_result))
-    # Persist result to GCS for the console to read after completion
-    if upload_cloud:
-        try:
-            store.upload_bytes_cloud(
-                "harvest_results/latest.json",
-                ("OIC_RESULT_JSON: " + _json.dumps(_result)).encode("utf-8"),
-                content_type="application/json; charset=utf-8",
-            )
-        except Exception:
-            pass
     return 0
 
 

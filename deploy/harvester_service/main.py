@@ -360,15 +360,14 @@ def harvest_large_status(execution: str, x_api_key: Optional[str] = Header(defau
         status = "succeeded" if succeeded else ("failed" if failed else "completed")
     else:
         status = "running"
-    logs = _fetch_job_logs(execution) if completed else ""
-    result = _parse_result(logs) if (completed and status == "succeeded") else None
+    result = _fetch_job_result() if (completed and status == "succeeded") else None
     return {
         "execution": execution,
         "status": status,
         "completionTime": completed,
         "succeededCount": data.get("succeededCount"),
         "failedCount": data.get("failedCount"),
-        "log_tail": logs[-4000:],
+        "log_tail": "",
         "result": result,
         "log_url": f"https://console.cloud.google.com/run/jobs/executions/details/{REGION}/{execution.split('/')[-1]}/logs?project={PROJECT}",
     }
