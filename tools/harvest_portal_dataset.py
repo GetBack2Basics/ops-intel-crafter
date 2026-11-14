@@ -952,13 +952,19 @@ def harvest_portal_dataset(url: str, cfg: Dict[str, Any], args: argparse.Namespa
     if gdf.crs is None or str(gdf.crs).upper() != "EPSG:4326":
         gdf = gdf.to_crs("EPSG:4326")
 
-    slug = re.sub(r"[^a-z0-9]+", "_", source["dataset_id"].lower()).strip("_")
-    dataset_key = args.key or f"{defaults.get('key_prefix', '')}{slug}"
-    gdf, primary_key = resolve_primary_key(gdf, dataset_key)
-
     title = harvest_meta.get("title") or source["dataset_id"]
     publisher = harvest_meta.get("publisher") or source["host"]
     jurisdiction = args.jurisdiction or cfg["portals"].get("jurisdiction_by_host", {}).get(source["host"]) or defaults.get("jurisdiction", "QLD")
+    if not args.key:
+        slug = re.sub(r"[^a-z0-9]+", "_", source["dataset_id"].lower()).strip("_")
+        # Prefix with jurisdiction code if not already present (matches library naming convention)
+        known_prefixes = ("qld_", "nsw_", "vic_", "wa_", "sa_", "tas_", "nt_", "act_", "ga_", "abs_", "next_", "vic_")
+        if not any(slug.startswith(p) for p in known_prefixes):
+            slug = f"{jurisdiction.lower()}_{slug}"
+        dataset_key = f"{defaults.get('key_prefix', '')}{slug}"
+    else:
+        dataset_key = args.key
+    gdf, primary_key = resolve_primary_key(gdf, dataset_key)
     theme = derive_theme(title, harvest_meta.get("keywords") or [], cfg, args.theme)
     licence = derive_licence(harvest_meta, publisher, cfg)
     geom_type = observed_geometry_type(gdf)
