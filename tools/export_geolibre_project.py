@@ -178,6 +178,8 @@ def main() -> int:
             "source": {
                 "type": "geojson",
                 "s3_path": f"gs://{BUCKET}/{info['name']}",
+                "path": f"https://storage.googleapis.com/{BUCKET}/qa/data/{key}.geojson",
+                "url": f"https://storage.googleapis.com/{BUCKET}/qa/data/{key}.geojson",
                 "format": "parquet",
                 "spatial_engine": "DuckDB-WASM",
             },
