@@ -83,6 +83,9 @@ class HarvestRequest(BaseModel):
     dry_run: bool = True
     skip_wherobots: bool = True
     refresh_geolibre: bool = False
+    licence_name: Optional[str] = None
+    licence_url: Optional[str] = None
+    licence_attribution: Optional[str] = None
 
 
 def _job_key(job_id: str) -> str:
@@ -143,6 +146,12 @@ def _run_job(job_id: str, req: HarvestRequest) -> None:
         args += ["--jurisdiction", req.jurisdiction]
     if req.max_features:
         args += ["--max-features", str(req.max_features)]
+    if req.licence_name:
+        args += ["--licence-name", req.licence_name]
+    if req.licence_url:
+        args += ["--licence-url", req.licence_url]
+    if req.licence_attribution:
+        args += ["--licence-attribution", req.licence_attribution]
     if req.dry_run:
         args += ["--dry-run"]
     if req.skip_wherobots:
@@ -282,6 +291,12 @@ def harvest_large(req: HarvestRequest, x_api_key: Optional[str] = Header(default
         args += ["--jurisdiction", req.jurisdiction]
     if req.max_features:
         args += ["--max-features", str(req.max_features)]
+    if req.licence_name:
+        args += ["--licence-name", req.licence_name]
+    if req.licence_url:
+        args += ["--licence-url", req.licence_url]
+    if req.licence_attribution:
+        args += ["--licence-attribution", req.licence_attribution]
     if req.dry_run:
         args += ["--dry-run"]
     if req.skip_wherobots:

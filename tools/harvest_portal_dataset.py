@@ -1157,12 +1157,21 @@ def main() -> int:
     parser.add_argument("--skip-gcs", action="store_true", help="Alias for --dry-run (nothing persists locally or in cloud)")
     parser.add_argument("--skip-wherobots", action="store_true", help="Skip Iceberg dispatch")
     parser.add_argument("--max-features", type=int, default=None, help="Cap harvested features (ODS limit= param)")
-    parser.add_argument("--no-register", action="store_true", help="Do not touch the catalogue manifest")
+    parser.add_argument("--licence-name", default=None, help="Licence name override (required for direct downloads without portal metadata)")
+    parser.add_argument("--licence-url", default=None, help="Licence URL override")
+    parser.add_argument("--licence-attribution", default=None, help="Licence attribution override")
     args = parser.parse_args()
 
     cfg = load_config(Path(args.config))
     if args.max_features is not None:
         cfg.setdefault("portals", {})["max_features"] = int(args.max_features)
+    if args.licence_name:
+        cfg.setdefault("dataset_defaults", {})["licence_override"] = {
+            "name": args.licence_name,
+            "url": args.licence_url,
+            "attribution": args.licence_attribution or f"© {args.licence_name}",
+            "redistribution_permitted": True,
+        }
     record = harvest_portal_dataset(args.url, cfg, args)
     print("\n" + "=" * 70)
     print(f"DONE: {record['dataset_key']} | {record['overall_qa_status']} | {record['feature_count']} features | {record['stored_crs']}")
