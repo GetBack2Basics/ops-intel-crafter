@@ -177,7 +177,7 @@ def main() -> int:
             "opacity": 0.9,
             "source": {
                 "type": "geojson",
-                "path": f"qa/data/{key}.geojson",
+                "path": f"https://storage.googleapis.com/{BUCKET}/qa/data/{key}.geojson",
                 "gcs_lakehouse": f"gs://{BUCKET}/",
             },
             "style": style,
