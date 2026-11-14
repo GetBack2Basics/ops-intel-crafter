@@ -42,6 +42,7 @@ $("cancelBtn").addEventListener("click", async () => {
     $("status").textContent = "Cancel error: " + e.message;
   }
 });
+$("submitBtn").addEventListener("click", async () => {
   const url = $("portalUrl").value.trim();
   if (!url) { alert("Portal URL is required"); return; }
   $("submitBtn").disabled = true;
