@@ -218,6 +218,18 @@ def resolve_source(url: str, cfg: Dict[str, Any]) -> Dict[str, Any]:
     host = parsed.netloc
     path = parsed.path.rstrip("/")
 
+    # Direct download URL (e.g. QLD Spatial ArcGIS output zip, GeoPackage, GeoJSON, CSV)
+    data_exts = (".zip", ".gpkg", ".geojson", ".json", ".csv", ".shp", ".gdb")
+    if path.lower().endswith(data_exts):
+        stem = Path(path).stem
+        return {
+            "kind": "direct_download",
+            "host": host,
+            "dataset_id": stem,
+            "url": url,
+            "ckan_package": None,
+        }
+
     # Opendatasoft explore URL passed directly
     m = re.match(r"^/explore/dataset/([A-Za-z0-9_\-]+)", path)
     if m:
@@ -764,6 +776,89 @@ def dispatch_wherobots(items: List[Dict[str, Any]], cfg: Dict[str, Any]) -> None
 # ----------------------------------------------------------------------
 # Main pipeline
 # ----------------------------------------------------------------------
+def harvest_direct_download(source: Dict[str, Any], cfg: Dict[str, Any]) -> Tuple[gpd.GeoDataFrame, bytes, Dict[str, Any]]:
+    url = source["url"]
+    host = source["host"]
+    # Determine suffix for temp file
+    parsed = urlparse(url)
+    suffix = Path(parsed.path).suffix or ".bin"
+    tmp, http_status, elapsed_ms = download_to_temp(url, cfg, suffix)
+    raw_bytes = tmp.read_bytes()
+
+    # Determine file type
+    url_l = url.lower().split("?")[0]
+    if url_l.endswith(".zip"):
+        with zipfile.ZipFile(io.BytesIO(raw_bytes)) as zf:
+            names = zf.namelist()
+            gpkg_names = [n for n in names if n.lower().endswith(".gpkg")]
+            shp_names = [n for n in names if n.lower().endswith(".shp")]
+            if gpkg_names:
+                # Extract the gpkg to a temp file and read it
+                import tempfile as _tf
+                fd, gpkg_tmp = _tf.mkstemp(suffix=".gpkg")
+                os.close(fd)
+                with open(gpkg_tmp, "wb") as f:
+                    f.write(zf.read(gpkg_names[0]))
+                gdf = gpd.read_file(gpkg_tmp)
+                Path(gpkg_tmp).unlink(missing_ok=True)
+            elif shp_names:
+                gdf = gpd.read_file(io.BytesIO(raw_bytes))
+            else:
+                tmp.unlink(missing_ok=True)
+                raise HarvestAbort(f"ZIP contains no .shp or .gpkg member: {url} ({names[:10]})")
+    elif url_l.endswith(".gpkg"):
+        gdf = gpd.read_file(tmp)
+    elif url_l.endswith((".geojson", ".json")):
+        gdf = gpd.read_file(tmp)
+    elif url_l.endswith(".csv"):
+        import pandas as pd
+        df = pd.read_csv(tmp)
+        cols_lower = {c.lower().strip(): c for c in df.columns}
+        lat_col = next((cols_lower[c] for c in sorted(cols_lower) if c in LAT_CANDIDATES), None)
+        lon_col = next((cols_lower[c] for c in sorted(cols_lower) if c in LON_CANDIDATES), None)
+        if not lat_col or not lon_col:
+            tmp.unlink(missing_ok=True)
+            raise HarvestAbort(f"CSV has no recognizable lat/lon columns: {url}")
+        from shapely.geometry import Point
+        geom = [Point(xy) for xy in zip(df[lon_col], df[lat_col])]
+        gdf = gpd.GeoDataFrame(df.drop(columns=[lat_col, lon_col]), geometry=geom, crs="EPSG:4326")
+    elif url_l.endswith(".shp"):
+        gdf = gpd.read_file(tmp)
+    else:
+        tmp.unlink(missing_ok=True)
+        raise HarvestAbort(f"Unsupported direct-download format: {url}")
+
+    tmp.unlink(missing_ok=True)
+    if gdf.crs is None:
+        if url_l.endswith(".csv"):
+            pass  # already set
+        else:
+            raise HarvestAbort(f"Resource has no declared CRS: {url} (zero-mock: refusing to assume EPSG:4326)")
+    elif str(gdf.crs).upper() != "EPSG:4326":
+        gdf = gdf.to_crs("EPSG:4326")
+
+    # Determine title from filename
+    stem = Path(urlparse(url).path).stem
+    title = stem.replace("_", " ").replace("-", " ").title()
+
+    harvest_meta = {
+        "endpoint": url,
+        "service_type": "direct_download",
+        "http_status": http_status,
+        "download_ms": elapsed_ms,
+        "probed_count": None,
+        "probe_detail": "Count derived from downloaded file (no independent count API for direct downloads)",
+        "title": title,
+        "license_name": None,
+        "license_url": None,
+        "keywords": [],
+        "modified": None,
+        "publisher": host,
+        "portal_host": host,
+    }
+    return gdf, raw_bytes, harvest_meta
+
+
 def harvest_portal_dataset(url: str, cfg: Dict[str, Any], args: argparse.Namespace) -> Dict[str, Any]:
     now_utc = datetime.now(timezone.utc)
     timestamp = now_utc.strftime("%Y%m%dT%H%M%SZ")
@@ -782,6 +877,8 @@ def harvest_portal_dataset(url: str, cfg: Dict[str, Any], args: argparse.Namespa
     # 2. Harvest
     if source["kind"] == "ods":
         gdf, raw_bytes, harvest_meta = harvest_ods(source, cfg)
+    elif source["kind"] == "direct_download":
+        gdf, raw_bytes, harvest_meta = harvest_direct_download(source, cfg)
     else:
         gdf, raw_bytes, harvest_meta = harvest_ckan_resource(source, cfg)
     print(f"Harvested {len(gdf)} features ({harvest_meta['download_ms']} ms) from {harvest_meta['endpoint']}")
@@ -1076,4 +1173,6 @@ def main() -> int:
 
 if __name__ == "__main__":
     code = main()
+    sys.stdout.flush()
+    sys.stderr.flush()
     os._exit(code if isinstance(code, int) else 0)
