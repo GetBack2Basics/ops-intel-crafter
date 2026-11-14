@@ -150,8 +150,6 @@ def _run_job(job_id: str, req: HarvestRequest) -> None:
         args += ["--licence-name", req.licence_name]
     if req.licence_url:
         args += ["--licence-url", req.licence_url]
-    if req.licence_attribution:
-        args += ["--licence-attribution", req.licence_attribution]
     if req.dry_run:
         args += ["--dry-run"]
     if req.skip_wherobots:
@@ -295,8 +293,6 @@ def harvest_large(req: HarvestRequest, x_api_key: Optional[str] = Header(default
         args += ["--licence-name", req.licence_name]
     if req.licence_url:
         args += ["--licence-url", req.licence_url]
-    if req.licence_attribution:
-        args += ["--licence-attribution", req.licence_attribution]
     if req.dry_run:
         args += ["--dry-run"]
     if req.skip_wherobots:
