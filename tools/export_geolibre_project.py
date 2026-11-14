@@ -177,7 +177,7 @@ def main() -> int:
             "opacity": 0.9,
             "source": {
                 "type": "geojson",
-                "s3_path": f"gs://{BUCKET}/{info['name']}",
+                "s3_path": f"https://storage.googleapis.com/{BUCKET}/{info['name']}",
                 "path": f"https://storage.googleapis.com/{BUCKET}/qa/data/{key}.geojson",
                 "url": f"https://storage.googleapis.com/{BUCKET}/qa/data/{key}.geojson",
                 "format": "parquet",
