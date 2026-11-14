@@ -51,7 +51,7 @@
 & .\.venv\Scripts\python.exe tools\build_workbench_and_packs.py
 
 # 4. Audit canonical GCS artifacts, rebuild QA reports, and publish web deliverables
-#    (cloud-first: no local data/lake staging is read or written)
+#    (cloud-first: no local staging is read or written)
 & .\.venv\Scripts\python.exe tools\publish_to_gcs.py
 ```
 

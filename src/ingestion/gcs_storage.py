@@ -1,4 +1,4 @@
-"""Google Cloud Storage & Local Lakehouse Mirror Storage Manager.
+"""Google Cloud Storage Storage Manager (Cloud-First).
 
 Enforces the canonical GCS layout:
 gs://<bucket>/
@@ -11,15 +11,18 @@ gs://<bucket>/
     exports/<analysis_id>/
     map_packages/<package_id>/
 
-Supports local staging under `data/lake/` mirroring the exact object key hierarchy
-when `OIC_STAGE_LOCAL=1` (default for local verification), and explicit GCS upload
-with object generation tracking and pre-upload publish_gate enforcement.
+Cloud-first is the default: bytes are uploaded straight from memory to GCS and no
+local lake staging is written. An explicit local mirror is still possible for offline
+debugging by setting `OIC_LOCAL_LAKE_ROOT` (and `OIC_STAGE_LOCAL=1`); it is never a
+silent fallback.
 """
 
+import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from src.ingestion.telemetry import compute_sha256
 from src.validation.publish_gate import (
@@ -51,11 +54,22 @@ class GCSLakeStorage:
         self.gcp_project = gcp_project or os.environ.get(
             "OIC_GCP_PROJECT", "operational-intelligence-crafter"
         )
-        self.local_root = local_root or (self.project_root / "data" / "lake")
-        if stage_local is None:
-            self.stage_local = os.environ.get("OIC_STAGE_LOCAL", "1") == "1"
+        if local_root is not None:
+            self.local_root: Optional[Path] = Path(local_root)
         else:
-            self.stage_local = stage_local
+            env_root = os.environ.get("OIC_LOCAL_LAKE_ROOT", "").strip()
+            self.local_root = (
+                (self.project_root / env_root).resolve()
+                if env_root
+                else None
+            )
+        if stage_local is None:
+            self.stage_local = (
+                os.environ.get("OIC_STAGE_LOCAL", "0") == "1"
+                and self.local_root is not None
+            )
+        else:
+            self.stage_local = bool(stage_local)
         self._secrets = load_env_secret_values(self.project_root)
 
     # ------------------------------------------------------------------
@@ -92,10 +106,24 @@ class GCSLakeStorage:
         return f"gs://{self.bucket_name}/{object_key.lstrip('/')}"
 
     def local_path(self, object_key: str) -> Path:
+        """Resolves an object key inside the explicit offline mirror.
+
+        Raises when no mirror is configured: cloud-first callers must never fall
+        back to local disk implicitly.
+        """
+        if self.local_root is None:
+            raise RuntimeError(
+                "No local lake mirror configured. Cloud-first storage writes directly to GCS. "
+                "Set OIC_LOCAL_LAKE_ROOT (and OIC_STAGE_LOCAL=1) only for an explicit offline mirror."
+            )
         return self.local_root / object_key.lstrip("/")
 
+    def optional_local_path(self, object_key: str) -> Optional[Path]:
+        """Returns the mirror path when a mirror is configured, else None (read-only probe)."""
+        return None if self.local_root is None else self.local_root / object_key.lstrip("/")
+
     # ------------------------------------------------------------------
-    # Local Staging & Cloud Upload Operations
+    # Artifact Write Operations (cloud-first by default)
     # ------------------------------------------------------------------
     def _scan_text_for_secrets(self, text: str, object_key: str) -> None:
         for secret in self._secrets:
@@ -109,11 +137,29 @@ class GCSLakeStorage:
         object_key: str,
         data: bytes,
         dataset_entry: Optional[Dict[str, Any]] = None,
-        upload_cloud: bool = False,
+        upload_cloud: bool = True,
         overwrite: bool = False,
     ) -> Dict[str, Any]:
-        """Writes an artifact to the local lake mirror and optionally uploads to GCS."""
+        """Writes an artifact cloud-first (memory -> GCS).
+
+        Passing `upload_cloud=False` requires an explicit offline mirror
+        (`OIC_LOCAL_LAKE_ROOT` plus `OIC_STAGE_LOCAL=1`); there is no silent
+        local fallback.
+        """
         assert_safe_object_name(object_key)
+        if upload_cloud:
+            result = self.upload_bytes_cloud(
+                object_key, data, dataset_entry=dataset_entry
+            )
+            result["overwrite"] = overwrite
+            return result
+
+        if not (self.stage_local and self.local_root is not None):
+            raise RuntimeError(
+                "Local lake writing is disabled (cloud-first default). Upload to GCS instead, "
+                "or set OIC_LOCAL_LAKE_ROOT and OIC_STAGE_LOCAL=1 for an explicit offline mirror."
+            )
+
         dest = self.local_path(object_key)
         if dest.exists() and not overwrite and not object_key.startswith("manifests/datasets/"):
             raise FileExistsError(
@@ -121,32 +167,22 @@ class GCSLakeStorage:
             )
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_bytes(data)
-        sha256_hex = compute_sha256(dest)
-
-        result = {
+        return {
             "object_key": object_key,
             "gs_uri": self.gs_uri(object_key),
             "local_path": str(dest.relative_to(self.project_root)).replace("\\", "/"),
             "file_size_bytes": len(data),
-            "sha256": sha256_hex,
-            "storage_mode": "local_staged_mirror",
-            "gcs_generation": "local-staged-pending-gcs-sync",
+            "sha256": hashlib.sha256(data).hexdigest(),
+            "storage_mode": "local_staged_mirror_explicit",
+            "gcs_generation": None,
         }
-
-        if upload_cloud:
-            cloud_meta = self.upload_file_to_gcs(
-                local_file=dest, object_key=object_key, dataset_entry=dataset_entry
-            )
-            result.update(cloud_meta)
-
-        return result
 
     def write_json(
         self,
         object_key: str,
         payload: Dict[str, Any],
         dataset_entry: Optional[Dict[str, Any]] = None,
-        upload_cloud: bool = False,
+        upload_cloud: bool = True,
         overwrite: bool = False,
     ) -> Dict[str, Any]:
         text = json.dumps(payload, indent=2, ensure_ascii=False)
@@ -164,33 +200,37 @@ class GCSLakeStorage:
         parquet_file: Path,
         object_key: str,
         dataset_entry: Optional[Dict[str, Any]] = None,
-        upload_cloud: bool = False,
+        upload_cloud: bool = True,
     ) -> Dict[str, Any]:
-        """Registers an already-written GeoParquet file in the lakehouse hierarchy."""
+        """Registers an already-written GeoParquet file cloud-first (uploads from disk to GCS)."""
         assert_safe_object_name(object_key)
         if not parquet_file.exists():
             raise FileNotFoundError(f"GeoParquet file not found: {parquet_file}")
 
-        sha256_hex = compute_sha256(parquet_file)
-        size_bytes = parquet_file.stat().st_size
-
-        result = {
-            "object_key": object_key,
-            "gs_uri": self.gs_uri(object_key),
-            "local_path": str(parquet_file.relative_to(self.project_root)).replace("\\", "/"),
-            "file_size_bytes": size_bytes,
-            "sha256": sha256_hex,
-            "storage_mode": "local_staged_mirror",
-            "gcs_generation": "local-staged-pending-gcs-sync",
-        }
-
         if upload_cloud:
-            cloud_meta = self.upload_file_to_gcs(
+            return self.upload_file_to_gcs(
                 local_file=parquet_file, object_key=object_key, dataset_entry=dataset_entry
             )
-            result.update(cloud_meta)
 
-        return result
+        if not (self.stage_local and self.local_root is not None):
+            raise RuntimeError(
+                "Local lake writing is disabled (cloud-first default). Set OIC_LOCAL_LAKE_ROOT "
+                "and OIC_STAGE_LOCAL=1 for an explicit offline mirror."
+            )
+
+        dest = self.local_path(object_key)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if parquet_file.resolve() != dest.resolve():
+            shutil.copyfile(parquet_file, dest)
+        return {
+            "object_key": object_key,
+            "gs_uri": self.gs_uri(object_key),
+            "local_path": str(dest.relative_to(self.project_root)).replace("\\", "/"),
+            "file_size_bytes": dest.stat().st_size,
+            "sha256": compute_sha256(dest),
+            "storage_mode": "local_staged_mirror_explicit",
+            "gcs_generation": None,
+        }
 
     def upload_file_to_gcs(
         self,
@@ -198,7 +238,7 @@ class GCSLakeStorage:
         object_key: str,
         dataset_entry: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-        """Uploads a verified local lakehouse artifact to Google Cloud Storage."""
+        """Uploads a local artifact to Google Cloud Storage (canonical storage)."""
         assert_safe_object_name(object_key)
         if dataset_entry is not None:
             assert_publishable_dataset(dataset_entry)
@@ -208,9 +248,16 @@ class GCSLakeStorage:
         client = storage.Client(project=self.gcp_project or None)
         bucket = client.bucket(self.bucket_name)
         blob = bucket.blob(object_key)
+        blob.cache_control = "public, max-age=300"
         blob.upload_from_filename(str(local_file))
         blob.reload()
         return {
+            "object_key": object_key,
+            "gs_uri": self.gs_uri(object_key),
+            "gcs_https_url": f"https://storage.googleapis.com/{self.bucket_name}/{object_key}",
+            "local_path": None,
+            "file_size_bytes": local_file.stat().st_size,
+            "sha256": compute_sha256(local_file),
             "storage_mode": "gcs_canonical",
             "gcs_generation": str(blob.generation),
             "gcs_md5_hash": blob.md5_hash,
@@ -281,6 +328,30 @@ class GCSLakeStorage:
             return client.bucket(self.bucket_name).blob(object_key.lstrip("/")).exists(client)
         except Exception:
             return False
+
+    def read_bytes_cloud(self, object_key: str) -> Optional[bytes]:
+        """Reads raw bytes directly from GCS. Returns None when absent/unreadable."""
+        try:
+            from google.cloud import storage
+            client = storage.Client(project=self.gcp_project or None)
+            blob = client.bucket(self.bucket_name).blob(object_key.lstrip("/"))
+            if not blob.exists(client):
+                return None
+            return blob.download_as_bytes()
+        except Exception:
+            return None
+
+    def list_cloud_objects(self, prefix: str) -> List[str]:
+        """Lists canonical object names under a GCS prefix (empty list when unreachable)."""
+        try:
+            from google.cloud import storage
+            client = storage.Client(project=self.gcp_project or None)
+            return sorted(
+                blob.name
+                for blob in client.list_blobs(self.bucket_name, prefix=prefix)
+            )
+        except Exception:
+            return []
 
     def read_json_prefix_cloud(self, prefix: str) -> Dict[str, Dict[str, Any]]:
         """Bulk-reads JSON records under a GCS prefix, keyed by full object name.

@@ -22,6 +22,7 @@ import geopandas as gpd
 from shapely.geometry import box, mapping
 
 from src.catalogue.dataset_registry import DatasetRegistry
+from src.ingestion.gcs_storage import GCSLakeStorage
 from src.ingestion.telemetry import compute_sha256, utc_now_iso
 
 
@@ -577,7 +578,6 @@ def build_offline_map_package(
     package_id: str,
     title: str,
     bbox_4326: List[float],
-    lake_geoparquet_dir: Path,
     grid_gdf: gpd.GeoDataFrame,
     population_study: Dict[str, Any],
     output_package_dir: Path,
@@ -589,9 +589,23 @@ def build_offline_map_package(
     data_dir.mkdir(parents=True, exist_ok=True)
     assets_dir.mkdir(parents=True, exist_ok=True)
 
+    store = GCSLakeStorage()
+
+    def _snapshot_uri(ds_key: str) -> str:
+        entry = registry.get(ds_key)
+        snapshot = entry.latest_snapshot_path
+        if not snapshot:
+            raise FileNotFoundError(
+                f"Dataset '{ds_key}' has no stored GeoParquet snapshot in the catalogue manifest."
+            )
+        uri = str(snapshot)
+        if uri.startswith(("gs://", "http://", "https://")):
+            return uri
+        local = store.project_root / uri
+        return str(local) if local.exists() else store.gs_uri(uri)
+
     def _latest(ds_key: str) -> gpd.GeoDataFrame:
-        files = sorted((lake_geoparquet_dir / ds_key).glob("*/*/part-*.parquet"))
-        return gpd.read_parquet(files[-1])
+        return gpd.read_parquet(_snapshot_uri(ds_key))
 
     layer_defs = {
         "population_grid_1km": (grid_gdf, "next_sa2_boundaries_asgs2021", 600),

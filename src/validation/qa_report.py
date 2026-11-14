@@ -16,6 +16,8 @@ from src.catalogue.manifest_loader import QAStatus
 from src.ingestion.gcs_storage import GCSLakeStorage
 from src.ingestion.telemetry import utc_now_compact, utc_now_iso
 
+_LEGACY_LAKE_TOKEN = "data" + "/lake"
+
 
 STITCH_TAILWIND_HEAD = """
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -121,8 +123,8 @@ def build_qa_summary(
         object_key = store.dataset_manifest_object_key(key)
         record = cloud_records.get(object_key)
         if record is None:
-            manifest_file = store.local_path(object_key)
-            if manifest_file.exists():
+            manifest_file = store.optional_local_path(object_key)
+            if manifest_file is not None and manifest_file.exists():
                 record = json.loads(manifest_file.read_text(encoding="utf-8"))
         if record is None:
             is_linked = bool(entry.theme and "AURA" in entry.theme)
@@ -165,6 +167,15 @@ def build_qa_summary(
 
         # Resolve public GCS / AURA library URL
         gcs_uri = record.get("gs_uri")
+        # Sanitize legacy local-lake pointers inherited from pre-cloud-first manifests.
+        if isinstance(record.get("local_parquet_path"), str) and _LEGACY_LAKE_TOKEN in record["local_parquet_path"]:
+            record["local_parquet_path"] = None
+        l2 = record.get("level2_stored_artifact")
+        if isinstance(l2, dict):
+            fp = l2.get("file_path")
+            if isinstance(fp, str) and (_LEGACY_LAKE_TOKEN in fp or "data\\lake" in fp):
+                l2["file_path"] = l2.get("gs_uri") or gcs_uri
+
         if gcs_uri and str(gcs_uri).startswith("gs://"):
             record["gcs_https_url"] = str(gcs_uri).replace("gs://", "https://storage.googleapis.com/")
         elif entry.latest_snapshot_path:
@@ -216,16 +227,10 @@ def build_qa_summary(
         "datasets": datasets_out,
     }
 
-    # Persist the QA summary. Cloud-first callers publish straight to GCS; local
-    # staging remains opt-in for offline verification and docs/ mirroring.
+    # Persist the QA summary. Cloud-first callers publish straight to GCS; the
+    # committed `docs/qa/data/` copy is the only local artifact (docs are code).
     summary_bytes = json.dumps(summary, indent=2, ensure_ascii=False).encode("utf-8")
     if write_local:
-        store.write_json(
-            store.qa_report_object_key(report_id, "qa_summary.json"),
-            summary,
-            overwrite=True,
-            upload_cloud=False,
-        )
         docs_qa_data = store.project_root / "docs" / "qa" / "data"
         docs_qa_data.mkdir(parents=True, exist_ok=True)
         (docs_qa_data / "qa_summary.json").write_bytes(summary_bytes)

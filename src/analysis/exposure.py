@@ -1,7 +1,6 @@
 """Multi-Scale Emergency Exposure Analysis (Local, State/Regional, and National Scales)."""
 
 import time
-from pathlib import Path
 from typing import Any, Dict
 
 from src.engines.duckdb_engine import DuckDBSpatialEngine
@@ -9,29 +8,21 @@ from src.engines.duckdb_engine import DuckDBSpatialEngine
 
 def run_multi_scale_exposure_analysis(
     engine: DuckDBSpatialEngine,
-    lake_geoparquet_dir: Path,
 ) -> Dict[str, Any]:
     """Executes verifiable emergency exposure analyses across Local, Regional/State, and National scales
-    directly against stored GeoParquet snapshots in DuckDB Spatial.
+    directly against catalogue-resolved GeoParquet snapshots (gs://) in DuckDB Spatial.
     """
     t0 = time.perf_counter()
 
-    def _latest_parquet(ds_key: str) -> Path:
-        ds_dir = lake_geoparquet_dir / ds_key
-        files = sorted(ds_dir.glob("*/*/part-*.parquet"))
-        if not files:
-            raise FileNotFoundError(f"No stored GeoParquet found for {ds_key} under {ds_dir}")
-        return files[-1]
-
-    engine.register_geoparquet_view("substations", _latest_parquet("ga_electricity_substations"))
-    engine.register_geoparquet_view("power_stations", _latest_parquet("ga_major_power_stations"))
-    engine.register_geoparquet_view("tx_lines", _latest_parquet("ga_electricity_transmission_lines"))
-    engine.register_geoparquet_view("seismic_pga", _latest_parquet("ga_seismic_hazard_pga_10pct"))
-    engine.register_geoparquet_view("lga_asgs", _latest_parquet("next_lga_boundaries_asgs2025"))
-    engine.register_geoparquet_view("sa2_asgs", _latest_parquet("next_sa2_boundaries_asgs2021"))
-    engine.register_geoparquet_view("foi_buildings", _latest_parquet("nsw_foi_building_complexes"))
-    engine.register_geoparquet_view("inundation", _latest_parquet("nsw_water_inundation_areas"))
-    engine.register_geoparquet_view("rfs_incidents", _latest_parquet("nsw_rfs_major_incidents_live"))
+    engine.register_catalogue_view("substations", "ga_electricity_substations")
+    engine.register_catalogue_view("power_stations", "ga_major_power_stations")
+    engine.register_catalogue_view("tx_lines", "ga_electricity_transmission_lines")
+    engine.register_catalogue_view("seismic_pga", "ga_seismic_hazard_pga_10pct")
+    engine.register_catalogue_view("lga_asgs", "next_lga_boundaries_asgs2025")
+    engine.register_catalogue_view("sa2_asgs", "next_sa2_boundaries_asgs2021")
+    engine.register_catalogue_view("foi_buildings", "nsw_foi_building_complexes")
+    engine.register_catalogue_view("inundation", "nsw_water_inundation_areas")
+    engine.register_catalogue_view("rfs_incidents", "nsw_rfs_major_incidents_live")
 
     # 1. LOCAL SCALE: Lower Hunter Flood & Inundation Facility Exposure (within 250m metric buffer in EPSG:3112)
     local_sql = """

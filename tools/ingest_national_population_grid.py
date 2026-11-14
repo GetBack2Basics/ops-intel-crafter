@@ -10,7 +10,7 @@
   (result.parquet, result.geojson, analysis_manifest.json).
 - Publishes canonical dataset/QA manifests and updates `config/dataset_manifest.json`.
 
-No `data/lake/` staging is written. Passing `upload_cloud=False` performs a fully
+No local lake staging is written. Passing `upload_cloud=False` performs a fully
 ephemeral dry-run: validation runs against a temp file and nothing is persisted.
 """
 

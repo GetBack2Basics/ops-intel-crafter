@@ -13,22 +13,30 @@ Zero mock data: all coordinates, extents, and localities sourced directly from l
 
 import json
 from pathlib import Path
-import glob
 import duckdb
+
+from src.catalogue.dataset_registry import DatasetRegistry
+from src.ingestion.gcs_storage import GCSLakeStorage
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-def find_latest_parquet(dataset_dir_name: str) -> Path:
-    candidates = glob.glob(str(PROJECT_ROOT / "data" / "lake" / "geoparquet" / dataset_dir_name / "**" / "*.parquet"), recursive=True)
-    if not candidates:
-        raise FileNotFoundError(f"No parquet found for dataset {dataset_dir_name}")
-    candidates.sort()
-    return Path(candidates[-1])
+def snapshot_uri(dataset_key: str) -> str:
+    """Resolves a catalogue dataset to its canonical readable snapshot (gs://, cloud-first)."""
+    store = GCSLakeStorage()
+    entry = DatasetRegistry().get(dataset_key)
+    snapshot = entry.latest_snapshot_path
+    if not snapshot:
+        raise FileNotFoundError(f"No stored GeoParquet snapshot for dataset {dataset_key}")
+    uri = str(snapshot)
+    if uri.startswith(("gs://", "http://", "https://")):
+        return uri
+    local = store.project_root / uri
+    return str(local) if local.exists() else store.gs_uri(uri)
 
-LGA_PARQUET = find_latest_parquet("next_lga_boundaries_asgs2025")
-SA2_PARQUET = find_latest_parquet("next_sa2_boundaries_asgs2021")
-SUB_PARQUET = find_latest_parquet("ga_electricity_substations")
-POW_PARQUET = find_latest_parquet("ga_major_power_stations")
+LGA_PARQUET = snapshot_uri("next_lga_boundaries_asgs2025")
+SA2_PARQUET = snapshot_uri("next_sa2_boundaries_asgs2021")
+SUB_PARQUET = snapshot_uri("ga_electricity_substations")
+POW_PARQUET = snapshot_uri("ga_major_power_stations")
 
 OUTPUT_JSON = PROJECT_ROOT / "docs" / "data" / "locality_gazetteer.json"
 COMPACT_JSON = PROJECT_ROOT / "docs" / "data" / "lga_gazetteer_compact.json"
@@ -98,7 +106,7 @@ def main():
         gazetteer[k] = v
 
     # 3. All ABS ASGS 2025 LGAs
-    print(f"[GAZETTEER] Querying LGAs from {LGA_PARQUET.name}...")
+    print(f"[GAZETTEER] Querying LGAs from {Path(LGA_PARQUET).name}...")
     lga_rows = conn.execute(f"""
         SELECT
             lga_code,
@@ -108,7 +116,7 @@ def main():
             ROUND(_bbox_miny, 4) AS miny,
             ROUND(_bbox_maxx, 4) AS maxx,
             ROUND(_bbox_maxy, 4) AS maxy
-        FROM '{LGA_PARQUET.as_posix()}'
+        FROM '{LGA_PARQUET}'
         WHERE _bbox_minx IS NOT NULL AND _bbox_maxx IS NOT NULL
     """).fetchall()
 
@@ -134,7 +142,7 @@ def main():
             gazetteer[stripped] = entry
 
     # 4. All Suburbs & Towns from ASGS 2021 SA2
-    print(f"[GAZETTEER] Querying SA2s from {SA2_PARQUET.name}...")
+    print(f"[GAZETTEER] Querying SA2s from {Path(SA2_PARQUET).name}...")
     sa2_rows = conn.execute(f"""
         SELECT
             sa2_code_2021,
@@ -144,7 +152,7 @@ def main():
             ROUND(_bbox_miny, 4) AS miny,
             ROUND(_bbox_maxx, 4) AS maxx,
             ROUND(_bbox_maxy, 4) AS maxy
-        FROM '{SA2_PARQUET.as_posix()}'
+        FROM '{SA2_PARQUET}'
         WHERE _bbox_minx IS NOT NULL AND _bbox_maxx IS NOT NULL
     """).fetchall()
 
@@ -181,7 +189,7 @@ def main():
                     gazetteer[p_clean] = entry
 
     # 5. Localities from Geoscience Australia Electricity Substations (1,475 distinct localities)
-    print(f"[GAZETTEER] Querying infrastructure localities from {SUB_PARQUET.name}...")
+    print(f"[GAZETTEER] Querying infrastructure localities from {Path(SUB_PARQUET).name}...")
     sub_rows = conn.execute(f"""
         SELECT
             TRIM(locality) AS locality,
@@ -193,7 +201,7 @@ def main():
             ROUND(AVG((_bbox_minx + _bbox_maxx) / 2), 4) AS cx,
             ROUND(AVG((_bbox_miny + _bbox_maxy) / 2), 4) AS cy,
             COUNT(*) AS sub_count
-        FROM '{SUB_PARQUET.as_posix()}'
+        FROM '{SUB_PARQUET}'
         WHERE locality IS NOT NULL AND locality != ''
         GROUP BY TRIM(locality), TRIM(state)
     """).fetchall()
@@ -214,7 +222,7 @@ def main():
             }
 
     # 6. Localities from Geoscience Australia Major Power Stations (329 distinct localities)
-    print(f"[GAZETTEER] Querying power station localities from {POW_PARQUET.name}...")
+    print(f"[GAZETTEER] Querying power station localities from {Path(POW_PARQUET).name}...")
     pow_rows = conn.execute(f"""
         SELECT
             TRIM(locality) AS locality,
@@ -226,7 +234,7 @@ def main():
             ROUND(AVG((_bbox_minx + _bbox_maxx) / 2), 4) AS cx,
             ROUND(AVG((_bbox_miny + _bbox_maxy) / 2), 4) AS cy,
             COUNT(*) AS pow_count
-        FROM '{POW_PARQUET.as_posix()}'
+        FROM '{POW_PARQUET}'
         WHERE locality IS NOT NULL AND locality != ''
         GROUP BY TRIM(locality), TRIM(state)
     """).fetchall()
@@ -256,7 +264,7 @@ def main():
             ROUND(_bbox_maxy + 0.035, 4) AS maxy,
             ROUND((_bbox_minx + _bbox_maxx)/2, 4) AS cx,
             ROUND((_bbox_miny + _bbox_maxy)/2, 4) AS cy
-        FROM '{SUB_PARQUET.as_posix()}'
+        FROM '{SUB_PARQUET}'
         WHERE name IS NOT NULL AND name != ''
     """).fetchall()
     for name, st, minx, miny, maxx, maxy, cx, cy in station_names:

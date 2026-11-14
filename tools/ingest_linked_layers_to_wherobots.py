@@ -7,6 +7,7 @@ Zero-Mock Invariant: Fetches real authoritative features directly from official 
 import json
 import os
 import sys
+import tempfile
 import time
 import urllib.request
 from pathlib import Path
@@ -29,7 +30,6 @@ from src.engines.wherobots_engine import WherobotsSedonaEngine
 dotenv.load_dotenv(PROJECT_ROOT / ".env")
 
 GCS_BUCKET_NAME = os.environ.get("OIC_GCS_BUCKET", "operational-intelligence-crafter-lake")
-LAKE_ROOT = PROJECT_ROOT / "data" / "lake"
 
 # Key linked vector datasets to harvest and promote to permanent Wherobots tables
 LINKED_TARGETS = [
@@ -192,66 +192,68 @@ def main():
     timestamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     prepared_items = []
 
-    for item in targets:
-        key = item["key"]
-        print(f"\n[1/3] Harvesting authoritative features for '{key}'...")
-        local_pq = LAKE_ROOT / "geoparquet" / key / "AURA-v2" / timestamp / "part-00000.parquet"
-        
-        try:
-            t0 = time.perf_counter()
-            count = harvest_dataset_to_geoparquet(item, local_pq)
-            sec = round(time.perf_counter() - t0, 2)
-            print(f"  Harvested {count} features in {sec}s -> {local_pq}")
+    with tempfile.TemporaryDirectory(prefix="oic_linked_layers_") as td:
+        td_path = Path(td)
+        for item in targets:
+            key = item["key"]
+            print(f"\n[1/3] Harvesting authoritative features for '{key}'...")
+            local_pq = td_path / "geoparquet" / key / "AURA-v2" / timestamp / "part-00000.parquet"
 
-            # Upload to canonical GCS
-            rel_blob = f"geoparquet/{key}/AURA-v2/{timestamp}/part-00000.parquet"
-            gcs_url = upload_geoparquet_to_gcs(local_pq, rel_blob)
-            print(f"  Published to GCS: {gcs_url}")
+            try:
+                t0 = time.perf_counter()
+                count = harvest_dataset_to_geoparquet(item, local_pq)
+                sec = round(time.perf_counter() - t0, 2)
+                print(f"  Harvested {count} features in {sec}s -> {local_pq}")
 
-            prepared_items.append({
-                "key": key,
-                "title": item["title"],
-                "url": gcs_url,
-                "target_table": f"org_catalog.ops_intel.{key}",
-                "expected_rows": count,
-            })
-        except Exception as exc:
-            print(f"  ERROR harvesting '{key}': {exc}", file=sys.stderr)
+                # Upload to canonical GCS
+                rel_blob = f"geoparquet/{key}/AURA-v2/{timestamp}/part-00000.parquet"
+                gcs_url = upload_geoparquet_to_gcs(local_pq, rel_blob)
+                print(f"  Published to GCS: {gcs_url}")
 
-    if not prepared_items:
-        print("[FATAL] No datasets were successfully harvested.", file=sys.stderr)
-        sys.exit(1)
+                prepared_items.append({
+                    "key": key,
+                    "title": item["title"],
+                    "url": gcs_url,
+                    "target_table": f"org_catalog.ops_intel.{key}",
+                    "expected_rows": count,
+                })
+            except Exception as exc:
+                print(f"  ERROR harvesting '{key}': {exc}", file=sys.stderr)
 
-    # Submit batch ingestion to Wherobots
-    print(f"\n[2/3] Dispatching Wherobots batch job for {len(prepared_items)} new datasets...")
-    from wherobots import WherobotsJob
+        if not prepared_items:
+            print("[FATAL] No datasets were successfully harvested.", file=sys.stderr)
+            sys.exit(1)
 
-    scratch_manifest = PROJECT_ROOT / "scratch" / "wherobots_linked_manifest.json"
-    with open(scratch_manifest, "w", encoding="utf-8") as f:
-        json.dump(prepared_items, f, indent=2)
+        # Submit batch ingestion to Wherobots
+        print(f"\n[2/3] Dispatching Wherobots batch job for {len(prepared_items)} new datasets...")
+        from wherobots import WherobotsJob
 
-    manifest_dep = WherobotsJob.add_file_dependency(str(scratch_manifest))
-    script_path = str(PROJECT_ROOT / "tools" / "wherobots_batch_ingest.py")
-    
-    api_key = os.environ.get("WHEROBOTS_API_KEY", "").strip()
-    job = WherobotsJob(
-        script=script_path,
-        name="oic-linked-layers-upload",
-        runtime="tiny",
-        api_key=api_key,
-        dependencies=[manifest_dep],
-    )
+        scratch_manifest = PROJECT_ROOT / "scratch" / "wherobots_linked_manifest.json"
+        with open(scratch_manifest, "w", encoding="utf-8") as f:
+            json.dump(prepared_items, f, indent=2)
 
-    job.submit()
-    print(f"  Job dispatched. Run ID: {job.run_id}")
-    print("[3/3] Streaming remote Spark execution logs...")
-    status = job.wait_for_completion(stream_logs=True)
-    print(f"  Job finished with status: {status}")
+        manifest_dep = WherobotsJob.add_file_dependency(str(scratch_manifest))
+        script_path = str(PROJECT_ROOT / "tools" / "wherobots_batch_ingest.py")
 
-    # Final Teardown Audit
-    engine = WherobotsSedonaEngine(api_key=api_key)
-    audit = engine.audit_active_sessions()
-    print(f"\n[TEARDOWN AUDIT] Active Sessions: {audit.get('active_sessions')} | Cost: $0.00/hr ({audit.get('status')})")
+        api_key = os.environ.get("WHEROBOTS_API_KEY", "").strip()
+        job = WherobotsJob(
+            script=script_path,
+            name="oic-linked-layers-upload",
+            runtime="tiny",
+            api_key=api_key,
+            dependencies=[manifest_dep],
+        )
+
+        job.submit()
+        print(f"  Job dispatched. Run ID: {job.run_id}")
+        print("[3/3] Streaming remote Spark execution logs...")
+        status = job.wait_for_completion(stream_logs=True)
+        print(f"  Job finished with status: {status}")
+
+        # Final Teardown Audit
+        engine = WherobotsSedonaEngine(api_key=api_key)
+        audit = engine.audit_active_sessions()
+        print(f"\n[TEARDOWN AUDIT] Active Sessions: {audit.get('active_sessions')} | Cost: $0.00/hr ({audit.get('status')})")
 
 
 if __name__ == "__main__":

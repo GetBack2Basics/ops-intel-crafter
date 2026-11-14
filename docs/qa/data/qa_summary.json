@@ -1,6 +1,6 @@
 {
-  "report_id": "qa-report-20261114T004338Z",
-  "generated_at_utc": "2026-11-14T00:43:38Z",
+  "report_id": "qa-report-20261114T014300Z",
+  "generated_at_utc": "2026-11-14T01:43:00Z",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
   "total_datasets": 52,
@@ -49,8 +49,8 @@
     "Live Hazard Feeds": 1,
     "Emergency Management & Natural Hazards": 3
   },
-  "total_features_stored": 122235,
-  "total_bytes_stored": 233268399,
+  "total_features_stored": 409062,
+  "total_bytes_stored": 265649218,
   "datasets": [
     {
       "dataset_key": "abs_australia_1km_population_grid",
@@ -62,7 +62,6 @@
       "jurisdiction": "NATIONAL",
       "theme": "NExT Population & Geography",
       "endpoint": "https://www.abs.gov.au/statistics/people/population/regional-population/2024-25/GEOTIFF.zip",
-      "wfs_type_name": null,
       "licence": {
         "name": "CC-BY-4.0",
         "url": "https://creativecommons.org/licenses/by/4.0/",
@@ -72,49 +71,239 @@
       },
       "source_publication_date": "2026-03-26",
       "source_vintage": "2025-ABS",
-      "retrieval_timestamp_utc": "2026-11-10T02:26:39Z",
+      "retrieval_timestamp_utc": "2026-11-14T01:41:02Z",
+      "retrieval_id": "20261114T014102Z",
       "original_crs": "EPSG:3577",
       "stored_crs": "EPSG:7844",
       "geometry_type": "Polygon",
-      "feature_count": 0,
+      "feature_count": 286827,
       "bbox": [
-        95.0,
-        -45.0,
-        168.0,
-        -9.0
+        96.818786,
+        -43.585846,
+        168.000677,
+        -9.22158
       ],
-      "file_size_bytes": 0,
-      "sha256": null,
-      "gcs_generation": null,
-      "gs_uri": null,
+      "file_size_bytes": 32380819,
+      "sha256": "6c2d05b3525b86273eb291cca74cded3e7cfbf452bcca7a6ebff6d6f8873a50c",
+      "gcs_generation": "1794620472679495",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet",
+      "local_parquet_path": null,
       "overall_qa_status": "PASS",
       "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
         "status": "PASS",
+        "endpoint": "https://www.abs.gov.au/statistics/people/population/regional-population/2024-25/GEOTIFF.zip",
+        "layer_name": "ABS 2025 — Australian Population Grid 1 km² (National Modeled ERP Grid)",
+        "http_status": 200,
+        "content_type": "application/zip",
+        "latency_ms": 191.94,
+        "source_feature_count": 286827,
+        "query_bbox": [
+          95.0,
+          -45.0,
+          168.0,
+          -9.0
+        ],
+        "available_fields": [
+          "cell_id",
+          "easting_m",
+          "northing_m",
+          "cell_population",
+          "centroid_lon",
+          "centroid_lat"
+        ],
+        "error_message": null,
         "checks": [
           {
-            "name": "Linked Authority Check",
+            "check": "endpoint_reachable",
             "status": "PASS",
-            "details": "External endpoint: https://www.abs.gov.au/statistics/people/population/regional-population/2024-25/GEOTIFF.zip"
+            "detail": "HTTP 200 (191.94 ms)"
+          },
+          {
+            "check": "valid_archive_format",
+            "status": "PASS",
+            "detail": "ZIP archive verified (3 files: apg25r_1_0_0_19115-3_metadata.xml, apgr25_1_0_0.tif, apgr25_1_0_0.tif.xml)"
+          },
+          {
+            "check": "raster_grid_valid",
+            "status": "PASS",
+            "detail": "GeoTIFF grid 7401x4100 verified with 286827 populated cells"
           }
         ]
       },
       "level2_stored_artifact": {
-        "status": "NOT_APPLICABLE",
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet",
+        "gcs_generation": "1794620472679495",
+        "file_size_bytes": 32380819,
+        "sha256": "6c2d05b3525b86273eb291cca74cded3e7cfbf452bcca7a6ebff6d6f8873a50c",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "Polygon"
+        ],
+        "feature_count": 286827,
+        "bbox": [
+          96.818786,
+          -43.585846,
+          168.000677,
+          -9.22158
+        ],
+        "geometry_validation": {
+          "total_rows": 286827,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 286827,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "cell_id",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "Polygon"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "cell_id",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "easting_m",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "northing_m",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "cell_population",
+            "type": "float",
+            "nullable": true
+          },
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "centroid_lon",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "centroid_lat",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          }
+        ],
         "checks": [
           {
-            "name": "Stored GeoParquet",
-            "status": "NOT_APPLICABLE",
-            "details": "Direct external service connection (zero storage duplication)"
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 286827 rows in 1 row group(s) (32380819 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['Polygon']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [96.81879, -43.58585, 168.00068, -9.22158] within declared catalogue extent [95.0, -45.0, 168.0, -9.0] (±0.5°)"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'cell_id': 0 duplicates across 286827 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=6c2d05b3525b8627... | generation=1794620472679495"
           }
         ]
       },
       "level3_reconciliation": {
-        "status": "NOT_APPLICABLE",
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 286827,
+        "stored_feature_count": 286827,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "CRS reprojection from EPSG:3577 to canonical EPSG:7844",
+          "Spatial envelope filter applied: bbox=[95.0, -45.0, 168.0, -9.0] (WGS84/GDA2020)",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
         "checks": [
           {
-            "name": "Feature Reconciliation",
-            "status": "NOT_APPLICABLE",
-            "details": "External authoritative dataset"
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 286827 stored / 286827 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 6 required native fields and 4 mapped aliases (14 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Stored extent [96.818786, -43.585846, 168.000677, -9.22158] overlaps query envelope [95.0, -45.0, 168.0, -9.0]"
           }
         ]
       },
@@ -123,10 +312,11 @@
         "Population counts are disaggregated from SA1 using ABS Address Register and ICP points; modelled proxy, not a direct headcount."
       ],
       "refresh_policy": "annual_release",
-      "gcs_https_url": "data/lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
-      "source_count": null,
-      "stored_count": 0,
-      "sync_status": "—"
+      "operational_suitability": "National baseline for Method A, B, and C exposure calculations across Australia.",
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet",
+      "source_count": 286827,
+      "stored_count": 286827,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "aura_drainage_hand_euclid_m_v1",
@@ -802,7 +992,7 @@
       "sha256": "d9bf2909c6fb6a3665f2755276341214608a89413d0bbea53f814092797daee7",
       "gcs_generation": "1794274717512674",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
-      "local_parquet_path": "data/lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
+      "local_parquet_path": null,
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_electricity_substations/20261109T073013Z/source_payload.json",
       "raw_payload_sha256": "a2851097469aff2245640927b3586398b13b91bcaecf4c3ae21df8a065a26dd7",
       "preview_geojson": {
@@ -878,7 +1068,7 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "PASS",
-        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_electricity_substations\\2024-GA-NEI\\20261109T073013Z\\part-00000.parquet",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
         "gcs_generation": "1794274717512674",
         "file_size_bytes": 323389,
@@ -1183,7 +1373,7 @@
       "sha256": "6f3be3b0108767a0fb60de38041cd8fecb8212b1fcaabeb32a554fabc95d4763",
       "gcs_generation": "1794274718946780",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
-      "local_parquet_path": "data/lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
+      "local_parquet_path": null,
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_electricity_transmission_lines/20261109T073016Z/source_payload.json",
       "raw_payload_sha256": "7b23a8e7fd794fa2c327cef517ef8e62d2180109a832640ae5db643ccd7a90d9",
       "preview_geojson": {
@@ -1258,7 +1448,7 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "PASS",
-        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_electricity_transmission_lines\\2024-GA-NEI\\20261109T073016Z\\part-00000.parquet",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
         "gcs_generation": "1794274718946780",
         "file_size_bytes": 6374729,
@@ -1562,7 +1752,7 @@
       "sha256": "4ceb334b09a13e3d5dc4a063f930a5cc097b4b5882873476ac041e052fcc27bd",
       "gcs_generation": "1794274719254519",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
-      "local_parquet_path": "data/lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
+      "local_parquet_path": null,
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_major_power_stations/20261109T073026Z/source_payload.json",
       "raw_payload_sha256": "0c669543a4e622bee77f8196a6fd3ba3fee7f8aa47b687f804f83970892523ca",
       "preview_geojson": {
@@ -1643,7 +1833,7 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "PASS",
-        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_major_power_stations\\2024-GA-NEI\\20261109T073026Z\\part-00000.parquet",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
         "gcs_generation": "1794274719254519",
         "file_size_bytes": 108601,
@@ -1983,7 +2173,7 @@
       "sha256": "66f9bda36bfd1b75314aecbecc71cfa329c363e6dae8b59be9c239afea4a6269",
       "gcs_generation": "1794274719730757",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
-      "local_parquet_path": "data/lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
+      "local_parquet_path": null,
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/ga_seismic_hazard_pga_10pct/20261109T073027Z/source_payload.json",
       "raw_payload_sha256": "aaa965c27fa991069dedb91717e26f142ad9d9e943f87af52cdb22e3bab11ec3",
       "preview_geojson": {
@@ -2043,7 +2233,7 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "PASS",
-        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\ga_seismic_hazard_pga_10pct\\NSHA-2018\\20261109T073027Z\\part-00000.parquet",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
         "gcs_generation": "1794274719730757",
         "file_size_bytes": 224737,
@@ -2828,7 +3018,7 @@
       "sha256": "274ea5e2af3265ce33e02f0ec6cc6f7bc575628bd9b484cc2622ab3240133c3f",
       "gcs_generation": "1794274729689555",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
-      "local_parquet_path": "data/lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
+      "local_parquet_path": null,
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/next_lga_boundaries_asgs2025/20261109T073027Z/source_payload.json",
       "raw_payload_sha256": "6fb8854ced344d35e8a076c0e7f8f499e85ad91f457381869163ae2beb18735e",
       "preview_geojson": {
@@ -2895,7 +3085,7 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "WARNING",
-        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\next_lga_boundaries_asgs2025\\ASGS-2025\\20261109T073027Z\\part-00000.parquet",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
         "gcs_generation": "1794274729689555",
         "file_size_bytes": 53870639,
@@ -3171,7 +3361,7 @@
       "sha256": "a762acf90baf181b525c6264c28e52b0e413ec514bf6fa5fb6318e66686bd912",
       "gcs_generation": "1794274741843622",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
-      "local_parquet_path": "data/lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
+      "local_parquet_path": null,
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/next_sa2_boundaries_asgs2021/20261109T073056Z/source_payload.json",
       "raw_payload_sha256": "5f88d4792aa997a6b13e31a1007cc2d09532a27826b108fda2ca8e156094d42d",
       "preview_geojson": {
@@ -3247,7 +3437,7 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "WARNING",
-        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\next_sa2_boundaries_asgs2021\\ASGS-2021\\20261109T073056Z\\part-00000.parquet",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
         "gcs_generation": "1794274741843622",
         "file_size_bytes": 69056426,
@@ -4083,7 +4273,7 @@
       "sha256": "db491ca198de72a70c2c6b24f859d7e13100262257b414d2052f5cc85b94c7cc",
       "gcs_generation": "1794274744323718",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
-      "local_parquet_path": "data/lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
+      "local_parquet_path": null,
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_foi_building_complexes/20261109T073128Z/source_payload.json",
       "raw_payload_sha256": "5dbb3f940475d452a5429f4f3e338b703b20ce3784fc2c20473311d274f1f57f",
       "preview_geojson": {
@@ -4166,7 +4356,7 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "PASS",
-        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_foi_building_complexes\\2026-NSW-FOI\\20261109T073128Z\\part-00000.parquet",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
         "gcs_generation": "1794274744323718",
         "file_size_bytes": 11977228,
@@ -5059,7 +5249,7 @@
       "sha256": "7ef111c64bc3a12df8880016d7ccb37585bcbccefc25d78b379931a646efbf12",
       "gcs_generation": "1794274749734242",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
-      "local_parquet_path": "data/lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
+      "local_parquet_path": null,
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_rfs_major_incidents_live/20261109T073310Z/source_payload.json",
       "raw_payload_sha256": "80b520d939126230fe7979777626328e6870f06ca9d20e312964f1e148e2ab0d",
       "preview_geojson": {
@@ -5111,7 +5301,7 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "PASS",
-        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_rfs_major_incidents_live\\LIVE-FEED\\20261109T073310Z\\part-00000.parquet",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
         "gcs_generation": "1794274749734242",
         "file_size_bytes": 25113,
@@ -5447,7 +5637,7 @@
       "sha256": "b7d64b861b816c46a3db85467310677af1e00b016b5293f6b9d8504c993ecc4a",
       "gcs_generation": "1794274751649133",
       "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
-      "local_parquet_path": "data/lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
+      "local_parquet_path": null,
       "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/nsw_water_inundation_areas/20261109T073310Z/source_payload.json",
       "raw_payload_sha256": "f4ebb930eb65ce9662945817543264ce8da4e6d68a5d8416e9399bb4dfcf6d8d",
       "preview_geojson": {
@@ -5530,7 +5720,7 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "PASS",
-        "file_path": "C:\\Projects\\operational_intelligence_crafter\\data\\lake\\geoparquet\\nsw_water_inundation_areas\\2026-NSW-Water\\20261109T073310Z\\part-00000.parquet",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
         "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
         "gcs_generation": "1794274751649133",
         "file_size_bytes": 6931951,

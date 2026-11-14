@@ -34,18 +34,15 @@
     ],
     "src/ai/__init__.py": [],
     "src/analysis/exposure.py": [
-      "pathlib",
       "src.engines.duckdb_engine",
       "time",
       "typing"
     ],
     "src/analysis/infrastructure_dependencies.py": [
-      "pathlib",
       "src.engines.duckdb_engine",
       "typing"
     ],
     "src/analysis/isolation.py": [
-      "pathlib",
       "src.engines.duckdb_engine",
       "typing"
     ],
@@ -101,10 +98,10 @@
     ],
     "src/catalogue/__init__.py": [],
     "src/engines/benchmark_runner.py": [
-      "json",
-      "pathlib",
+      "src.catalogue.dataset_registry",
       "src.engines.duckdb_engine",
       "src.engines.wherobots_engine",
+      "src.ingestion.gcs_storage",
       "src.ingestion.telemetry",
       "time",
       "typing"
@@ -164,6 +161,7 @@
       "pathlib",
       "shapely.geometry",
       "src.catalogue.dataset_registry",
+      "src.ingestion.gcs_storage",
       "src.ingestion.telemetry",
       "typing"
     ],
@@ -175,6 +173,7 @@
       "json",
       "os",
       "pathlib",
+      "shutil",
       "src.ingestion.telemetry",
       "src.validation.publish_gate",
       "typing"
@@ -316,9 +315,10 @@
     ],
     "tools/build_locality_gazetteer.py": [
       "duckdb",
-      "glob",
       "json",
-      "pathlib"
+      "pathlib",
+      "src.catalogue.dataset_registry",
+      "src.ingestion.gcs_storage"
     ],
     "tools/build_workbench_and_packs.py": [
       "geopandas",
@@ -336,8 +336,10 @@
       "src.exports.geojson_export",
       "src.exports.geoparquet_export",
       "src.exports.map_package_builder",
+      "src.ingestion.gcs_storage",
       "src.ingestion.telemetry",
-      "sys"
+      "sys",
+      "tempfile"
     ],
     "tools/dispatch_new_datasets_wherobots.py": [
       "json",
@@ -460,6 +462,7 @@
       "requests",
       "src.engines.wherobots_engine",
       "sys",
+      "tempfile",
       "time",
       "typing",
       "urllib.request",
@@ -529,6 +532,7 @@
       "os",
       "pathlib",
       "src.engines.wherobots_engine",
+      "src.ingestion.gcs_storage",
       "sys",
       "time",
       "typing",

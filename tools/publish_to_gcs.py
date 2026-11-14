@@ -2,7 +2,7 @@
 
 Cloud-first by design: all GeoParquet snapshots, per-dataset manifests, and QA records
 are written directly to GCS by the ingestion/harvest pipelines. This tool never reads
-or writes a local `data/lake/` staging tree. It:
+or writes a local staging tree. It:
 
 1. Ensures the billing account, bucket, versioning, CORS, and public object-viewer IAM.
 2. Fails loudly when no canonical cloud artifacts exist yet.
@@ -193,7 +193,7 @@ def audit_cloud_inventory(bucket: storage.Bucket) -> Dict[str, Any]:
     if total_blobs == 0:
         raise RuntimeError(
             f"gs://{bucket.name}/ contains no canonical artifacts under {CANONICAL_PREFIXES}. "
-            "Run a cloud-first ingestion/harvest pipeline before publishing; local `data/lake` staging is not supported."
+            "Run a cloud-first ingestion/harvest pipeline before publishing; local lake staging is not supported."
         )
     return {
         "prefix_counts": prefix_counts,

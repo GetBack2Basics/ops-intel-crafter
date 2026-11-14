@@ -5,6 +5,7 @@ Engine Benchmarks, and the Google Stitch Emergency Spatial Intelligence Workbenc
 import json
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -27,14 +28,47 @@ from src.engines.duckdb_engine import DuckDBSpatialEngine
 from src.exports.geojson_export import export_rfc7946_geojson
 from src.exports.geoparquet_export import export_analysis_geoparquet
 from src.exports.map_package_builder import build_offline_map_package
-from src.ingestion.telemetry import utc_now_iso
+from src.ingestion.gcs_storage import GCSLakeStorage
+from src.ingestion.telemetry import utc_now_compact, utc_now_iso
 
 
-def _latest_parquet(geoparquet_dir: Path, ds_key: str) -> Path:
-    files = sorted((geoparquet_dir / ds_key).glob("*/*/part-*.parquet"))
-    if not files:
-        raise FileNotFoundError(f"No stored GeoParquet found for {ds_key}")
-    return files[-1]
+def _snapshot_uri(registry: DatasetRegistry, ds_key: str) -> str:
+    """Resolves a catalogue dataset to its canonical gs:// snapshot (cloud-first)."""
+    store = GCSLakeStorage()
+    entry = registry.get(ds_key)
+    snapshot = entry.latest_snapshot_path
+    if not snapshot:
+        raise FileNotFoundError(f"Dataset '{ds_key}' has no stored GeoParquet snapshot.")
+    uri = str(snapshot)
+    if uri.startswith(("gs://", "http://", "https://")):
+        return uri
+    local = store.project_root / uri
+    return str(local) if local.exists() else store.gs_uri(uri)
+
+
+def _content_type(path: Path) -> str:
+    suffix = path.suffix.lower()
+    return {
+        ".json": "application/json; charset=utf-8",
+        ".geojson": "application/geo+json; charset=utf-8",
+        ".html": "text/html; charset=utf-8",
+        ".css": "text/css; charset=utf-8",
+        ".js": "application/javascript; charset=utf-8",
+        ".txt": "text/plain; charset=utf-8",
+        ".parquet": "application/vnd.apache.parquet",
+    }.get(suffix, "application/octet-stream")
+
+
+def _upload_tree(store: GCSLakeStorage, root: Path, prefix: str) -> int:
+    """Uploads an ephemeral build tree to canonical GCS (no local lake staging)."""
+    uploaded = 0
+    for item in sorted(root.rglob("*")):
+        if not item.is_file():
+            continue
+        key = f"{prefix}/{item.relative_to(root).as_posix()}"
+        store.upload_bytes_cloud(key, item.read_bytes(), content_type=_content_type(item))
+        uploaded += 1
+    return uploaded
 
 
 def build_workbench_html(bundle: dict, output_html_path: Path) -> None:
@@ -552,38 +586,42 @@ def build_workbench_html(bundle: dict, output_html_path: Path) -> None:
 
 
 def main() -> None:
-    lake_root = PROJECT_ROOT / "data" / "lake"
-    geoparquet_dir = lake_root / "geoparquet"
-    exports_dir = lake_root / "exports"
-    map_packages_dir = lake_root / "map_packages"
+    store = GCSLakeStorage()
+    registry = DatasetRegistry()
     docs_dir = PROJECT_ROOT / "docs"
 
-    registry = DatasetRegistry()
+    # Heavy deliverables are built in an ephemeral temp tree, uploaded to GCS, and
+    # only human-readable docs mirrors are retained on local disk (code/docs only).
+    work_dir = Path(tempfile.mkdtemp(prefix="oic_workbench_"))
+    exports_dir = work_dir / "exports"
+    map_packages_dir = work_dir / "map_packages"
+    exports_dir.mkdir(parents=True, exist_ok=True)
+    map_packages_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[TEMP] Ephemeral build workspace: {work_dir}")
 
-    # 1. Build 1 km² evaluation grid over Lower Hunter from stored ABS SA2 & NSW FOI snapshots
-    grid_parquet_path = (
-        geoparquet_dir
-        / "derived_hunter_1km_population_grid"
-        / "ASGS2021-FOI-v1"
-        / "20261109T003500Z"
-        / "part-00000.parquet"
-    )
+    # 1. Build 1 km² evaluation grid over Lower Hunter from gs:// ABS SA2 & NSW FOI snapshots
     print("[1/7] Building 1 km² Lower Hunter evaluation grid from ABS SA2 & NSW FOI complexes...")
+    grid_parquet_path = work_dir / "derived_hunter_1km_population_grid.parquet"
     grid_gdf = build_hunter_1km_evaluation_grid(
-        sa2_parquet_path=_latest_parquet(geoparquet_dir, "next_sa2_boundaries_asgs2021"),
-        foi_parquet_path=_latest_parquet(geoparquet_dir, "nsw_foi_building_complexes"),
+        sa2_parquet_path=_snapshot_uri(registry, "next_sa2_boundaries_asgs2021"),
+        foi_parquet_path=_snapshot_uri(registry, "nsw_foi_building_complexes"),
         output_parquet_path=grid_parquet_path,
     )
-    print(f"      Generated {len(grid_gdf)} 1 km² cells at {grid_parquet_path}")
+    grid_key = store.geoparquet_object_key(
+        "derived_hunter_1km_population_grid", "ASGS2021-FOI-v1", utc_now_compact()
+    )
+    grid_meta = store.register_local_parquet(grid_parquet_path, grid_key)
+    grid_uri = grid_meta["gs_uri"]
+    print(f"      Generated {len(grid_gdf)} 1 km² cells -> {grid_uri}")
 
-    with DuckDBSpatialEngine(registry=registry) as engine:
+    with DuckDBSpatialEngine(registry=registry, storage=store) as engine:
         # 2. Run 4-Regime NExT Population Representation Comparison (Methods A, B, and C)
         print("[2/7] Running 4-regime NExT Population Representation Comparison (Methods A, B, C)...")
         pop_study = run_four_regime_population_study(
             engine=engine,
-            grid_parquet_path=grid_parquet_path,
-            inundation_parquet_path=_latest_parquet(geoparquet_dir, "nsw_water_inundation_areas"),
-            transmission_parquet_path=_latest_parquet(geoparquet_dir, "ga_electricity_transmission_lines"),
+            grid_parquet_path=grid_uri,
+            inundation_parquet_path=_snapshot_uri(registry, "nsw_water_inundation_areas"),
+            transmission_parquet_path=_snapshot_uri(registry, "ga_electricity_transmission_lines"),
         )
         for reg in pop_study["regimes"]:
             print(
@@ -595,9 +633,9 @@ def main() -> None:
 
         # 3. Run Multi-Scale Exposure, Isolation, and Infrastructure Dependency Analyses
         print("[3/7] Running Multi-Scale Exposure, Isolation, and Substation Dependency analyses...")
-        multi_scale_exp = run_multi_scale_exposure_analysis(engine, geoparquet_dir)
-        isolation_res = run_isolation_vulnerability_analysis(engine, geoparquet_dir)
-        dep_res = run_infrastructure_dependency_analysis(engine, geoparquet_dir)
+        multi_scale_exp = run_multi_scale_exposure_analysis(engine)
+        isolation_res = run_isolation_vulnerability_analysis(engine)
+        dep_res = run_infrastructure_dependency_analysis(engine)
 
         # 4. Export RFC 7946 GeoJSON + GeoParquet deliverables for Regime 2 Population Grid & Substation Dependencies
         print("[4/7] Exporting RFC 7946 GeoJSON & GeoParquet deliverables for GeoLibre and QGIS...")
@@ -624,7 +662,7 @@ def main() -> None:
         export_analysis_geoparquet(grid_exp_gdf, pop_export_dir / "result.parquet")
 
         # Export Substation Dependency GeoJSON & GeoParquet
-        sub_gdf = gpd.read_parquet(_latest_parquet(geoparquet_dir, "ga_electricity_substations"))
+        sub_gdf = gpd.read_parquet(_snapshot_uri(registry, "ga_electricity_substations"))
         dep_map = {int(s["substation_id"]): s for s in dep_res["substations"]}
         sub_id_col = "objectid" if "objectid" in sub_gdf.columns else "OBJECTID"
         sub_gdf["distance_to_inundation_m"] = sub_gdf[sub_id_col].map(lambda sid: dep_map.get(int(sid), {}).get("distance_to_inundation_m", -1.0))
@@ -643,7 +681,7 @@ def main() -> None:
         )
         export_analysis_geoparquet(sub_gdf, sub_export_dir / "result.parquet")
 
-        # Also copy exports to docs/exports/ so docs/index.html can load them locally & on GCS
+        # Mirror exports to docs/exports/ so docs/index.html can load them locally & on GCS
         for exp_name in ("hunter_population_grid_comparison", "hunter_substation_flood_dependency"):
             dst = docs_dir / "exports" / exp_name
             dst.mkdir(parents=True, exist_ok=True)
@@ -652,7 +690,7 @@ def main() -> None:
 
         # 5. Execute AI Spatial Agent queries & save audit trail
         print("[5/7] Executing Catalogue-Grounded AI Spatial Agent queries & audit logs...")
-        agent = AISpatialAgent(registry=registry, engine=engine, lake_geoparquet_dir=geoparquet_dir)
+        agent = AISpatialAgent(registry=registry, engine=engine)
         sample_questions = [
             ("Which power substations in the Lower Hunter are closest to flood inundation zones and how many FOI facilities depend on them within 5km?", None),
             ("Summarize Lower Hunter LGAs by flood inundation polygons, substations, and building complexes.", "Method B"),
@@ -673,7 +711,6 @@ def main() -> None:
         package_id="hunter_flood_emergency_pack",
         title="Lower Hunter Flood & Critical Infrastructure Map-in-a-Box",
         bbox_4326=[151.45, -32.95, 151.82, -32.68],
-        lake_geoparquet_dir=geoparquet_dir,
         grid_gdf=grid_gdf,
         population_study=pop_study,
         output_package_dir=pack_dir,
@@ -685,10 +722,15 @@ def main() -> None:
 
     # 7. Run Execution Engine Benchmarks & Build Stitch Workbench HTML
     print("[7/7] Running Execution Engine Benchmarks and generating Stitch Workbench (docs/index.html)...")
-    benchmarks = run_engine_benchmarks(lake_root)
+    benchmarks = run_engine_benchmarks(registry=registry, storage=store)
     bench_path = exports_dir / "benchmarks" / "engine_benchmarks.json"
     bench_path.parent.mkdir(parents=True, exist_ok=True)
     bench_path.write_text(json.dumps(benchmarks, indent=2), encoding="utf-8")
+
+    # Publish ephemeral deliverables to canonical GCS (no local lake staging).
+    exports_uploaded = _upload_tree(store, exports_dir, "exports")
+    packs_uploaded = _upload_tree(store, map_packages_dir, "map_packages")
+    print(f"      Published {exports_uploaded} export object(s) and {packs_uploaded} map-package object(s) to GCS.")
 
     bundle = {
         "generated_at_utc": utc_now_iso(),
@@ -703,6 +745,7 @@ def main() -> None:
     bundle_out.parent.mkdir(parents=True, exist_ok=True)
     bundle_out.write_text(json.dumps(bundle, indent=2), encoding="utf-8")
 
+    shutil.rmtree(work_dir, ignore_errors=True)
     print("[DONE] All analytical deliverables, exports, offline map package, and workbench bundle generated.")
 
 

@@ -250,6 +250,51 @@ class DuckDBSpatialEngine:
             return None, gs_uri
         return pq_file, self.storage.gs_uri(s)
 
+    def catalogue_snapshot_uri(self, dataset_key: str) -> str:
+        """Resolves a catalogue dataset to its canonical readable snapshot URI.
+
+        Prefers the manifest's `gs://` snapshot pointer; an explicit local mirror is
+        used only when the manifest still holds a relative path that exists on disk.
+        Raises when the dataset has no stored snapshot at all (zero-mock).
+        """
+        entry = self.registry.get(dataset_key)
+        snapshot = entry.latest_snapshot_path
+        if not snapshot:
+            raise FileNotFoundError(
+                f"Dataset '{dataset_key}' has no stored GeoParquet snapshot in the catalogue manifest."
+            )
+        uri = str(snapshot)
+        if uri.startswith(("gs://", "http://", "https://")):
+            return uri
+        local = self.storage.project_root / uri
+        if local.exists():
+            return str(local)
+        return self.storage.gs_uri(uri)
+
+    def register_catalogue_view(self, view_name: str, dataset_key: str) -> Dict[str, Any]:
+        """Registers one allow-listed catalogue dataset as a DuckDB view (cloud-first)."""
+        entry = self.registry.get(dataset_key)
+        if not entry.latest_snapshot_path:
+            raise FileNotFoundError(
+                f"Dataset '{dataset_key}' has no stored GeoParquet snapshot in the catalogue manifest."
+            )
+        ref, gs_uri = self._resolve_snapshot_ref(entry.latest_snapshot_path)
+        if ref is None:
+            raise FileNotFoundError(
+                f"Dataset '{dataset_key}' snapshot is unreachable: {entry.latest_snapshot_path}"
+            )
+        self.register_geoparquet_view(view_name, ref)
+        meta = {
+            "dataset_key": dataset_key,
+            "parquet_path": str(entry.latest_snapshot_path),
+            "gs_uri": gs_uri,
+            "source_vintage": entry.source_vintage,
+            "retrieval_utc": entry.latest_retrieval_utc,
+            "stored_crs": entry.stored_crs,
+        }
+        self.registered_views[view_name] = meta
+        return meta
+
     def register_catalogue_views(self, keys: Optional[List[str]] = None) -> Dict[str, Dict[str, Any]]:
         """Registers a DuckDB view for each catalogued dataset that has a verified GeoParquet snapshot (local or gs://)."""
         target_keys = keys or self.registry.list_keys()

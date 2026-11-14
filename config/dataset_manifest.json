@@ -2,7 +2,7 @@
   "manifest_version": "1.0.0",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
-  "updated_at_utc": "2026-11-14T00:42:39Z",
+  "updated_at_utc": "2026-11-14T01:41:02Z",
   "default_stored_crs": "EPSG:7844",
   "default_metric_crs": "EPSG:3112",
   "default_export_crs": "EPSG:4326",
@@ -596,8 +596,8 @@
         -9.0
       ],
       "qa_status": "PASS",
-      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
-      "latest_retrieval_utc": "2026-11-10T02:26:39Z"
+      "latest_snapshot_path": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-14T01:41:02Z"
     },
     "qld_cyclones_historical_tracks": {
       "dataset_key": "qld_cyclones_historical_tracks",

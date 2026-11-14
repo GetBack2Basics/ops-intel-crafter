@@ -6,58 +6,68 @@ Compares and records verifiable latency, data volume, and cost metrics across:
 3. Wherobots / Apache Sedona engine status (records exact configuration status or live run telemetry with $0.00/hr idle teardown guarantee).
 """
 
-import json
 import time
-from pathlib import Path
 from typing import Any, Dict, List
 
+from src.catalogue.dataset_registry import DatasetRegistry
 from src.engines.duckdb_engine import DuckDBSpatialEngine
 from src.engines.wherobots_engine import WherobotsSedonaEngine
+from src.ingestion.gcs_storage import GCSLakeStorage
 from src.ingestion.telemetry import utc_now_iso
 
 
+def _latest_qa_records(storage: GCSLakeStorage) -> Dict[str, Dict[str, Any]]:
+    """Resolves the newest canonical QA record per dataset directly from GCS."""
+    latest: Dict[str, Dict[str, Any]] = {}
+    for object_name, record in storage.read_json_prefix_cloud("qa/datasets/").items():
+        parts = object_name.split("/")
+        if len(parts) < 4:
+            continue
+        dataset_key, retrieval_id = parts[2], parts[3]
+        if dataset_key not in latest or retrieval_id > latest[dataset_key]["_retrieval_id"]:
+            latest[dataset_key] = {**record, "_retrieval_id": retrieval_id}
+    return latest
+
+
 def run_engine_benchmarks(
-    lake_root: Path,
+    registry: DatasetRegistry = None,
+    storage: GCSLakeStorage = None,
 ) -> Dict[str, Any]:
-    """Executes reproducible spatial SQL benchmarks over stored GeoParquet and compares against
-    recorded live endpoint retrieval telemetry.
+    """Executes reproducible spatial SQL benchmarks over catalogue-resolved GeoParquet (gs://)
+    and compares against recorded live endpoint retrieval telemetry from canonical GCS QA records.
     """
-    geoparquet_dir = lake_root / "geoparquet"
-    qa_datasets_dir = lake_root / "qa" / "datasets"
+    reg = registry or DatasetRegistry()
+    store = storage or GCSLakeStorage()
 
-    # 1. Gather recorded live source retrieval timings from latest QA artifacts
+    # 1. Gather recorded live source retrieval timings from latest GCS QA artifacts
     live_retrievals: List[Dict[str, Any]] = []
-    if qa_datasets_dir.exists():
-        for ds_dir in sorted(qa_datasets_dir.iterdir()):
-            if not ds_dir.is_dir():
-                continue
-            qa_files = sorted(ds_dir.glob("*.json"))
-            if not qa_files:
-                continue
-            latest_qa = json.loads(qa_files[-1].read_text(encoding="utf-8"))
-            telem = latest_qa.get("telemetry") or {}
-            l1 = latest_qa.get("level_1_source_contract") or {}
-            l2 = latest_qa.get("level_2_stored_artifact") or {}
-            live_retrievals.append(
-                {
-                    "dataset_key": ds_dir.name,
-                    "qa_status": latest_qa.get("overall_status"),
-                    "http_probe_ms": l1.get("elapsed_ms"),
-                    "full_source_download_ms": telem.get("source_download_ms"),
-                    "normalization_and_parquet_write_ms": round(
-                        float(telem.get("normalization_ms") or 0.0)
-                        + float(telem.get("parquet_write_ms") or 0.0),
-                        2,
-                    ),
-                    "raw_bytes_downloaded": telem.get("bytes_downloaded"),
-                    "geoparquet_bytes_stored": l2.get("file_size_bytes"),
-                    "stored_row_count": l2.get("num_rows"),
-                }
-            )
+    for dataset_key, latest_qa in sorted(_latest_qa_records(store).items()):
+        telem = latest_qa.get("telemetry") or {}
+        l1 = latest_qa.get("level1_source_contract") or latest_qa.get("level_1_source_contract") or {}
+        l2 = latest_qa.get("level2_stored_artifact") or latest_qa.get("level_2_stored_artifact") or {}
+        live_retrievals.append(
+            {
+                "dataset_key": dataset_key,
+                "qa_status": latest_qa.get("overall_qa_status") or latest_qa.get("overall_status"),
+                "http_probe_ms": l1.get("latency_ms", l1.get("elapsed_ms")),
+                "full_source_download_ms": telem.get("source_download_ms"),
+                "normalization_and_parquet_write_ms": round(
+                    float(telem.get("normalization_ms") or 0.0)
+                    + float(telem.get("parquet_write_ms") or 0.0),
+                    2,
+                ),
+                "raw_bytes_downloaded": telem.get("bytes_downloaded")
+                or latest_qa.get("raw_payload_size_bytes"),
+                "geoparquet_bytes_stored": l2.get("file_size_bytes", latest_qa.get("file_size_bytes")),
+                "stored_row_count": l2.get(
+                    "feature_count", l2.get("num_rows", latest_qa.get("feature_count"))
+                ),
+            }
+        )
 
-    # 2. Execute DuckDB Spatial cold vs warm spatial queries over stored GeoParquet
+    # 2. Execute DuckDB Spatial cold vs warm spatial queries over catalogue GeoParquet
     duck_tasks: List[Dict[str, Any]] = []
-    with DuckDBSpatialEngine() as engine:
+    with DuckDBSpatialEngine(registry=reg, storage=store) as engine:
         t_cold_start = time.perf_counter()
         for ds_key in (
             "ga_electricity_substations",
@@ -69,9 +79,10 @@ def run_engine_benchmarks(
             "nsw_water_inundation_areas",
             "nsw_rfs_major_incidents_live",
         ):
-            files = sorted((geoparquet_dir / ds_key).glob("*/*/part-*.parquet"))
-            if files:
-                engine.register_geoparquet_view(ds_key, files[-1])
+            try:
+                engine.register_catalogue_view(ds_key, ds_key)
+            except FileNotFoundError:
+                continue
         cold_register_ms = round((time.perf_counter() - t_cold_start) * 1000.0, 2)
 
         queries = [

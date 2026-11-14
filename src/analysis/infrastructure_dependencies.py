@@ -7,7 +7,6 @@ Evaluates:
    service catchment (`EPSG:3112`) of each substation to quantify potential outage blast radius.
 """
 
-from pathlib import Path
 from typing import Any, Dict
 
 from src.engines.duckdb_engine import DuckDBSpatialEngine
@@ -15,18 +14,13 @@ from src.engines.duckdb_engine import DuckDBSpatialEngine
 
 def run_infrastructure_dependency_analysis(
     engine: DuckDBSpatialEngine,
-    lake_geoparquet_dir: Path,
 ) -> Dict[str, Any]:
     """Computes substation flood proximity and 5 km metric service-catchment facility dependencies."""
 
-    def _latest(ds_key: str) -> Path:
-        files = sorted((lake_geoparquet_dir / ds_key).glob("*/*/part-*.parquet"))
-        return files[-1]
-
-    engine.register_geoparquet_view("substations", _latest("ga_electricity_substations"))
-    engine.register_geoparquet_view("tx_lines", _latest("ga_electricity_transmission_lines"))
-    engine.register_geoparquet_view("inundation", _latest("nsw_water_inundation_areas"))
-    engine.register_geoparquet_view("foi_buildings", _latest("nsw_foi_building_complexes"))
+    engine.register_catalogue_view("substations", "ga_electricity_substations")
+    engine.register_catalogue_view("tx_lines", "ga_electricity_transmission_lines")
+    engine.register_catalogue_view("inundation", "nsw_water_inundation_areas")
+    engine.register_catalogue_view("foi_buildings", "nsw_foi_building_complexes")
 
     sql = """
     WITH inund_3112 AS (

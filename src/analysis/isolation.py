@@ -7,7 +7,6 @@ Evaluates community and facility isolation during Lower Hunter inundation events
    distinguishing Euclidean proximity from floodplain corridor severance.
 """
 
-from pathlib import Path
 from typing import Any, Dict
 
 from src.engines.duckdb_engine import DuckDBSpatialEngine
@@ -15,17 +14,12 @@ from src.engines.duckdb_engine import DuckDBSpatialEngine
 
 def run_isolation_vulnerability_analysis(
     engine: DuckDBSpatialEngine,
-    lake_geoparquet_dir: Path,
 ) -> Dict[str, Any]:
     """Identifies facilities and SA2 communities at risk of flood-induced access severance."""
 
-    def _latest(ds_key: str) -> Path:
-        files = sorted((lake_geoparquet_dir / ds_key).glob("*/*/part-*.parquet"))
-        return files[-1]
-
-    engine.register_geoparquet_view("foi_buildings", _latest("nsw_foi_building_complexes"))
-    engine.register_geoparquet_view("inundation", _latest("nsw_water_inundation_areas"))
-    engine.register_geoparquet_view("sa2_asgs", _latest("next_sa2_boundaries_asgs2021"))
+    engine.register_catalogue_view("foi_buildings", "nsw_foi_building_complexes")
+    engine.register_catalogue_view("inundation", "nsw_water_inundation_areas")
+    engine.register_catalogue_view("sa2_asgs", "next_sa2_boundaries_asgs2021")
 
     sql = """
     WITH inund_3112 AS (

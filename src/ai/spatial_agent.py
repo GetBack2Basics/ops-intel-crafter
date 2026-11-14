@@ -25,14 +25,10 @@ class AISpatialAgent:
         self,
         registry: Optional[DatasetRegistry] = None,
         engine: Optional[DuckDBSpatialEngine] = None,
-        lake_geoparquet_dir: Optional[Path] = None,
     ):
         self.registry = registry or DatasetRegistry()
         self.engine = engine or DuckDBSpatialEngine()
         self.project_root = Path(__file__).resolve().parent.parent.parent
-        self.lake_geoparquet_dir = lake_geoparquet_dir or (
-            self.project_root / "data" / "lake" / "geoparquet"
-        )
 
     def _register_dataset_views(self, dataset_keys: list[str]) -> None:
         """Registers query views from canonical gs:// snapshots (cloud-first, no local staging)."""

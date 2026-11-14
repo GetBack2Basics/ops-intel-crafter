@@ -28,6 +28,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.engines.wherobots_engine import WherobotsSedonaEngine
+from src.ingestion.gcs_storage import GCSLakeStorage
 
 dotenv.load_dotenv(PROJECT_ROOT / ".env")
 
@@ -51,7 +52,7 @@ def load_library_manifest(root: Path) -> List[Dict[str, Any]]:
             continue
 
         # Map to canonical GCS HTTPS endpoint
-        # e.g., data/lake/geoparquet/... -> https://storage.googleapis.com/.../geoparquet/...
+        # e.g., relative geoparquet/... -> https://storage.googleapis.com/.../geoparquet/...
         parts = Path(snapshot_rel).parts
         if "geoparquet" in parts:
             idx = parts.index("geoparquet")
@@ -65,17 +66,18 @@ def load_library_manifest(root: Path) -> List[Dict[str, Any]]:
             "title": item.get("title", key),
             "theme": item.get("theme", "Foundation"),
             "url": public_url,
-            "local_path": str(root / snapshot_rel),
             "stored_crs": item.get("stored_crs", "EPSG:7844"),
             "target_table": f"{DEFAULT_CATALOG_DB}.{key}",
         })
 
-    # Add derived models if present on GCS
-    hunter_grid_files = sorted((root / "data" / "lake" / "geoparquet" / "derived_hunter_1km_population_grid").glob("*/*/part-*.parquet"))
-    hunter_grid_rel = (
-        hunter_grid_files[-1].relative_to(root / "data" / "lake").as_posix()
-        if hunter_grid_files
-        else "geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T073315Z/part-00000.parquet"
+    # Add derived models from canonical GCS objects (no local lake staging)
+    store = GCSLakeStorage()
+    derived_prefix = "geoparquet/derived_hunter_1km_population_grid/"
+    derived_objects = sorted(
+        o for o in store.list_cloud_objects(derived_prefix) if o.endswith(".parquet")
+    )
+    hunter_grid_rel = derived_objects[-1] if derived_objects else (
+        "geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T073315Z/part-00000.parquet"
     )
     derived_models = [
         ("derived_hunter_1km_population_grid", hunter_grid_rel),
@@ -87,7 +89,6 @@ def load_library_manifest(root: Path) -> List[Dict[str, Any]]:
             "title": key.replace("_", " ").title(),
             "theme": "Derived Operational Intelligence",
             "url": f"{GCS_PUBLIC_ROOT}/{rel}",
-            "local_path": str(root / "data" / "lake" / rel),
             "stored_crs": "EPSG:7844",
             "target_table": f"{DEFAULT_CATALOG_DB}.{key}",
         })
