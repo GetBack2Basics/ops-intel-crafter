@@ -1159,7 +1159,7 @@ def main() -> int:
     parser.add_argument("--max-features", type=int, default=None, help="Cap harvested features (ODS limit= param)")
     parser.add_argument("--licence-name", default=None, help="Licence name override (required for direct downloads without portal metadata)")
     parser.add_argument("--licence-url", default=None, help="Licence URL override")
-    parser.add_argument("--licence-attribution", default=None, help="Licence attribution override")
+    parser.add_argument("--no-register", action="store_true", help="Do not touch the catalogue manifest")
     args = parser.parse_args()
 
     cfg = load_config(Path(args.config))

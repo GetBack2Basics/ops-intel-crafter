@@ -338,4 +338,5 @@ def harvest_large_status(execution: str, x_api_key: Optional[str] = Header(defau
         "succeededCount": data.get("succeededCount"),
         "failedCount": data.get("failedCount"),
         "log_url": f"https://console.cloud.google.com/run/jobs/executions/details/{REGION}/{execution.split('/')[-1]}/logs?project={PROJECT}",
-    }
+    }# cache bust
+
