@@ -177,9 +177,7 @@ def main() -> int:
             "opacity": 0.9,
             "source": {
                 "type": "geojson",
-                "s3_path": f"https://storage.googleapis.com/{BUCKET}/{info['name']}",
-                "path": f"https://storage.googleapis.com/{BUCKET}/qa/data/{key}.geojson",
-                "url": f"https://storage.googleapis.com/{BUCKET}/qa/data/{key}.geojson",
+                "s3_path": f"gs://{BUCKET}/{info['name']}",
                 "format": "parquet",
                 "spatial_engine": "DuckDB-WASM",
             },
@@ -204,12 +202,14 @@ def main() -> int:
 
     spec = {
         "version": "0.2.0",
-        "name": "Operational Intelligence Crafter â€” National Emergency Spatial Workbench",
-        "description": "Direct GCS GeoParquet project (byte-range reads via DuckDB-WASM / GeoLibre Desktop / QGIS).",
+        "name": "Operational Intelligence Crafter - National Emergency Spatial Workbench",
         "mapView": {"center": [133.7751, -25.2744], "zoom": 4.0, "bearing": 0, "pitch": 0, "bbox": [112.9, -43.7, 153.7, -10.0]},
         "basemapStyleUrl": "https://tiles.openfreemap.org/styles/liberty",
-        "cloudStorage": cloud,
+        "basemapVisible": True,
+        "basemapOpacity": 0.65,
+        "blankBackgroundColor": None,
         "layerGroups": LAYER_GROUPS,
+        "styles": {},
         "layers": layers,
         "metadata": {
             "generated_utc": generated,

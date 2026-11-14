@@ -1,7 +1,6 @@
 {
   "version": "0.2.0",
-  "name": "Operational Intelligence Crafter â€” National Emergency Spatial Workbench",
-  "description": "Direct GCS GeoParquet project (byte-range reads via DuckDB-WASM / GeoLibre Desktop / QGIS).",
+  "name": "Operational Intelligence Crafter - National Emergency Spatial Workbench",
   "mapView": {
     "center": [
       133.7751,
@@ -18,12 +17,9 @@
     ]
   },
   "basemapStyleUrl": "https://tiles.openfreemap.org/styles/liberty",
-  "cloudStorage": {
-    "provider": "gcs",
-    "endpoint": "https://storage.googleapis.com",
-    "bucket": "operational-intelligence-crafter-lake",
-    "authMode": "public"
-  },
+  "basemapVisible": true,
+  "basemapOpacity": 0.65,
+  "blankBackgroundColor": null,
   "layerGroups": [
     {
       "id": "grp_emergency",
@@ -56,6 +52,7 @@
       "visible": false
     }
   ],
+  "styles": {},
   "layers": [
     {
       "id": "abs_australia_1km_population_grid",
@@ -66,9 +63,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/abs_australia_1km_population_grid.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/abs_australia_1km_population_grid.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -97,9 +92,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/datacenter_candidates_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/datacenter_candidates_v2.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/datacenter_candidates_v2.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/datacenter_candidates_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -128,9 +121,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T003500Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/derived_hunter_1km_population_grid.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/derived_hunter_1km_population_grid.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/derived_hunter_1km_population_grid/ASGS2021-FOI-v1/20261109T003500Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -159,9 +150,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T083721Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/flood_awareness_storm_tide.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/flood_awareness_storm_tide.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T083721Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -188,9 +177,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_electricity_substations.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_electricity_substations.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_substations/2024-GA-NEI/20261109T073013Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -219,9 +206,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_electricity_transmission_lines.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_electricity_transmission_lines.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_electricity_transmission_lines/2024-GA-NEI/20261109T073016Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -248,9 +233,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_major_power_stations.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_major_power_stations.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_major_power_stations/2024-GA-NEI/20261109T073026Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -279,9 +262,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_seismic_hazard_pga_10pct.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_seismic_hazard_pga_10pct.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/ga_seismic_hazard_pga_10pct/NSHA-2018/20261109T073027Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -308,9 +289,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_cyclone_hazard_tcha_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_cyclone_hazard_tcha_v2.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_cyclone_hazard_tcha_v2.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/national_cyclone_hazard_tcha_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -339,9 +318,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_healthcare_nhsd_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_healthcare_nhsd_v2.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_healthcare_nhsd_v2.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/national_healthcare_nhsd_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -370,9 +347,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/national_schools_acara_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_schools_acara_v2.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_schools_acara_v2.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/national_schools_acara_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -401,9 +376,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/next_lga_boundaries_asgs2025.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/next_lga_boundaries_asgs2025.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/next_lga_boundaries_asgs2025/ASGS-2025/20261109T073027Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -432,9 +405,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/next_sa2_boundaries_asgs2021.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/next_sa2_boundaries_asgs2021.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/next_sa2_boundaries_asgs2021/ASGS-2021/20261109T073056Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -463,9 +434,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_coastal_inundation_hazard_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_coastal_inundation_hazard_v2.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_coastal_inundation_hazard_v2.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_coastal_inundation_hazard_v2/AURA-v2/20261113T010735Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -494,9 +463,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_foi_building_complexes.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_foi_building_complexes.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_foi_building_complexes/2026-NSW-FOI/20261109T073128Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -525,9 +492,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_lga_boundaries.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_lga_boundaries.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_lga_boundaries/2026-NSW-DCS/20261114T004239Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -556,9 +521,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_rfs_major_incidents_live.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_rfs_major_incidents_live.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_rfs_major_incidents_live/LIVE-FEED/20261109T073310Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -587,9 +550,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_transmission_grid_v2.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_transmission_grid_v2.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -616,9 +577,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_water_inundation_areas.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_water_inundation_areas.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/nsw_water_inundation_areas/2026-NSW-Water/20261109T073310Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -647,9 +606,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_fixes.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_fixes.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_fixes/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -678,9 +635,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_tracks.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_tracks.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_tracks/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -707,9 +662,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_wind_areas.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_wind_areas.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_cyclones_historical_wind_areas/QLD-HISTORICAL/20261114T002840Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -738,9 +691,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_flood_awareness_storm_tide/2025-BRISBANE/20261114T131245Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_flood_awareness_storm_tide.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_flood_awareness_storm_tide.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_flood_awareness_storm_tide/2025-BRISBANE/20261114T131245Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -767,9 +718,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T125013Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_storm_tide_high_hazard.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_storm_tide_high_hazard.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T125013Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -796,9 +745,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qsc_extracted_data_20261114_174311037395_8872/2026-INFORMATION/20261114T090011Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qsc_extracted_data_20261114_174311037395_8872.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qsc_extracted_data_20261114_174311037395_8872.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/qsc_extracted_data_20261114_174311037395_8872/2026-INFORMATION/20261114T090011Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -825,9 +772,7 @@
       "opacity": 0.9,
       "source": {
         "type": "geojson",
-        "s3_path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/wa_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
-        "path": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/wa_transmission_grid_v2.geojson",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/wa_transmission_grid_v2.geojson",
+        "s3_path": "gs://operational-intelligence-crafter-lake/geoparquet/wa_transmission_grid_v2/AURA-v2/20261113T011350Z/part-00000.parquet",
         "format": "parquet",
         "spatial_engine": "DuckDB-WASM"
       },
@@ -847,7 +792,7 @@
     }
   ],
   "metadata": {
-    "generated_utc": "2026-11-14T21:13:18Z",
+    "generated_utc": "2026-11-14T21:48:09Z",
     "generator": "tools/export_geolibre_project.py",
     "datasets_on_gcs": 26,
     "read_failures": [],
