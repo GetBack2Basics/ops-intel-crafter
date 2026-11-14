@@ -34,6 +34,7 @@ PROJECT = os.environ.get("OIC_GCP_PROJECT", "ops-intelligence-crafter")
 REGION = os.environ.get("OIC_REGION", "australia-southeast1")
 JOB_NAME = os.environ.get("OIC_RUN_JOB", "oic-harvester-job")
 RUN_API = "https://run.googleapis.com/v2"
+PROJECT_ROOT = Path(os.environ.get("OIC_PROJECT_ROOT", "/app"))
 HARVESTER = PROJECT_ROOT / "tools" / "harvest_portal_dataset.py"
 CONFIG = PROJECT_ROOT / "config" / "harvester_config.json"
 
@@ -49,7 +50,9 @@ app.add_middleware(
 )
 
 # Lazy GCS store (imported after path setup)
-def _store():
+def _check_key(x_api_key: Optional[str]) -> None:
+    if not API_KEY or x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing X-API-Key")
     from src.ingestion.gcs_storage import GCSLakeStorage
     return GCSLakeStorage()
 
@@ -227,7 +230,7 @@ def harvest_large(req: HarvestRequest, x_api_key: Optional[str] = Header(default
 
     sess = _authed_session()
     url = f"{RUN_API}/projects/{PROJECT}/locations/{REGION}/jobs/{JOB_NAME}:run"
-    body = {"overrides": {"containerOverrides": [{"args": ["python"] + args}]}}
+    body = {"overrides": {"containerOverrides": [{"args": args}]}}
     resp = sess.post(url, json=body, timeout=60)
     if resp.status_code not in (200, 202):
         raise HTTPException(status_code=502, detail=f"Cloud Run Jobs run failed: {resp.status_code} {resp.text[:300]}")
