@@ -428,6 +428,8 @@ def harvest_ckan_resource(source: Dict[str, Any], cfg: Dict[str, Any]) -> Tuple[
         from shapely.geometry import Point
         geom = [Point(xy) for xy in zip(df[lon_col], df[lat_col])]
         gdf = gpd.GeoDataFrame(df.drop(columns=[lat_col, lon_col]), geometry=geom, crs="EPSG:4326")
+        inner_name = Path(urlparse(url).path).stem
+        title = inner_name.replace("_", " ").replace("-", " ").title()
         harvest_meta = {
             "endpoint": url,
             "service_type": "file_download",
@@ -787,29 +789,64 @@ def harvest_direct_download(source: Dict[str, Any], cfg: Dict[str, Any]) -> Tupl
 
     # Determine file type
     url_l = url.lower().split("?")[0]
+    title = None
+    inner_name = None
     if url_l.endswith(".zip"):
         with zipfile.ZipFile(io.BytesIO(raw_bytes)) as zf:
             names = zf.namelist()
             gpkg_names = [n for n in names if n.lower().endswith(".gpkg")]
             shp_names = [n for n in names if n.lower().endswith(".shp")]
             if gpkg_names:
-                # Extract the gpkg to a temp file and read it
-                import tempfile as _tf
-                fd, gpkg_tmp = _tf.mkstemp(suffix=".gpkg")
+                inner_name = Path(gpkg_names[0]).stem
+                fd, gpkg_tmp = tempfile.mkstemp(suffix=".gpkg")
                 os.close(fd)
                 with open(gpkg_tmp, "wb") as f:
                     f.write(zf.read(gpkg_names[0]))
+                # Prefer the GeoPackage's own layer name over the generic filename
+                try:
+                    import pyogrio
+                    layers = pyogrio.list_layers(gpkg_tmp)
+                    if layers is not None and len(layers) > 0:
+                        row = layers[0]
+                        layer_name = row[0] if hasattr(row, "__getitem__") else str(row)
+                        layer_name = str(layer_name).strip()
+                        if layer_name and layer_name.lower() not in ("data", "layer", "features"):
+                            inner_name = layer_name
+                except Exception:
+                    pass
+                # Fall back to zip stem if the inner name is generic
+                if (inner_name or "").lower() in ("data", "layer", "features", ""):
+                    inner_name = Path(urlparse(url).path).stem
                 gdf = gpd.read_file(gpkg_tmp)
                 Path(gpkg_tmp).unlink(missing_ok=True)
             elif shp_names:
+                inner_name = Path(shp_names[0]).stem
                 gdf = gpd.read_file(io.BytesIO(raw_bytes))
             else:
                 tmp.unlink(missing_ok=True)
                 raise HarvestAbort(f"ZIP contains no .shp or .gpkg member: {url} ({names[:10]})")
+        title = (inner_name or "").replace("_", " ").replace("-", " ").title()
     elif url_l.endswith(".gpkg"):
         gdf = gpd.read_file(tmp)
+        inner_name = Path(urlparse(url).path).stem
+        try:
+            import pyogrio
+            layers = pyogrio.list_layers(tmp)
+            if layers is not None and len(layers) > 0:
+                row = layers[0]
+                layer_name = row[0] if hasattr(row, "__getitem__") else str(row)
+                layer_name = str(layer_name).strip()
+                if layer_name and layer_name.lower() not in ("data", "layer", "features"):
+                    inner_name = layer_name
+        except Exception:
+            pass
+        if (inner_name or "").lower() in ("data", "layer", "features", ""):
+            inner_name = Path(urlparse(url).path).stem
+        title = inner_name.replace("_", " ").replace("-", " ").title()
     elif url_l.endswith((".geojson", ".json")):
         gdf = gpd.read_file(tmp)
+        inner_name = Path(urlparse(url).path).stem
+        title = inner_name.replace("_", " ").replace("-", " ").title()
     elif url_l.endswith(".csv"):
         import pandas as pd
         df = pd.read_csv(tmp)
@@ -822,8 +859,12 @@ def harvest_direct_download(source: Dict[str, Any], cfg: Dict[str, Any]) -> Tupl
         from shapely.geometry import Point
         geom = [Point(xy) for xy in zip(df[lon_col], df[lat_col])]
         gdf = gpd.GeoDataFrame(df.drop(columns=[lat_col, lon_col]), geometry=geom, crs="EPSG:4326")
+        inner_name = Path(urlparse(url).path).stem
+        title = inner_name.replace("_", " ").replace("-", " ").title()
     elif url_l.endswith(".shp"):
         gdf = gpd.read_file(tmp)
+        inner_name = Path(urlparse(url).path).stem
+        title = inner_name.replace("_", " ").replace("-", " ").title()
     else:
         tmp.unlink(missing_ok=True)
         raise HarvestAbort(f"Unsupported direct-download format: {url}")
@@ -837,10 +878,14 @@ def harvest_direct_download(source: Dict[str, Any], cfg: Dict[str, Any]) -> Tupl
     elif str(gdf.crs).upper() != "EPSG:4326":
         gdf = gdf.to_crs("EPSG:4326")
 
-    # Determine title from filename
-    stem = Path(urlparse(url).path).stem
-    title = stem.replace("_", " ").replace("-", " ").title()
+    # Fall back to filename stem if no title was derived above
+    if not title:
+        stem = Path(urlparse(url).path).stem
+        title = stem.replace("_", " ").replace("-", " ").title()
+        inner_name = stem
 
+    if inner_name:
+        source["dataset_id"] = inner_name
     harvest_meta = {
         "endpoint": url,
         "service_type": "direct_download",
@@ -848,7 +893,7 @@ def harvest_direct_download(source: Dict[str, Any], cfg: Dict[str, Any]) -> Tupl
         "download_ms": elapsed_ms,
         "probed_count": None,
         "probe_detail": "Count derived from downloaded file (no independent count API for direct downloads)",
-        "title": title,
+        "title": title or inner_name or Path(urlparse(url).path).stem,
         "license_name": None,
         "license_url": None,
         "keywords": [],

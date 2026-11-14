@@ -387,6 +387,7 @@
       "os",
       "pandas",
       "pathlib",
+      "pyogrio",
       "re",
       "requests",
       "shapely.geometry",
