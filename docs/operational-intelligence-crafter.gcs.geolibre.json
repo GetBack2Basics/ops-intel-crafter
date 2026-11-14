@@ -708,6 +708,34 @@
       }
     },
     {
+      "id": "qld_flood_awareness_storm_tide",
+      "name": "Flood — Awareness — Storm Tide",
+      "groupId": "grp_hazards",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_flood_awareness_storm_tide/2025-BRISBANE/20261114T131245Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_flood_awareness_storm_tide/2025-BRISBANE/20261114T131245Z/part-00000.parquet"
+      },
+      "style": {
+        "strokeColor": "#64748b",
+        "strokeWidth": 1
+      },
+      "metadata": {
+        "source_agency": "Brisbane City Council",
+        "features_stored": 100,
+        "object_bytes": 62311,
+        "object_updated_utc": "2026-11-14T13:12:48.540000+00:00",
+        "qa_status": "PASS",
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
       "id": "qld_storm_tide_high_hazard",
       "name": "Storm Tide High Hazard",
       "groupId": "grp_hazards",
@@ -718,8 +746,8 @@
         "type": "geoparquet",
         "format": "parquet",
         "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T123817Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T123817Z/part-00000.parquet"
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T125013Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T125013Z/part-00000.parquet"
       },
       "style": {
         "strokeColor": "#64748b",
@@ -729,7 +757,7 @@
         "source_agency": "spatial-gp.information.qld.gov.au",
         "features_stored": 4514,
         "object_bytes": 116170210,
-        "object_updated_utc": "2026-11-14T12:38:36.460000+00:00",
+        "object_updated_utc": "2026-11-14T12:50:26.746000+00:00",
         "qa_status": "WARNING",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
@@ -793,9 +821,9 @@
     }
   ],
   "metadata": {
-    "generated_utc": "2026-11-14T12:45:19Z",
+    "generated_utc": "2026-11-14T20:26:15Z",
     "generator": "tools/export_geolibre_project.py",
-    "datasets_on_gcs": 25,
+    "datasets_on_gcs": 26,
     "read_failures": [],
     "zero_mock": true,
     "disclaimer": "Engineering proof of concept only. Not for operational emergency warning, dispatch, or life-safety decisions."
