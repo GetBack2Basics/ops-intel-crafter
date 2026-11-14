@@ -1,12 +1,12 @@
 {
-  "report_id": "qa-report-20261114T014938Z",
-  "generated_at_utc": "2026-11-14T01:49:38Z",
+  "report_id": "qa-report-20261114T100907Z",
+  "generated_at_utc": "2026-11-14T10:09:07Z",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
-  "total_datasets": 52,
+  "total_datasets": 53,
   "status_counts": {
     "PASS": 13,
-    "WARNING": 2,
+    "WARNING": 3,
     "FAIL": 1,
     "NOT TESTED": 0,
     "NOT APPLICABLE": 0,
@@ -14,7 +14,7 @@
   },
   "coverage_by_scale": {
     "national": 20,
-    "local": 1,
+    "local": 2,
     "nsw": 9,
     "state": 8,
     "qld": 5,
@@ -27,7 +27,7 @@
     "NExT Population & Geography": 2,
     "AURA: Water Hydrography": 8,
     "AURA: Commercial Yield": 1,
-    "Flood & Hydrography": 2,
+    "Flood & Hydrography": 3,
     "Critical Infrastructure": 3,
     "Hazards": 1,
     "AURA: Cadastre Parcels": 2,
@@ -49,8 +49,8 @@
     "Live Hazard Feeds": 1,
     "Emergency Management & Natural Hazards": 3
   },
-  "total_features_stored": 409062,
-  "total_bytes_stored": 265649218,
+  "total_features_stored": 378868,
+  "total_bytes_stored": 333003439,
   "datasets": [
     {
       "dataset_key": "abs_australia_1km_population_grid",
@@ -677,54 +677,54 @@
       "scale": "local",
       "jurisdiction": "QLD",
       "theme": "Flood & Hydrography",
-      "endpoint": "https://data.brisbane.qld.gov.au/api/explore/v2.1/catalog/datasets/flood-awareness-storm-tide/exports/geojson",
+      "endpoint": "https://data.brisbane.qld.gov.au/api/explore/v2.1/catalog/datasets/flood-awareness-storm-tide/exports/geojson?limit=100",
       "licence": {
-        "name": "CC BY 4.0",
+        "name": "CC-BY-4.0",
         "url": null,
-        "attribution": "© Brisbane City Council — CC BY 4.0",
+        "attribution": "© CC-BY-4.0",
         "redistribution_permitted": true,
         "verified_on": "2026-11-14"
       },
       "source_publication_date": "2025-06-09",
       "source_vintage": "2025-BRISBANE",
-      "retrieval_timestamp_utc": "2026-11-14T00:25:59Z",
-      "retrieval_id": "20261114T002559Z",
+      "retrieval_timestamp_utc": "2026-11-14T08:37:21Z",
+      "retrieval_id": "20261114T083721Z",
       "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
       "transformation_version": "geoparquet-1.1.0-gda2020-v1",
       "original_crs": "EPSG:4326",
       "stored_crs": "EPSG:7844",
       "geometry_type": "MultiPolygon, Polygon",
-      "feature_count": 34808,
+      "feature_count": 100,
       "bbox": [
-        152.785121,
-        -27.606276,
-        153.202425,
-        -27.274587
+        153.089602,
+        -27.440157,
+        153.172129,
+        -27.362614
       ],
-      "file_size_bytes": 48878280,
-      "sha256": "d1b6be97611d2e0a471ff2ac1fa5852b6ba9dc585529b0739e37832dac877bed",
-      "gcs_generation": "1794616031589444",
-      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
+      "file_size_bytes": 62291,
+      "sha256": "7c1f7c7e4a83b10d2f315200929ab09b5cc3858d26925f9a15bd46b65b594919",
+      "gcs_generation": "1794645445902535",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T083721Z/part-00000.parquet",
       "local_parquet_path": null,
-      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/flood_awareness_storm_tide/20261114T002559Z/source_payload.json",
-      "raw_payload_sha256": "9352f025b8c3bcbbac9de96c99c9d29be8aa61c30ba990c662e9ea536f7e01ba",
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/flood_awareness_storm_tide/20261114T083721Z/source_payload.json",
+      "raw_payload_sha256": "b3edea853089de19c1001ca0e11882bc9fb226b93f6e634a82c6538a4708fa09",
       "preview_geojson": {
         "preview_geojson_path": "data/flood_awareness_storm_tide.geojson",
-        "preview_feature_count": 34808,
-        "total_feature_count": 34808
+        "preview_feature_count": 100,
+        "total_feature_count": 100
       },
       "overall_qa_status": "PASS",
       "level1_source_contract": {
         "level": 1,
         "level_name": "Source Contract",
         "status": "PASS",
-        "endpoint": "https://data.brisbane.qld.gov.au/api/explore/v2.1/catalog/datasets/flood-awareness-storm-tide/exports/geojson",
+        "endpoint": "https://data.brisbane.qld.gov.au/api/explore/v2.1/catalog/datasets/flood-awareness-storm-tide/exports/geojson?limit=100",
         "layer_name": "Flood — Awareness — Storm Tide",
         "http_status": 200,
         "content_type": "application/json;charset=UTF-8",
-        "latency_ms": 15673.9,
+        "latency_ms": 716.71,
         "max_record_count": null,
-        "source_feature_count": 34808,
+        "source_feature_count": 100,
         "query_bbox": null,
         "available_fields": [
           "objectid",
@@ -741,7 +741,7 @@
           {
             "check": "endpoint_reachable",
             "status": "PASS",
-            "detail": "HTTP 200 (15673.9 ms) from https://data.brisbane.qld.gov.au/api/explore/v2.1/catalog/datasets/flood-awareness-storm-tide/exports/geojson"
+            "detail": "HTTP 200 (716.71 ms) from https://data.brisbane.qld.gov.au/api/explore/v2.1/catalog/datasets/flood-awareness-storm-tide/exports/geojson?limit=100"
           },
           {
             "check": "not_embedded_error_or_html",
@@ -756,7 +756,7 @@
           {
             "check": "source_feature_count_probe",
             "status": "PASS",
-            "detail": "ODS records API total_count=34808; harvested 34808, probed 34808"
+            "detail": "ODS records API total_count=34808; harvested 100, probed 100"
           }
         ]
       },
@@ -764,11 +764,11 @@
         "level": 2,
         "level_name": "Stored GeoParquet Artifact",
         "status": "PASS",
-        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
-        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
-        "gcs_generation": "1794616031589444",
-        "file_size_bytes": 48878280,
-        "sha256": "d1b6be97611d2e0a471ff2ac1fa5852b6ba9dc585529b0739e37832dac877bed",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T083721Z/part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T083721Z/part-00000.parquet",
+        "gcs_generation": "1794645445902535",
+        "file_size_bytes": 62291,
+        "sha256": "7c1f7c7e4a83b10d2f315200929ab09b5cc3858d26925f9a15bd46b65b594919",
         "geoparquet_version": "1.1.0",
         "geometry_encoding": "WKB",
         "stored_crs": "EPSG:7844",
@@ -776,19 +776,19 @@
           "MultiPolygon",
           "Polygon"
         ],
-        "feature_count": 34808,
+        "feature_count": 100,
         "bbox": [
-          152.785121,
-          -27.606276,
-          153.202425,
-          -27.274587
+          153.089602,
+          -27.440157,
+          153.172129,
+          -27.362614
         ],
         "geometry_validation": {
-          "total_rows": 34808,
+          "total_rows": 100,
           "null_geometry_count": 0,
           "empty_geometry_count": 0,
           "invalid_geometry_count": 0,
-          "valid_geometry_count": 34808,
+          "valid_geometry_count": 100,
           "valid_geometry_rate_pct": 100.0,
           "primary_key_checked": "objectid",
           "duplicate_id_count": 0,
@@ -868,7 +868,7 @@
           {
             "check": "parquet_footer_and_magic",
             "status": "PASS",
-            "detail": "PAR1 header/footer valid; 34808 rows in 1 row group(s) (48878280 bytes)"
+            "detail": "PAR1 header/footer valid; 100 rows in 1 row group(s) (62291 bytes)"
           },
           {
             "check": "geoparquet_metadata_valid",
@@ -883,7 +883,7 @@
           {
             "check": "bounding_box_australian_envelope",
             "status": "PASS",
-            "detail": "Bbox [152.78512, -27.60628, 153.20242, -27.27459] within declared catalogue extent [152.535, -27.856, 153.452, -27.025] (±0.5°)"
+            "detail": "Bbox [153.0896, -27.44016, 153.17213, -27.36261] within declared catalogue extent [152.84, -27.69, 153.422, -27.113] (±0.5°)"
           },
           {
             "check": "geometry_validity_and_null_rates",
@@ -893,12 +893,12 @@
           {
             "check": "primary_key_uniqueness",
             "status": "PASS",
-            "detail": "Primary key 'objectid': 0 duplicates across 34808 rows"
+            "detail": "Primary key 'objectid': 0 duplicates across 100 rows"
           },
           {
             "check": "sha256_and_storage_lineage",
             "status": "PASS",
-            "detail": "sha256=d1b6be97611d2e0a... | generation=1794616031589444"
+            "detail": "sha256=7c1f7c7e4a83b10d... | generation=1794645445902535"
           }
         ]
       },
@@ -906,8 +906,8 @@
         "level": 3,
         "level_name": "Source-to-Storage Reconciliation",
         "status": "PASS",
-        "source_feature_count": 34808,
-        "stored_feature_count": 34808,
+        "source_feature_count": 100,
+        "stored_feature_count": 100,
         "reconciliation_rate_pct": 100.0,
         "expected_transformations": [
           "CRS reprojection from EPSG:4326 to canonical EPSG:7844",
@@ -917,7 +917,7 @@
           {
             "check": "feature_count_reconciliation",
             "status": "PASS",
-            "detail": "Exact match: 34808 stored / 34808 source features (100.0%)"
+            "detail": "Exact match: 100 stored / 100 source features (100.0%)"
           },
           {
             "check": "attribute_and_schema_reconciliation",
@@ -927,32 +927,32 @@
           {
             "check": "spatial_extent_reconciliation",
             "status": "PASS",
-            "detail": "Full dataset extent recorded: [152.785121, -27.606276, 153.202425, -27.274587]"
+            "detail": "Full dataset extent recorded: [153.089602, -27.440157, 153.172129, -27.362614]"
           }
         ]
       },
       "known_limitations": [
         "Harvested from data.brisbane.qld.gov.au open-data portal via deterministic zero-AI pipeline (ods).",
         "default_bbox declared from the first verified harvest extent (+/-0.25 deg); re-harvests outside it will flag at Level 2.",
-        "Source licence: CC BY 4.0. Native source columns preserved; no attribute synthesis."
+        "Source licence: CC-BY-4.0. Native source columns preserved; no attribute synthesis."
       ],
       "refresh_policy": "portal_snapshot",
       "operational_suitability": "Suitable for flood & hydrography exposure analysis and emergency planning overlays.",
       "telemetry": {
         "dataset_key": "flood_awareness_storm_tide",
-        "retrieval_timestamp_utc": "2026-11-14T00:25:59Z",
+        "retrieval_timestamp_utc": "2026-11-14T08:37:21Z",
         "http_requests_count": 1,
-        "source_download_ms": 15673.9,
-        "normalization_ms": 763.85,
-        "validation_ms": 7667.03,
-        "bytes_written": 48878280,
+        "source_download_ms": 716.71,
+        "normalization_ms": 89.04,
+        "validation_ms": 1579.99,
+        "bytes_written": 62291,
         "notes": [
           "Zero-AI deterministic portal harvest (no LLM credits used)."
         ]
       },
-      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
-      "source_count": 34808,
-      "stored_count": 34808,
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T083721Z/part-00000.parquet",
+      "source_count": 100,
+      "stored_count": 100,
       "sync_status": "100.0%"
     },
     {
@@ -7735,6 +7735,263 @@
       "source_count": null,
       "stored_count": 0,
       "sync_status": "Linked"
+    },
+    {
+      "dataset_key": "qld_storm_tide_high_hazard",
+      "title": "Storm Tide High Hazard",
+      "provider": "spatial-gp.information.qld.gov.au",
+      "source_agency": "spatial-gp.information.qld.gov.au",
+      "category": "periodically_refreshed_authoritative",
+      "scale": "local",
+      "jurisdiction": "QLD",
+      "theme": "Flood & Hydrography",
+      "endpoint": "https://spatial-gp.information.qld.gov.au/arcgis/rest/directories/arcgisoutput/QSC_Extract/QSC_Extracted_Data_20261114_174311037395-8872.zip",
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "Copyright CC-BY-4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-14"
+      },
+      "source_publication_date": null,
+      "source_vintage": "2026-INFORMATION",
+      "retrieval_timestamp_utc": "2026-11-14T10:05:27Z",
+      "retrieval_id": "20261114T100527Z",
+      "ingestion_software_version": "operational_intelligence_crafter/0.2.0",
+      "transformation_version": "geoparquet-1.1.0-gda2020-v1",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "geometry_type": "MultiPolygon",
+      "feature_count": 4514,
+      "bbox": [
+        139.144241,
+        -28.201785,
+        153.561085,
+        -9.410524
+      ],
+      "file_size_bytes": 116170210,
+      "sha256": "1eca4232394da2b19ea5155d887ec3d912d18238d5df4b26dfc1dabeea5cf40e",
+      "gcs_generation": "1794650746014822",
+      "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet",
+      "local_parquet_path": null,
+      "raw_payload_gs_uri": "gs://operational-intelligence-crafter-lake/raw/qld_storm_tide_high_hazard/20261114T100527Z/source_payload.json",
+      "raw_payload_sha256": "bf19e4c12afc4934b2c276b98525bdf4428ba0fb70bff7e21e479ef73cdf21f0",
+      "preview_geojson": {
+        "preview_geojson_path": "data/qld_storm_tide_high_hazard.geojson",
+        "preview_feature_count": 4514,
+        "total_feature_count": 4514
+      },
+      "overall_qa_status": "WARNING",
+      "level1_source_contract": {
+        "level": 1,
+        "level_name": "Source Contract",
+        "status": "WARNING",
+        "endpoint": "https://spatial-gp.information.qld.gov.au/arcgis/rest/directories/arcgisoutput/QSC_Extract/QSC_Extracted_Data_20261114_174311037395-8872.zip",
+        "layer_name": "Storm Tide High Hazard",
+        "http_status": 200,
+        "content_type": "application/json;charset=UTF-8",
+        "latency_ms": 679.28,
+        "max_record_count": null,
+        "source_feature_count": 4514,
+        "query_bbox": null,
+        "available_fields": [],
+        "error_message": null,
+        "harvested_sublayers": null,
+        "checks": [
+          {
+            "check": "endpoint_reachable",
+            "status": "PASS",
+            "detail": "HTTP 200 (679.28 ms) from https://spatial-gp.information.qld.gov.au/arcgis/rest/directories/arcgisoutput/QSC_Extract/QSC_Extracted_Data_20261114_174311037395-8872.zip"
+          },
+          {
+            "check": "not_embedded_error_or_html",
+            "status": "PASS",
+            "detail": "Payload parsed as valid spatial data (no embedded error object, no HTML block page)."
+          },
+          {
+            "check": "geometry_type_contract",
+            "status": "PASS",
+            "detail": "Harvested geometry types ['MultiPolygon'] vs catalogue 'MultiPolygon'"
+          },
+          {
+            "check": "source_feature_count_probe",
+            "status": "WARNING",
+            "detail": "Count derived from downloaded file (no independent count API for direct downloads); harvested 4514"
+          }
+        ]
+      },
+      "level2_stored_artifact": {
+        "level": 2,
+        "level_name": "Stored GeoParquet Artifact",
+        "status": "PASS",
+        "file_path": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet",
+        "gs_uri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet",
+        "gcs_generation": "1794650746014822",
+        "file_size_bytes": 116170210,
+        "sha256": "1eca4232394da2b19ea5155d887ec3d912d18238d5df4b26dfc1dabeea5cf40e",
+        "geoparquet_version": "1.1.0",
+        "geometry_encoding": "WKB",
+        "stored_crs": "EPSG:7844",
+        "geometry_types": [
+          "MultiPolygon"
+        ],
+        "feature_count": 4514,
+        "bbox": [
+          139.144241,
+          -28.201785,
+          153.561085,
+          -9.410524
+        ],
+        "geometry_validation": {
+          "total_rows": 4514,
+          "null_geometry_count": 0,
+          "empty_geometry_count": 0,
+          "invalid_geometry_count": 0,
+          "valid_geometry_count": 4514,
+          "valid_geometry_rate_pct": 100.0,
+          "primary_key_checked": "feature_uid",
+          "duplicate_id_count": 0,
+          "geometry_types": [
+            "MultiPolygon"
+          ]
+        },
+        "schema_columns": [
+          {
+            "name": "geometry",
+            "type": "binary",
+            "nullable": true
+          },
+          {
+            "name": "feature_uid",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_dataset_key",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_source_vintage",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_oic_retrieval_utc",
+            "type": "large_string",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_minx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_miny",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxx",
+            "type": "double",
+            "nullable": true
+          },
+          {
+            "name": "_bbox_maxy",
+            "type": "double",
+            "nullable": true
+          }
+        ],
+        "checks": [
+          {
+            "check": "parquet_footer_and_magic",
+            "status": "PASS",
+            "detail": "PAR1 header/footer valid; 4514 rows in 1 row group(s) (116170210 bytes)"
+          },
+          {
+            "check": "geoparquet_metadata_valid",
+            "status": "PASS",
+            "detail": "GeoParquet v1.1.0, primary_column='geometry', encoding='WKB', geometry_types=['MultiPolygon']"
+          },
+          {
+            "check": "crs_recorded_and_matched",
+            "status": "PASS",
+            "detail": "Stored CRS 'EPSG:7844' (expected 'EPSG:7844')"
+          },
+          {
+            "check": "bounding_box_australian_envelope",
+            "status": "PASS",
+            "detail": "Bbox [139.14424, -28.20179, 153.56109, -9.41052] within declared catalogue extent [138.894, -28.452, 153.811, -9.161] (±0.5°)"
+          },
+          {
+            "check": "geometry_validity_and_null_rates",
+            "status": "PASS",
+            "detail": "100.0% valid (null=0, empty=0, invalid=0)"
+          },
+          {
+            "check": "primary_key_uniqueness",
+            "status": "PASS",
+            "detail": "Primary key 'feature_uid': 0 duplicates across 4514 rows"
+          },
+          {
+            "check": "sha256_and_storage_lineage",
+            "status": "PASS",
+            "detail": "sha256=1eca4232394da2b1... | generation=1794650746014822"
+          }
+        ]
+      },
+      "level3_reconciliation": {
+        "level": 3,
+        "level_name": "Source-to-Storage Reconciliation",
+        "status": "PASS",
+        "source_feature_count": 4514,
+        "stored_feature_count": 4514,
+        "reconciliation_rate_pct": 100.0,
+        "expected_transformations": [
+          "CRS reprojection from EPSG:4326 to canonical EPSG:7844",
+          "Added per-feature bounding box columns (_bbox_minx.._bbox_maxy) and centroid spatial ordering"
+        ],
+        "checks": [
+          {
+            "check": "feature_count_reconciliation",
+            "status": "PASS",
+            "detail": "Exact match: 4514 stored / 4514 source features (100.0%)"
+          },
+          {
+            "check": "attribute_and_schema_reconciliation",
+            "status": "PASS",
+            "detail": "Preserved all 0 required native fields and 0 mapped aliases (9 total columns)"
+          },
+          {
+            "check": "spatial_extent_reconciliation",
+            "status": "PASS",
+            "detail": "Full dataset extent recorded: [139.144241, -28.201785, 153.561085, -9.410524]"
+          }
+        ]
+      },
+      "known_limitations": [
+        "Harvested from spatial-gp.information.qld.gov.au open-data portal via deterministic zero-AI pipeline (direct_download).",
+        "default_bbox declared from the first verified harvest extent (+/-0.25 deg); re-harvests outside it will flag at Level 2.",
+        "Source licence: CC-BY-4.0. Native source columns preserved; no attribute synthesis."
+      ],
+      "refresh_policy": "portal_snapshot",
+      "operational_suitability": "Suitable for flood & hydrography exposure analysis and emergency planning overlays.",
+      "telemetry": {
+        "dataset_key": "qld_storm_tide_high_hazard",
+        "retrieval_timestamp_utc": "2026-11-14T10:05:27Z",
+        "http_requests_count": 1,
+        "source_download_ms": 679.28,
+        "normalization_ms": 2346.27,
+        "validation_ms": 9257.87,
+        "bytes_written": 116170210,
+        "notes": [
+          "Zero-AI deterministic portal harvest (no LLM credits used)."
+        ]
+      },
+      "gcs_https_url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet",
+      "source_count": 4514,
+      "stored_count": 4514,
+      "sync_status": "100.0%"
     },
     {
       "dataset_key": "qld_transmission_grid_v2",

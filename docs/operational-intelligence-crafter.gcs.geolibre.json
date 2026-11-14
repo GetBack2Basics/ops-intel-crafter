@@ -68,8 +68,8 @@
         "type": "geoparquet",
         "format": "parquet",
         "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261110T022639Z/part-00000.parquet"
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/abs_australia_1km_population_grid/2025-ABS/20261114T014102Z/part-00000.parquet"
       },
       "style": {
         "circleRadius": 3,
@@ -81,7 +81,7 @@
         "source_agency": "Australian Bureau of Statistics (ABS)",
         "features_stored": 286827,
         "object_bytes": 32380819,
-        "object_updated_utc": "2026-11-10T02:27:09.169000+00:00",
+        "object_updated_utc": "2026-11-14T01:41:12.684000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
@@ -158,8 +158,8 @@
         "type": "geoparquet",
         "format": "parquet",
         "spatialEngine": "DuckDB-WASM",
-        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet",
-        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T002559Z/part-00000.parquet"
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T083721Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/flood_awareness_storm_tide/2025-BRISBANE/20261114T083721Z/part-00000.parquet"
       },
       "style": {
         "strokeColor": "#64748b",
@@ -167,9 +167,9 @@
       },
       "metadata": {
         "source_agency": "Brisbane City Council",
-        "features_stored": 34808,
-        "object_bytes": 48878280,
-        "object_updated_utc": "2026-11-14T00:27:11.594000+00:00",
+        "features_stored": 100,
+        "object_bytes": 62291,
+        "object_updated_utc": "2026-11-14T08:37:25.908000+00:00",
         "qa_status": "PASS",
         "read_parquet_check": "PASS",
         "crs": "EPSG:4326 / EPSG:7844"
@@ -708,6 +708,62 @@
       }
     },
     {
+      "id": "qld_storm_tide_high_hazard",
+      "name": "Storm Tide High Hazard",
+      "groupId": "grp_hazards",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet"
+      },
+      "style": {
+        "strokeColor": "#64748b",
+        "strokeWidth": 1
+      },
+      "metadata": {
+        "source_agency": "spatial-gp.information.qld.gov.au",
+        "features_stored": 4514,
+        "object_bytes": 116170210,
+        "object_updated_utc": "2026-11-14T10:05:46.020000+00:00",
+        "qa_status": "WARNING",
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
+      "id": "qsc_extracted_data_20261114_174311037395_8872",
+      "name": "Qsc Extracted Data 20261114 174311037395 8872",
+      "groupId": "grp_hazards",
+      "type": "geoparquet",
+      "visible": true,
+      "opacity": 0.9,
+      "source": {
+        "type": "geoparquet",
+        "format": "parquet",
+        "spatialEngine": "DuckDB-WASM",
+        "gcsUri": "gs://operational-intelligence-crafter-lake/geoparquet/qsc_extracted_data_20261114_174311037395_8872/2026-INFORMATION/20261114T090011Z/part-00000.parquet",
+        "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/geoparquet/qsc_extracted_data_20261114_174311037395_8872/2026-INFORMATION/20261114T090011Z/part-00000.parquet"
+      },
+      "style": {
+        "strokeColor": "#64748b",
+        "strokeWidth": 1
+      },
+      "metadata": {
+        "source_agency": null,
+        "features_stored": 4514,
+        "object_bytes": 116170305,
+        "object_updated_utc": "2026-11-14T09:00:37.388000+00:00",
+        "qa_status": null,
+        "read_parquet_check": "PASS",
+        "crs": "EPSG:4326 / EPSG:7844"
+      }
+    },
+    {
       "id": "wa_transmission_grid_v2",
       "name": "Western Power SWIS & Horizon Power Transmission Network (>=66kV)",
       "groupId": "grp_infrastructure",
@@ -737,9 +793,9 @@
     }
   ],
   "metadata": {
-    "generated_utc": "2026-11-14T01:11:18Z",
+    "generated_utc": "2026-11-14T10:09:40Z",
     "generator": "tools/export_geolibre_project.py",
-    "datasets_on_gcs": 23,
+    "datasets_on_gcs": 25,
     "read_failures": [],
     "zero_mock": true,
     "disclaimer": "Engineering proof of concept only. Not for operational emergency warning, dispatch, or life-safety decisions."

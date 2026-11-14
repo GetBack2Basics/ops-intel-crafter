@@ -2,7 +2,7 @@
   "manifest_version": "1.0.0",
   "project_name": "operational_intelligence_crafter",
   "canonical_gcs_bucket": "operational-intelligence-crafter-lake",
-  "updated_at_utc": "2026-11-14T01:41:02Z",
+  "updated_at_utc": "2026-11-14T10:05:27Z",
   "default_stored_crs": "EPSG:7844",
   "default_metric_crs": "EPSG:3112",
   "default_export_crs": "EPSG:4326",
@@ -2498,6 +2498,52 @@
       "qa_status": "PASS",
       "latest_snapshot_path": "https://storage.googleapis.com/aura-siting-crafter-geolibre-app/exports_v2/datacenter_candidates_v2.json",
       "latest_retrieval_utc": null
+    },
+    "qld_storm_tide_high_hazard": {
+      "dataset_key": "qld_storm_tide_high_hazard",
+      "title": "Storm Tide High Hazard",
+      "category": "periodically_refreshed_authoritative",
+      "theme": "Flood & Hydrography",
+      "scale": "local",
+      "jurisdiction": "QLD",
+      "provider": "spatial-gp.information.qld.gov.au",
+      "source_agency": "spatial-gp.information.qld.gov.au",
+      "service_type": "file_download",
+      "endpoint": "https://spatial-gp.information.qld.gov.au/arcgis/rest/directories/arcgisoutput/QSC_Extract/QSC_Extracted_Data_20261114_174311037395-8872.zip",
+      "layer_id": null,
+      "wfs_type_name": null,
+      "licence": {
+        "name": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "Copyright CC-BY-4.0",
+        "redistribution_permitted": true,
+        "verified_on": "2026-11-14"
+      },
+      "source_publication_date": null,
+      "source_vintage": "2026-INFORMATION",
+      "refresh_policy": "portal_snapshot",
+      "original_crs": "EPSG:4326",
+      "stored_crs": "EPSG:7844",
+      "metric_crs": "EPSG:3112",
+      "geometry_type": "MultiPolygon",
+      "primary_key": null,
+      "required_fields": [],
+      "schema_mapping": {},
+      "known_limitations": [
+        "Harvested from spatial-gp.information.qld.gov.au open-data portal via deterministic zero-AI pipeline (direct_download).",
+        "default_bbox declared from the first verified harvest extent (+/-0.25 deg); re-harvests outside it will flag at Level 2.",
+        "Source licence: CC-BY-4.0. Native source columns preserved; no attribute synthesis."
+      ],
+      "operational_suitability": "Suitable for flood & hydrography exposure analysis and emergency planning overlays.",
+      "default_bbox": [
+        139.144,
+        -28.202,
+        153.561,
+        -9.411
+      ],
+      "qa_status": "WARNING",
+      "latest_snapshot_path": "geoparquet/qld_storm_tide_high_hazard/2026-INFORMATION/20261114T100527Z/part-00000.parquet",
+      "latest_retrieval_utc": "2026-11-14T10:05:27Z"
     }
   }
 }
