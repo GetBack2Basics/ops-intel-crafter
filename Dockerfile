@@ -7,8 +7,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential libgdal-dev gdal-bin \
+        build-essential libgdal-dev gdal-bin proj-data \
     && rm -rf /var/lib/apt/lists/*
+
+ENV PROJ_LIB=/usr/share/proj \
+    PROJ_DATA=/usr/share/proj
 
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt

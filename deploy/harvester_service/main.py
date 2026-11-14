@@ -136,19 +136,28 @@ def _run_job(job_id: str, req: HarvestRequest) -> None:
         stdout=open(log_path, "w", encoding="utf-8"),
         stderr=subprocess.STDOUT,
         text=True,
+        env={**os.environ, "GDAL_DATA": "/usr/share/gdal", "PROJ_LIB": "/usr/share/proj", "PROJ_DATA": "/usr/share/proj"},
     )
     PROCS[job_id] = proc
 
+    deadline = time.time() + int(os.environ.get("OIC_JOB_TIMEOUT_SEC", "540"))
     last_write = time.time()
     while True:
-        # check cancel
         cur = _read_job(job_id) or state
-        if cur.get("cancel_requested"):
+        cancel_requested = bool(cur.get("cancel_requested"))
+        timed_out = time.time() > deadline
+        if cancel_requested or timed_out:
             try:
-                proc.terminate()
+                proc.kill()
             except Exception:
                 pass
-            state["status"] = "cancelled"
+            try:
+                proc.wait(timeout=10)
+            except Exception:
+                pass
+            state["status"] = "cancelled" if cancel_requested else "failed"
+            if timed_out:
+                state["error"] = "timeout"
             break
         rc = proc.poll()
         now = time.time()

@@ -1045,6 +1045,7 @@ def main() -> int:
     parser.add_argument("--skip-gcs", action="store_true", help="Alias for --dry-run (nothing persists locally or in cloud)")
     parser.add_argument("--skip-wherobots", action="store_true", help="Skip Iceberg dispatch")
     parser.add_argument("--max-features", type=int, default=None, help="Cap harvested features (ODS limit= param)")
+    parser.add_argument("--no-register", action="store_true", help="Do not touch the catalogue manifest")
     args = parser.parse_args()
 
     cfg = load_config(Path(args.config))
@@ -1059,4 +1060,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    code = main()
+    os._exit(code if isinstance(code, int) else 0)
