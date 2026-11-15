@@ -177,10 +177,9 @@ def main() -> int:
             "opacity": 0.9,
             "source": {
                 "type": "geojson",
-                "s3_path": f"s3://{BUCKET}/qa/data/{key}.geojson",
-                "path": f"https://storage.googleapis.com/{BUCKET}/qa/data/{key}.geojson",
-                "gcs_lakehouse": f"gs://{BUCKET}/",
-                "format": "geojson",
+                "url": f"https://storage.googleapis.com/{BUCKET}/{info['name']}",
+                "format": "parquet",
+                "spatial_engine": "DuckDB-WASM",
             },
             "style": style,
             "metadata": {
