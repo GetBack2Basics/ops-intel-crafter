@@ -12,7 +12,7 @@ deterministically — with NO LLM / AI credit usage at any step:
        - CKAN GeoJSON resources
        - ArcGIS REST MapServer/FeatureServer layers (paginated; root services
          aggregate all feature sublayers, cyclone-harvester pattern)
-       - Zipped Shapefiles / GeoPackage
+       - Zipped Shapefiles / GeoPackage / KML
        - CSV with deterministic lat/lon column detection
   3. Writes canonical GeoParquet 1.1.0 via normalize_and_write_geoparquet
      (reprojects to configured stored_crs, default EPSG:7844 GDA2020, with
@@ -195,6 +195,8 @@ def classify_ckan_resource(res: Dict[str, Any]) -> Optional[str]:
         return "geojson"
     if fmt in ("gpkg", "geopackage") or url_l.split("?")[0].endswith(".gpkg"):
         return "gpkg"
+    if fmt in ("kml", "kmz") or url_l.split("?")[0].endswith((".kml", ".kmz")):
+        return "kml"
     if fmt in ("shp", "shapefile", "zip", "zipped shapefile") or url_l.split("?")[0].endswith(".zip"):
         return "shp_zip"
     if fmt == "csv" or url_l.split("?")[0].endswith(".csv"):
@@ -248,7 +250,7 @@ def resolve_source(url: str, cfg: Dict[str, Any]) -> Dict[str, Any]:
             kind = classify_ckan_resource(res)
             if kind:
                 harvestable.append((kind, res))
-        priority = {"geojson": 0, "arcgis_rest": 1, "gpkg": 2, "shp_zip": 3, "wfs": 4, "csv": 5}
+        priority = {"geojson": 0, "arcgis_rest": 1, "gpkg": 2, "kml": 3, "shp_zip": 4, "wfs": 5, "csv": 6}
         harvestable.sort(key=lambda kv: priority.get(kv[0], 9))
 
         if harvestable:
@@ -341,6 +343,7 @@ def harvest_ckan_resource(source: Dict[str, Any], cfg: Dict[str, Any]) -> Tuple[
     kind = source["resource_kind"]
     res = source["resource"]
     url = res["url"]
+    url_l = url.lower()
     pkg = source.get("ckan_package") or {}
 
     if kind == "arcgis_rest":
@@ -378,8 +381,8 @@ def harvest_ckan_resource(source: Dict[str, Any], cfg: Dict[str, Any]) -> Tuple[
         }
         return gdf, raw_bytes, harvest_meta
 
-    if kind in ("shp_zip", "gpkg"):
-        suffix = ".zip" if kind == "shp_zip" else ".gpkg"
+    if kind in ("shp_zip", "gpkg", "kml"):
+        suffix = ".zip" if kind == "shp_zip" else (".kmz" if kind == "kml" and url_l.endswith(".kmz") else (".kml" if kind == "kml" else ".gpkg"))
         tmp, http_status, elapsed_ms = download_to_temp(url, cfg, suffix)
         raw_bytes = tmp.read_bytes()
         if kind == "shp_zip":
@@ -389,12 +392,26 @@ def harvest_ckan_resource(source: Dict[str, Any], cfg: Dict[str, Any]) -> Tuple[
                     tmp.unlink(missing_ok=True)
                     raise HarvestAbort(f"ZIP resource contains no .shp member: {url} ({zf.namelist()[:10]})")
                 gdf = gpd.read_file(io.BytesIO(raw_bytes))
+        elif kind == "kml":
+            try:
+                gdf = gpd.read_file(tmp, on_invalid="ignore")
+            except Exception:
+                try:
+                    gdf = gpd.read_file(tmp, engine="pyogrio", on_invalid="ignore")
+                except Exception:
+                    raise
         else:
             gdf = gpd.read_file(tmp)
         tmp.unlink(missing_ok=True)
         if gdf.crs is None:
-            raise HarvestAbort(f"Resource has no declared CRS: {url} (zero-mock: refusing to assume EPSG:4326 for file resources)")
-        gdf = gdf.to_crs("EPSG:4326")
+            if kind == "kml":
+                gdf = gdf.set_crs("EPSG:4326")
+            else:
+                raise HarvestAbort(f"Resource has no declared CRS: {url} (zero-mock: refusing to assume EPSG:4326 for file resources)")
+        elif kind != "kml" and str(gdf.crs).upper() != "EPSG:4326":
+            gdf = gdf.to_crs("EPSG:4326")
+        elif kind == "kml":
+            gdf = gdf.to_crs("EPSG:4326") if str(gdf.crs).upper() != "EPSG:4326" else gdf
         harvest_meta = {
             "endpoint": url,
             "service_type": "file_download",

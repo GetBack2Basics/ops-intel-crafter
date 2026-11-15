@@ -21,7 +21,7 @@
     <header>
       <h1 class="text-2xl font-bold text-sky-300">Harvester Console</h1>
       <p class="text-sm text-slate-400">Deterministic portal → GeoParquet → GCS → QA → (Wherobots) pipeline. Dry-run only in v1.</p>
-    <p class="text-xs text-slate-500 mt-1">Supported: CKAN (<code>/dataset/&lt;slug&gt;</code>), Opendatasoft (<code>/explore/dataset/&lt;id&gt;</code>), and direct data URLs (GeoJSON, GeoPackage, zipped Shapefile, CSV with lat/lon, ArcGIS REST). Search-result pages (CSIRO, QLD Spatial catalogue search) are not harvestable — use a direct download link. Use "Cloud Run Job" for large datasets.</p>
+    <p class="text-xs text-slate-500 mt-1">Supported: CKAN (<code>/dataset/&lt;slug&gt;</code>), Opendatasoft (<code>/explore/dataset/&lt;id&gt;</code>), and direct data URLs (GeoJSON, GeoPackage, zipped Shapefile, KML, CSV with lat/lon, ArcGIS REST). Search-result pages (CSIRO, QLD Spatial catalogue search) are not harvestable — use a direct download link. Use "Cloud Run Job" for large datasets.</p>
     </header>
 
     <div class="card space-y-4">
@@ -36,7 +36,7 @@
       <div>
         <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Data URL (portal page or direct file)</label>
         <input id="portalUrl" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" placeholder="https://www.data.qld.gov.au/dataset/flood-awareness-storm-tide  OR  https://host/path/data.zip" />
-        <p class="text-xs text-slate-500 mt-1">Accepts CKAN/ODS portal pages and direct data URLs (.zip, .gpkg, .geojson, .csv). Search-result pages are not supported.</p>
+        <p class="text-xs text-slate-500 mt-1">Accepts CKAN/ODS portal pages and direct data URLs (.zip, .gpkg, .geojson, .kml, .csv). Search-result pages are not supported.</p>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
