@@ -65,6 +65,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/abs_australia_1km_population_grid.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/abs_australia_1km_population_grid.geojson",
       "style": {
         "circleRadius": 3,
         "fillColor": "#006973",
@@ -92,6 +93,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/datacenter_candidates_v2.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/datacenter_candidates_v2.geojson",
       "style": {
         "circleRadius": 6,
         "fillColor": "#22d3ee",
@@ -119,6 +121,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/derived_hunter_1km_population_grid.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/derived_hunter_1km_population_grid.geojson",
       "style": {
         "circleRadius": 3,
         "fillColor": "#006973",
@@ -146,6 +149,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/flood_awareness_storm_tide.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/flood_awareness_storm_tide.geojson",
       "style": {
         "strokeColor": "#64748b",
         "strokeWidth": 1
@@ -171,6 +175,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_electricity_substations.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_electricity_substations.geojson",
       "style": {
         "circleRadius": 5,
         "fillColor": "#facc15",
@@ -198,6 +203,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_electricity_transmission_lines.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_electricity_transmission_lines.geojson",
       "style": {
         "strokeColor": "#f97316",
         "strokeWidth": 1.6
@@ -223,6 +229,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_major_power_stations.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_major_power_stations.geojson",
       "style": {
         "circleRadius": 6,
         "fillColor": "#a855f7",
@@ -250,6 +257,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_seismic_hazard_pga_10pct.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/ga_seismic_hazard_pga_10pct.geojson",
       "style": {
         "strokeColor": "#8b5cf6",
         "strokeWidth": 1.2
@@ -275,6 +283,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_cyclone_hazard_tcha_v2.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_cyclone_hazard_tcha_v2.geojson",
       "style": {
         "fillColor": "#fb7185",
         "fillOpacity": 0.25,
@@ -302,6 +311,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_healthcare_nhsd_v2.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_healthcare_nhsd_v2.geojson",
       "style": {
         "circleRadius": 5,
         "fillColor": "#ef4444",
@@ -329,6 +339,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_schools_acara_v2.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/national_schools_acara_v2.geojson",
       "style": {
         "circleRadius": 4,
         "fillColor": "#0ea5e9",
@@ -356,6 +367,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/next_lga_boundaries_asgs2025.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/next_lga_boundaries_asgs2025.geojson",
       "style": {
         "fillColor": "#94a3b8",
         "fillOpacity": 0.05,
@@ -383,6 +395,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/next_sa2_boundaries_asgs2021.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/next_sa2_boundaries_asgs2021.geojson",
       "style": {
         "fillColor": "#94a3b8",
         "fillOpacity": 0.05,
@@ -410,6 +423,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_coastal_inundation_hazard_v2.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_coastal_inundation_hazard_v2.geojson",
       "style": {
         "fillColor": "#3b82f6",
         "fillOpacity": 0.35,
@@ -437,6 +451,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_foi_building_complexes.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_foi_building_complexes.geojson",
       "style": {
         "fillColor": "#10b981",
         "fillOpacity": 0.4,
@@ -464,6 +479,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_lga_boundaries.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_lga_boundaries.geojson",
       "style": {
         "fillColor": "#94a3b8",
         "fillOpacity": 0.05,
@@ -491,6 +507,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_rfs_major_incidents_live.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_rfs_major_incidents_live.geojson",
       "style": {
         "circleRadius": 7,
         "fillColor": "#dc2626",
@@ -518,6 +535,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_transmission_grid_v2.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_transmission_grid_v2.geojson",
       "style": {
         "strokeColor": "#f97316",
         "strokeWidth": 1.6
@@ -543,6 +561,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_water_inundation_areas.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/nsw_water_inundation_areas.geojson",
       "style": {
         "fillColor": "#3b82f6",
         "fillOpacity": 0.35,
@@ -570,6 +589,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_fixes.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_fixes.geojson",
       "style": {
         "circleRadius": 5,
         "fillColor": "#ea580c",
@@ -597,6 +617,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_tracks.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_tracks.geojson",
       "style": {
         "strokeColor": "#f43f5e",
         "strokeWidth": 2.5
@@ -622,6 +643,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_wind_areas.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_cyclones_historical_wind_areas.geojson",
       "style": {
         "fillColor": "#f59e0b",
         "fillOpacity": 0.28,
@@ -649,6 +671,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_flood_awareness_storm_tide.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_flood_awareness_storm_tide.geojson",
       "style": {
         "strokeColor": "#64748b",
         "strokeWidth": 1
@@ -674,6 +697,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_storm_tide_high_hazard.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qld_storm_tide_high_hazard.geojson",
       "style": {
         "strokeColor": "#64748b",
         "strokeWidth": 1
@@ -699,6 +723,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qsc_extracted_data_20261114_174311037395_8872.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/qsc_extracted_data_20261114_174311037395_8872.geojson",
       "style": {
         "strokeColor": "#64748b",
         "strokeWidth": 1
@@ -724,6 +749,7 @@
         "type": "geojson",
         "url": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/wa_transmission_grid_v2.geojson"
       },
+      "sourcePath": "https://storage.googleapis.com/operational-intelligence-crafter-lake/qa/data/wa_transmission_grid_v2.geojson",
       "style": {
         "strokeColor": "#f97316",
         "strokeWidth": 1.6
@@ -740,7 +766,7 @@
     }
   ],
   "metadata": {
-    "generated_utc": "2026-11-15T05:24:44Z",
+    "generated_utc": "2026-11-15T06:50:05Z",
     "generator": "tools/export_geolibre_project.py",
     "datasets_on_gcs": 26,
     "read_failures": [],

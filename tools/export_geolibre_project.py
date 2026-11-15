@@ -179,6 +179,7 @@ def main() -> int:
                 "type": "geojson",
                 "url": f"https://storage.googleapis.com/{BUCKET}/qa/data/{key}.geojson",
             },
+            "sourcePath": f"https://storage.googleapis.com/{BUCKET}/qa/data/{key}.geojson",
             "style": style,
             "metadata": {
                 "source_agency": q.get("source_agency"),
