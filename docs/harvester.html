@@ -19,15 +19,16 @@
 <body class="p-6">
   <div class="max-w-4xl mx-auto space-y-6">
     <header>
-      <h1 class="text-2xl font-bold text-sky-300">Harvester Console</h1>
-      <p class="text-sm text-slate-400">Deterministic portal → GeoParquet → GCS → QA → (Wherobots) pipeline. Dry-run only in v1.</p>
+      <h1 class="text-2xl font-bold text-sky-300">Harvester Console (Bring Your Own Backend)</h1>
+      <p class="text-sm text-slate-400">Template UI for a deterministic portal → GeoParquet → GCS → QA → (Wherobots) pipeline. Point it at your own harvester backend — no shared bucket or API key is provided.</p>
     <p class="text-xs text-slate-500 mt-1">Supported: CKAN (<code>/dataset/&lt;slug&gt;</code>), Opendatasoft (<code>/explore/dataset/&lt;id&gt;</code>), and direct data URLs (GeoJSON, GeoPackage, zipped Shapefile, KML, CSV with lat/lon, ArcGIS REST). Search-result pages (CSIRO, QLD Spatial catalogue search) are not harvestable — use a direct download link. Use "Cloud Run Job" for large datasets.</p>
     </header>
 
     <div class="card space-y-4">
       <div>
-        <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Backend URL (Cloud Run)</label>
-        <input id="backendUrl" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" value="https://oic-harvester-482213551331.australia-southeast1.run.app" />
+        <label class="block text-xs font-mono uppercase text-slate-400 mb-1">Backend URL (your Cloud Run service)</label>
+        <input id="backendUrl" class="w-full p-2 rounded bg-slate-900 border border-slate-700 mono text-sm" placeholder="https://your-harvester-xxxxx.a.run.app" />
+        <p class="text-xs text-slate-500 mt-1">Bring your own backend: deploy <code>tools/harvest_portal_dataset.py</code> + <code>deploy/harvester_service/</code> to your own GCP project, then paste the URL here. No access to any shared bucket is provided.</p>
       </div>
       <div>
         <label class="block text-xs font-mono uppercase text-slate-400 mb-1">API Key</label>
@@ -74,7 +75,6 @@
       <div class="flex items-center gap-4 text-sm">
         <label class="flex items-center gap-2"><input id="dryRun" type="checkbox" checked /> Dry-run (no GCS/Wherobots writes)</label>
         <label class="flex items-center gap-2"><input id="skipWb" type="checkbox" checked /> Skip Wherobots</label>
-        <label class="flex items-center gap-2"><input id="refreshGl" type="checkbox" /> Refresh GeoLibre (live only)</label>
         <label class="flex items-center gap-2"><input id="useJob" type="checkbox" checked /> Use Cloud Run Job (recommended for all datasets)</label>
       </div>
       <button id="submitBtn" class="btn">Run harvest</button>

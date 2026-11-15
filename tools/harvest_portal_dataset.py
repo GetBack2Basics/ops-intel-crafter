@@ -232,8 +232,19 @@ def resolve_source(url: str, cfg: Dict[str, Any]) -> Dict[str, Any]:
             "ckan_package": None,
         }
 
-    # Opendatasoft explore URL passed directly
-    m = re.match(r"^/explore/dataset/([A-Za-z0-9_\-]+)", path)
+    # Direct ArcGIS REST service URL (FeatureServer/MapServer, optionally with layer id)
+    m = re.search(r"/(MapServer|FeatureServer)(/\d+)?/?$", path, re.IGNORECASE)
+    if m:
+        service_name = path[:m.start()].rstrip("/").split("/")[-1] or host
+        return {
+            "kind": "arcgis_rest",
+            "host": host,
+            "dataset_id": service_name,
+            "url": url,
+            "ckan_package": None,
+            "resource": {"url": url, "format": "ArcGIS REST", "name": service_name},
+            "resource_kind": "arcgis_rest",
+        }
     if m:
         return {"kind": "ods", "host": host, "dataset_id": m.group(1), "ckan_package": None}
 

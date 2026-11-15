@@ -33,7 +33,7 @@ import google.auth
 from google.auth.transport.requests import AuthorizedSession
 
 PROJECT_ROOT = Path(os.environ.get("OIC_PROJECT_ROOT", "/app"))
-PROJECT = os.environ.get("OIC_GCP_PROJECT", "ops-intelligence-crafter")
+PROJECT = os.environ.get("OIC_GCP_PROJECT", "")
 REGION = os.environ.get("OIC_REGION", "australia-southeast1")
 JOB_NAME = os.environ.get("OIC_RUN_JOB", "oic-harvester-job")
 RUN_API = "https://run.googleapis.com/v2"
