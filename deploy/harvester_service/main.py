@@ -16,6 +16,7 @@ survives instance restarts.
 
 from __future__ import annotations
 
+import hmac
 import json
 import os
 import subprocess
@@ -59,7 +60,7 @@ def _store():
 
 
 def _check_key(x_api_key: Optional[str]) -> None:
-    if not API_KEY or x_api_key != API_KEY:
+    if not API_KEY or not x_api_key or not hmac.compare_digest(x_api_key, API_KEY):
         raise HTTPException(status_code=401, detail="Invalid or missing X-API-Key")
 
 
